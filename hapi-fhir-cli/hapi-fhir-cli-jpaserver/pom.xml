@@ -16,6 +16,11 @@
 	<name>HAPI FHIR - Command Line Client - Server WAR</name>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.dtc.common</groupId>
+			<artifactId>core</artifactId>
+			<version>0.0.1</version>
+		</dependency>
 
 		<!-- This dependency includes the core HAPI-FHIR classes -->
 		<dependency>
