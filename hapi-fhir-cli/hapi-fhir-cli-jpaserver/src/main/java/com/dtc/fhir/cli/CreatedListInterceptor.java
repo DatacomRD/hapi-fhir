@@ -106,7 +106,7 @@ public class CreatedListInterceptor extends ServerOperationInterceptorAdapter {
 
 		ListResource resource = (ListResource)baseResource;
 
-		if (!isOpd(resource)) { return; } //只有門診病歷才處理
+		if (!isOpd(resource) && isFromEmr(resource)) { return; } //只有 EMR 的門診病歷才處理
 
 		try {
 			init(detail); //初始化
@@ -198,6 +198,20 @@ public class CreatedListInterceptor extends ServerOperationInterceptorAdapter {
 	private boolean isOpd(ListResource resource) {
 		for (CodingDt coding : resource.getCode().getCoding()) {
 			if ("OPD".equals(coding.getCode())) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * 判斷是否來源為 EMR
+	 */
+	private boolean isFromEmr(ListResource resource) {
+		for (IdentifierDt identifier : resource.getIdentifier()) {
+			if ("Creator".equals(identifier.getSystem()) &&
+				"EMR".equals(identifier.getValue())) {
 				return true;
 			}
 		}
