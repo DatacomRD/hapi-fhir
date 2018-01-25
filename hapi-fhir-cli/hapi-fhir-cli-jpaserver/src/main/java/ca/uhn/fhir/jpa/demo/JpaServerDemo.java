@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.servlet.ServletException;
 
-import org.hl7.fhir.dstu3.model.Meta;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
@@ -50,8 +49,8 @@ public class JpaServerDemo extends RestfulServer {
 
 		// Get the spring context from the web container (it's declared in web.xml)
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
-		
-		/* 
+
+		/*
 		 * The hapi-fhir-server-resourceproviders-dev.xml file is a spring configuration
 		 * file which is automatically generated as a part of hapi-fhir-jpaserver-base and
 		 * contains bean definitions for a resource provider for each resource type
@@ -74,8 +73,8 @@ public class JpaServerDemo extends RestfulServer {
 
 		List<IResourceProvider> beans = myAppCtx.getBean(resourceProviderBeanName, List.class);
 		setResourceProviders(beans);
-		
-		/* 
+
+		/*
 		 * The system provider implements non-resource-type methods, such as
 		 * transaction, and global history.
 		 */
@@ -170,7 +169,8 @@ public class JpaServerDemo extends RestfulServer {
 		daoConfig.setAllowExternalReferences(ContextHolder.isAllowExternalRefs());
 		daoConfig.setEnforceReferentialIntegrityOnDelete(!ContextHolder.isDisableReferentialIntegrity());
 		daoConfig.setEnforceReferentialIntegrityOnWrite(!ContextHolder.isDisableReferentialIntegrity());
-		
+		daoConfig.setReuseCachedSearchResultsForMillis(null);
+
 	}
 
 }
