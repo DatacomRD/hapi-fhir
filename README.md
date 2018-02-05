@@ -1,3 +1,10 @@
+DTC Branch note
+===============
+
+- [v2.5-dtc](../../tree/v2.5-dtc)：DTC 用的主版本
+- [v2.5-interceptor](../../tree/v2.5-interceptor)：For TWR Interceptor 的版本
+
+
 hapi-fhir
 =========
 
