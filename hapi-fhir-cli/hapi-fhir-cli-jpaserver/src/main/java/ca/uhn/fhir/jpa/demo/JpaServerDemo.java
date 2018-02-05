@@ -11,6 +11,8 @@ import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 
+import com.dtc.fhir.cli.DtcConfig;
+import com.dtc.fhir.cli.ResourceConstraintInterceptor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
@@ -169,8 +171,12 @@ public class JpaServerDemo extends RestfulServer {
 		daoConfig.setAllowExternalReferences(ContextHolder.isAllowExternalRefs());
 		daoConfig.setEnforceReferentialIntegrityOnDelete(!ContextHolder.isDisableReferentialIntegrity());
 		daoConfig.setEnforceReferentialIntegrityOnWrite(!ContextHolder.isDisableReferentialIntegrity());
-		daoConfig.setReuseCachedSearchResultsForMillis(null);
 
+		/*
+		 * DTC customized
+		 */
+		registerInterceptor(new ResourceConstraintInterceptor()); //註冊 resource 驗證器
+		daoConfig.setReuseCachedSearchResultsForMillis(DtcConfig.getReuseCachedSearchResultsForMillis());
 	}
 
 }
