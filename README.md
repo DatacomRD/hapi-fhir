@@ -1,3 +1,12 @@
+DTC
+===
+
+Features:
+
+- 提供查詢結果 cache 的設定，詳見 [config.properties](hapi-fhir-cli/hapi-fhir-cli-jpaserver/src/main/resources/config.properties)
+- 提供限制 Fhir resource 必填欄位的設定，詳見 [constraint.properties](hapi-fhir-cli/hapi-fhir-cli-jpaserver/src/main/resources/constraint.properties)
+
+
 hapi-fhir
 =========
 
