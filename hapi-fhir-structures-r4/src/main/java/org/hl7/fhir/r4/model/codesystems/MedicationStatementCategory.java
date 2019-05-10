@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,7 +45,7 @@ public enum MedicationStatementCategory {
          */
         OUTPATIENT, 
         /**
-         * Includes orders for medications to be administered or consumed by the patient in their home (this would include long term care or nursing homes, hospices, etc)
+         * Includes orders for medications to be administered or consumed by the patient in their home (this would include long term care or nursing homes, hospices, etc.).
          */
         COMMUNITY, 
         /**
@@ -79,13 +79,13 @@ public enum MedicationStatementCategory {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/medication-statement-category";
+          return "http://terminology.hl7.org/CodeSystem/medication-statement-category";
         }
         public String getDefinition() {
           switch (this) {
             case INPATIENT: return "Includes orders for medications to be administered or consumed in an inpatient or acute care setting";
             case OUTPATIENT: return "Includes orders for medications to be administered or consumed in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office)";
-            case COMMUNITY: return "Includes orders for medications to be administered or consumed by the patient in their home (this would include long term care or nursing homes, hospices, etc)";
+            case COMMUNITY: return "Includes orders for medications to be administered or consumed by the patient in their home (this would include long term care or nursing homes, hospices, etc.).";
             case PATIENTSPECIFIED: return "Includes statements about medication use, including over the counter medication, provided by the patient, agent or another provider";
             default: return "?";
           }

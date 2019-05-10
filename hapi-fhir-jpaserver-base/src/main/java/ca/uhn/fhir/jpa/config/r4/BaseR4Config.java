@@ -6,19 +6,27 @@ import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.dao.r4.SearchParamExtractorR4;
-import ca.uhn.fhir.jpa.dao.r4.SearchParamRegistryR4;
+import ca.uhn.fhir.jpa.dao.TransactionProcessor;
+import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
+import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
+import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcR4;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR4;
-import ca.uhn.fhir.jpa.term.TerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
+import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.validation.IValidatorModule;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
+import org.hl7.fhir.r4.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.utils.GraphQLEngine;
 import org.hl7.fhir.r4.utils.IResourceValidator.BestPracticeWarningLevel;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
@@ -31,7 +39,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +59,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class BaseR4Config extends BaseConfig {
 
+	@Override
+	public FhirContext fhirContext() {
+		return fhirContextR4();
+	}
+
 	@Bean
 	@Primary
 	public FhirContext fhirContextR4() {
@@ -58,9 +71,31 @@ public class BaseR4Config extends BaseConfig {
 
 		// Don't strip versions in some places
 		ParserOptions parserOptions = retVal.getParserOptions();
-		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
+		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.what");
 
 		return retVal;
+	}
+
+	@Bean
+	public TransactionProcessor.ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
+		return new TransactionProcessorVersionAdapterR4();
+	}
+
+	@Bean
+	public TransactionProcessor<Bundle, Bundle.BundleEntryComponent> transactionProcessor() {
+		return new TransactionProcessor<>();
+	}
+
+	@Bean(name = "myGraphQLProvider")
+	@Lazy
+	public GraphQLProvider graphQLProvider() {
+		return new GraphQLProvider(fhirContextR4(), validationSupportChainR4(), graphqlStorageServices());
+	}
+
+	@Bean
+	@Lazy
+	public GraphQLEngine.IGraphQLStorageServices graphqlStorageServices() {
+		return new JpaStorageServices();
 	}
 
 	@Bean(name = "myInstanceValidatorR4")
@@ -72,9 +107,21 @@ public class BaseR4Config extends BaseConfig {
 		return val;
 	}
 
+	@Bean
+	public JpaValidationSupportChainR4 jpaValidationSupportChain() {
+		return new JpaValidationSupportChainR4();
+	}
+
 	@Bean(name = "myJpaValidationSupportR4", autowire = Autowire.BY_NAME)
 	public ca.uhn.fhir.jpa.dao.r4.IJpaValidationSupportR4 jpaValidationSupportR4() {
 		ca.uhn.fhir.jpa.dao.r4.JpaValidationSupportR4 retVal = new ca.uhn.fhir.jpa.dao.r4.JpaValidationSupportR4();
+		return retVal;
+	}
+
+	@Bean(name = "myResourceCountsCache")
+	public ResourceCountCache resourceCountsCache() {
+		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoR4().getResourceCounts());
+		retVal.setCacheMillis(4 * DateUtils.MILLIS_PER_HOUR);
 		return retVal;
 	}
 
@@ -82,12 +129,6 @@ public class BaseR4Config extends BaseConfig {
 	public IFulltextSearchSvc searchDaoR4() {
 		FulltextSearchSvcImpl searchDao = new FulltextSearchSvcImpl();
 		return searchDao;
-	}
-
-	@Bean(name = "myGraphQLProvider")
-	@Lazy
-	public GraphQLProvider graphQLProvider() {
-		return new GraphQLProvider(fhirContextR4(), validationSupportChainR4(), jpaStorageServices());
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
@@ -116,7 +157,7 @@ public class BaseR4Config extends BaseConfig {
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public IHapiTerminologyLoaderSvc terminologyLoaderService() {
-		return new TerminologyLoaderSvc();
+		return new TerminologyLoaderSvcImpl();
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
@@ -134,7 +175,7 @@ public class BaseR4Config extends BaseConfig {
 	@Primary
 	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainR4")
 	public IValidationSupport validationSupportChainR4() {
-		return new JpaValidationSupportChainR4();
+		return new CachingValidationSupport(jpaValidationSupportChain());
 	}
 
 }

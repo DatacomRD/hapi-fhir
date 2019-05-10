@@ -6,7 +6,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,17 +25,24 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 public interface IPagingProvider {
 
 	int getDefaultPageSize();
-		
+
 	int getMaximumPageSize();
-	
-	/**
-	 * Stores a result list and returns an ID with which that list can be returned
-	 */
-	public String storeResultList(IBundleProvider theList);
-	
+
 	/**
 	 * Retrieve a result list by ID
 	 */
-	public IBundleProvider retrieveResultList(String theId);
-	
+	IBundleProvider retrieveResultList(String theSearchId);
+
+	/**
+	 * Retrieve a result list by ID
+	 */
+	default IBundleProvider retrieveResultList(String theSearchId, String thePageId) {
+		return null;
+	}
+
+	/**
+	 * Stores a result list and returns an ID with which that list can be returned
+	 */
+	String storeResultList(IBundleProvider theList);
+
 }

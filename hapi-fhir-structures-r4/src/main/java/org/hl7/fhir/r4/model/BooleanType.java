@@ -75,7 +75,9 @@ public class BooleanType extends PrimitiveType<Boolean> implements IBaseBooleanD
 	}
 
 	public BooleanType copy() {
-		return new BooleanType(getValue());
+		BooleanType ret = new BooleanType(getValue());
+    copyValues(ret);
+    return ret;
 	}
 
 	protected String encode(Boolean theValue) {
@@ -100,4 +102,10 @@ public class BooleanType extends PrimitiveType<Boolean> implements IBaseBooleanD
 			throw new DataFormatException("Invalid boolean string: '" + theValue + "'");
 		}
 	}
+	
+  @Override
+  public boolean isBooleanPrimitive() {
+    return true;
+  }
+ 
 }

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -69,7 +69,7 @@ public enum EncounterAdmitSource {
          */
         PSYCH, 
         /**
-         * The patient has been transferred from a rehabilitiation facility or clinic.
+         * The patient has been transferred from a rehabilitation facility or clinic.
          */
         REHAB, 
         /**
@@ -121,7 +121,7 @@ public enum EncounterAdmitSource {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/admit-source";
+          return "http://terminology.hl7.org/CodeSystem/admit-source";
         }
         public String getDefinition() {
           switch (this) {
@@ -133,7 +133,7 @@ public enum EncounterAdmitSource {
             case MP: return "The patient has been admitted due to a referred from a Specialist (as opposed to a General Practitioner).";
             case NURSING: return "The patient has been transferred from a nursing home.";
             case PSYCH: return "The patient has been transferred from a psychiatric facility.";
-            case REHAB: return "The patient has been transferred from a rehabilitiation facility or clinic.";
+            case REHAB: return "The patient has been transferred from a rehabilitation facility or clinic.";
             case OTHER: return "The patient has been admitted from a source otherwise not specified here.";
             default: return "?";
           }

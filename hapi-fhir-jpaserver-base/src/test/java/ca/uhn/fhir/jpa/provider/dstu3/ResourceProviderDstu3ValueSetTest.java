@@ -2,7 +2,8 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
@@ -10,11 +11,15 @@ import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
@@ -28,10 +33,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest.URL_MY_VALUE_SET;
-import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3Test {
@@ -92,6 +98,39 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		createLocalVs(codeSystem);
 	}
 
+
+	public void createLoincSystemWithSomeCodes() {
+		runInTransaction(() -> {
+			CodeSystem codeSystem = new CodeSystem();
+			codeSystem.setUrl(CS_URL);
+			codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
+			IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+			ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+
+			TermCodeSystemVersion cs = new TermCodeSystemVersion();
+			cs.setResource(table);
+
+			TermConcept code;
+			code = new TermConcept(cs, "50015-7");
+			code.addPropertyString("SYSTEM", "Bld/Bone mar^Donor");
+			cs.getConcepts().add(code);
+
+			code = new TermConcept(cs, "43343-3");
+			code.addPropertyString("SYSTEM", "Ser");
+			code.addPropertyString("HELLO", "12345-1");
+			cs.getConcepts().add(code);
+
+			code = new TermConcept(cs, "43343-4");
+			code.addPropertyString("SYSTEM", "Ser");
+			code.addPropertyString("HELLO", "12345-2");
+			cs.getConcepts().add(code);
+
+			myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", cs);
+		});
+	}
+
+
 	private void createLocalVs(CodeSystem codeSystem) {
 		myLocalVs = new ValueSet();
 		myLocalVs.setUrl(URL_MY_VALUE_SET);
@@ -109,6 +148,16 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
 	}
 
+	private void createLocalVsWithIncludeConcept() {
+		myLocalVs = new ValueSet();
+		myLocalVs.setUrl(URL_MY_VALUE_SET);
+		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+		include.addConcept().setCode("A");
+		include.addConcept().setCode("AA");
+		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
+	}
+
 	private void createLocalVsWithUnknownCode(CodeSystem codeSystem) {
 		myLocalVs = new ValueSet();
 		myLocalVs.setUrl(URL_MY_VALUE_SET);
@@ -117,6 +166,71 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("childFOOOOOOO");
 		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
 	}
+
+
+	@Test
+	public void testExpandValueSetPropertySearchWithRegexExcludeUsingOr() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent exclude;
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(CS_URL);
+
+
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(CS_URL);
+		exclude
+			.addFilter()
+			.setProperty("HELLO")
+			.setOp(ValueSet.FilterOperator.REGEX)
+			.setValue("12345-1|12345-2");
+
+		IIdType vsId = ourClient.create().resource(vs).execute().getId();
+		outcome = (ValueSet) ourClient.operation().onInstance(vsId).named("expand").withNoParameters(Parameters.class).execute().getParameter().get(0).getResource();
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		ourLog.info("** Got codes: {}", codes);
+		assertThat(codes, Matchers.containsInAnyOrder("50015-7"));
+
+
+		assertEquals(1, outcome.getCompose().getInclude().size());
+		assertEquals(1, outcome.getCompose().getExclude().size());
+		assertEquals(1, outcome.getExpansion().getTotal());
+
+	}
+
+
+	@Test
+	public void testExpandValueSetPropertySearchWithRegexExcludeNoFilter() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent exclude;
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(CS_URL);
+
+
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(CS_URL);
+
+		IIdType vsId = ourClient.create().resource(vs).execute().getId();
+		outcome = (ValueSet) ourClient.operation().onInstance(vsId).named("expand").withNoParameters(Parameters.class).execute().getParameter().get(0).getResource();
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, Matchers.empty());
+	}
+
 
 	@Test
 	public void testExpandById() throws IOException {
@@ -132,19 +246,19 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
-		assertThat(resp, containsString("<expansion>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"8450-9\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure--expiration\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("<contains>"));
-		assertThat(resp, containsString("<system value=\"http://acme.org\"/>"));
-		assertThat(resp, containsString("<code value=\"11378-7\"/>"));
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, containsString("</contains>"));
-		assertThat(resp, containsString("</expansion>"));
+		assertThat(resp, Matchers.containsString("<ValueSet xmlns=\"http://hl7.org/fhir\">"));
+		assertThat(resp, Matchers.containsString("<expansion>"));
+		assertThat(resp, Matchers.containsString("<contains>"));
+		assertThat(resp, Matchers.containsString("<system value=\"http://acme.org\"/>"));
+		assertThat(resp, Matchers.containsString("<code value=\"8450-9\"/>"));
+		assertThat(resp, Matchers.containsString("<display value=\"Systolic blood pressure--expiration\"/>"));
+		assertThat(resp, Matchers.containsString("</contains>"));
+		assertThat(resp, Matchers.containsString("<contains>"));
+		assertThat(resp, Matchers.containsString("<system value=\"http://acme.org\"/>"));
+		assertThat(resp, Matchers.containsString("<code value=\"11378-7\"/>"));
+		assertThat(resp, Matchers.containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp, Matchers.containsString("</contains>"));
+		assertThat(resp, Matchers.containsString("</expansion>"));
 
 	}
 
@@ -163,8 +277,8 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, not(containsString("<display value=\"Systolic blood pressure--expiration\"/>")));
+		assertThat(resp, Matchers.containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp, Matchers.not(Matchers.containsString("<display value=\"Systolic blood pressure--expiration\"/>")));
 
 	}
 
@@ -172,7 +286,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	 * $expand?identifier=foo is legacy.. It's actually not valid in FHIR as of STU3
 	 * but we supported it for longer than we should have so I don't want to delete
 	 * it right now.
-	 *
+	 * <p>
 	 * https://groups.google.com/d/msgid/hapi-fhir/CAN2Cfy8kW%2BAOkgC6VjPsU3gRCpExCNZBmJdi-k5R_TWeyWH4tA%40mail.gmail.com?utm_medium=email&utm_source=footer
 	 */
 	@Test
@@ -187,7 +301,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp, Matchers.stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 
@@ -205,7 +319,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp, Matchers.stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 
@@ -228,7 +342,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp, Matchers.stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 		//@formatter:on
@@ -253,7 +367,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<code value=\"M\"/>"));
+		assertThat(resp, Matchers.containsStringIgnoringCase("<code value=\"M\"/>"));
 	}
 
 	@Test
@@ -275,9 +389,9 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAA\"/>"));
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
-		assertThat(resp, not(containsStringIgnoringCase("<code value=\"ParentA\"/>")));
+		assertThat(resp, Matchers.containsStringIgnoringCase("<code value=\"childAAA\"/>"));
+		assertThat(resp, Matchers.containsStringIgnoringCase("<code value=\"childAAB\"/>"));
+		assertThat(resp, Matchers.not(Matchers.containsStringIgnoringCase("<code value=\"ParentA\"/>")));
 
 	}
 
@@ -349,7 +463,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<code value=\"M\"/>"));
+		assertThat(resp, Matchers.containsStringIgnoringCase("<code value=\"M\"/>"));
 	}
 
 	@Test
@@ -370,9 +484,9 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAA\"/>"));
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
-		assertThat(resp, not(containsStringIgnoringCase("<code value=\"ParentA\"/>")));
+		assertThat(resp, Matchers.containsStringIgnoringCase("<code value=\"childAAA\"/>"));
+		assertThat(resp, Matchers.containsStringIgnoringCase("<code value=\"childAAB\"/>"));
+		assertThat(resp, Matchers.not(Matchers.containsStringIgnoringCase("<code value=\"ParentA\"/>")));
 
 	}
 
@@ -394,9 +508,9 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAA\"/>"));
-		assertThat(resp, containsStringIgnoringCase("<code value=\"childAAB\"/>"));
-		assertThat(resp, not(containsStringIgnoringCase("<code value=\"ParentA\"/>")));
+		assertThat(resp, Matchers.containsStringIgnoringCase("<code value=\"childAAA\"/>"));
+		assertThat(resp, Matchers.containsStringIgnoringCase("<code value=\"childAAB\"/>"));
+		assertThat(resp, Matchers.not(Matchers.containsStringIgnoringCase("<code value=\"ParentA\"/>")));
 
 	}
 
@@ -437,7 +551,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			ourLog.info(resp.toString());
 
 			assertEquals(400, resp.getStatusLine().getStatusCode());
-			assertThat(respString, containsString("Unknown FilterOperator code 'n'"));
+			assertThat(respString, Matchers.containsString("Unknown FilterOperator code 'n'"));
 
 		} finally {
 			IOUtils.closeQuietly(resp);
@@ -460,6 +574,29 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		ourLog.info(resp);
 
 		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+	}
+
+	@Test
+	public void testValidateCodeOperationByCodeAndSystemInstanceOnInstance() throws IOException {
+		createLocalCsAndVs();
+		createLocalVsWithIncludeConcept();
+
+		String url = ourServerBase +
+			"/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
+			UrlUtil.escapeUrlParam(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM) +
+			"&code=AA";
+
+		ourLog.info("* Requesting: {}", url);
+
+		HttpGet request = new HttpGet(url);
+		request.addHeader("Accept", "application/fhir+json");
+		try (CloseableHttpResponse response = ourHttpClient.execute(request)) {
+			String respString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info(respString);
+
+			Parameters respParam = myFhirCtx.newJsonParser().parseResource(Parameters.class, respString);
+			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		}
 	}
 
 	@Test
@@ -502,7 +639,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue().booleanValue());
 
 		assertEquals("message", respParam.getParameter().get(1).getName());
-		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue(), containsStringIgnoringCase("succeeded"));
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue(), Matchers.containsStringIgnoringCase("succeeded"));
 
 		assertEquals("display", respParam.getParameter().get(2).getName());
 		assertEquals("Burn", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
@@ -530,7 +667,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue().booleanValue());
 
 		assertEquals("message", respParam.getParameter().get(1).getName());
-		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue(), containsStringIgnoringCase("succeeded"));
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue(), Matchers.containsStringIgnoringCase("succeeded"));
 
 		assertEquals("display", respParam.getParameter().get(2).getName());
 		assertEquals("Burn", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
@@ -547,11 +684,10 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
 
-		ResourceTable table = theResourceTableDao.findOne(id.getIdPartAsLong());
+		ResourceTable table = theResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
-		cs.setResourceVersionId(table.getVersion());
 
 		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
 		cs.getConcepts().add(parentA);
@@ -571,8 +707,19 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, cs);
+		theTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", cs);
 		return codeSystem;
+	}
+
+
+	public static List<String> toCodesContains(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
+		List<String> retVal = new ArrayList<>();
+
+		for (ValueSet.ValueSetExpansionContainsComponent next : theContains) {
+			retVal.add(next.getCode());
+		}
+
+		return retVal;
 	}
 
 }

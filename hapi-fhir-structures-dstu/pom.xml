@@ -15,6 +15,14 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-dependencies</artifactId>
+			<version>${spring-boot.version}</version>
+			<type>pom</type>
+			<scope>import</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>${project.version}</version>
@@ -68,13 +76,13 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-schematron</artifactId>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-schematron</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-commons</artifactId>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-commons</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -186,7 +194,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<argLine>${argLine} -Dfile.encoding=UTF-8 -Xmx712m</argLine>
+					<argLine>@{argLine} -Dfile.encoding=UTF-8 -Xmx712m</argLine>
 				</configuration>
 			</plugin>
 			<plugin>

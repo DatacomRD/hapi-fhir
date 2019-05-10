@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,20 +23,19 @@ package ca.uhn.fhir.jpa.search;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.SearchStatusEnum;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl.SearchTask;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundleProvider {
-
+	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaSearchFirstPageBundleProvider.class);
 	private SearchTask mySearchTask;
 	private ISearchBuilder mySearchBuilder;
 	private Search mySearch;
@@ -54,20 +53,35 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 	@Override
 	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
 		SearchCoordinatorSvcImpl.verifySearchHasntFailedOrThrowInternalErrorException(mySearch);
+
+		ourLog.trace("Fetching search resource PIDs");
 		final List<Long> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex);
-		
+		ourLog.trace("Done fetching search resource PIDs");
+
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
-		return txTemplate.execute(new TransactionCallback<List<IBaseResource>>() {
-			@Override
-			public List<IBaseResource> doInTransaction(TransactionStatus theStatus) {
-				return toResourceList(mySearchBuilder, pids);
-			}});
+		List<IBaseResource> retVal = txTemplate.execute(theStatus -> toResourceList(mySearchBuilder, pids));
+
+		int totalCountWanted = theToIndex - theFromIndex;
+		if (retVal.size() < totalCountWanted) {
+			if (mySearch.getStatus() == SearchStatusEnum.PASSCMPLET) {
+				int remainingWanted = totalCountWanted - retVal.size();
+				int fromIndex = theToIndex - remainingWanted;
+				List<IBaseResource> remaining = super.getResources(fromIndex, theToIndex);
+				retVal.addAll(remaining);
+			}
+		}
+		ourLog.trace("Loaded resources to return");
+
+		return retVal;
 	}
 
 	@Override
 	public Integer size() {
+		ourLog.trace("Waiting for initial sync");
 		Integer size = mySearchTask.awaitInitialSync();
+		ourLog.trace("Finished waiting for local sync");
+
 		SearchCoordinatorSvcImpl.verifySearchHasntFailedOrThrowInternalErrorException(mySearch);
 		if (size != null) {
 			return size;

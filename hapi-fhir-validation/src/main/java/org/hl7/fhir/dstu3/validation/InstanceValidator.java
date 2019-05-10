@@ -293,7 +293,6 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   }
 
 
-
   @Override
   public boolean isNoInvariantChecks() {
     return noInvariantChecks;
@@ -305,10 +304,12 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     return this;
   }
 
+  @Override
   public IValidatorResourceFetcher getFetcher() {
     return this.fetcher;
   }
 
+  @Override
   public IResourceValidator setFetcher(IValidatorResourceFetcher value) {
     this.fetcher = value;
     return this;
@@ -1113,7 +1114,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       List<Element> extensions = new ArrayList<Element>();
       focus.getNamedChildren("extension", extensions);
       if (fixed.getExtension().size() == 0) {
-        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, extensions.size() == 0, "No extensions allowed");
+        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, extensions.size() == 0, "No extensions allowed, as the specified fixed value doesn't contain any extensions");
       } else if (rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, extensions.size() == fixed.getExtension().size(),
           "Extensions count mismatch: expected " + Integer.toString(fixed.getExtension().size()) + " but found " + Integer.toString(extensions.size()))) {
         for (Extension e : fixed.getExtension()) {
@@ -1983,7 +1984,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   }
 
   private boolean isPrimitiveType(String code) {
-    StructureDefinition sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+code);
+    StructureDefinition sd = context.fetchTypeDefinition(code);
     return sd != null && sd.getKind() == StructureDefinitionKind.PRIMITIVETYPE;
   }
 
@@ -2105,9 +2106,10 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   }
 
   private String resolve(String uri, String ref) {
-  	 if (isBlank(uri)) {
-  	 	return ref;
-	 }
+    if (isBlank(uri)) {
+      return ref;
+    }
+
     String[] up = uri.split("\\/");
     String[] rp = ref.split("\\/");
     if (context.getResourceNames().contains(up[up.length-2]) && context.getResourceNames().contains(rp[0])) {
@@ -2458,9 +2460,10 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         else if (itemType.equals("integer")) checkOption(errors, answer, ns, qsrc, qItem, "integer");
         else if (itemType.equals("string")) checkOption(errors, answer, ns, qsrc, qItem, "string", true);
         break;
-      case QUESTION:
-      case NULL:
-        break;
+			case QUESTION:
+			case NULL:
+				// nothing
+				break;
       }
       validateQuestionannaireResponseItems(qsrc, qItem.getItem(), errors, answer, stack, inProgress);
     }
@@ -2536,6 +2539,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         validateQuestionannaireResponseItem(qsrc, qItem, errors, mapItem, stack, inProgress);
       else
         rule(errors, IssueType.REQUIRED, element.line(), element.col(), stack.getLiteralPath(), !qItem.getRequired(), "No response found for required item "+qItem.getLinkId());
+      
     }
   }
 
@@ -3059,11 +3063,11 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       if (ei.path.endsWith(".extension"))
         rule(errors, IssueType.INVALID, ei.line(), ei.col(), ei.path, ei.definition != null, "Element is unknown or does not match any slice (url=\"" + ei.element.getNamedChildValue("url") + "\")" + (profile==null ? "" : " for profile " + profile.getUrl()));
       else if (!unsupportedSlicing)
-        if (ei.slice!=null && (ei.slice.getSlicing().getRules().equals(ElementDefinition.SlicingRules.OPEN)))
+        if (ei.slice!=null && (ei.slice.getSlicing().getRules().equals(ElementDefinition.SlicingRules.OPEN) || ei.slice.getSlicing().getRules().equals(ElementDefinition.SlicingRules.OPENATEND)))
           hint(errors, IssueType.INFORMATIONAL, ei.line(), ei.col(), ei.path, (ei.definition != null),
               "Element " + ei.element.getName() + " is unknown or does not match any slice " + sliceInfo + (profile==null ? "" : " for profile " + profile.getUrl()));
         else
-          if (ei.slice!=null && (ei.slice.getSlicing().getRules().equals(ElementDefinition.SlicingRules.OPEN)))
+          if (ei.slice!=null && (ei.slice.getSlicing().getRules().equals(ElementDefinition.SlicingRules.OPEN) || ei.slice.getSlicing().getRules().equals(ElementDefinition.SlicingRules.OPENATEND)))
             rule(errors, IssueType.INVALID, ei.line(), ei.col(), ei.path, (ei.definition != null),
                 "Element " + ei.element.getName() + " is unknown or does not match any slice " + sliceInfo + (profile==null ? "" : " for profile " + profile.getUrl()));
           else

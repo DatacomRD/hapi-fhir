@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum VisionBaseCodes {
 
         /**
-         * top
+         * top.
          */
         UP, 
         /**
-         * bottom
+         * bottom.
          */
         DOWN, 
         /**
-         * inner edge
+         * inner edge.
          */
         IN, 
         /**
-         * outer edge
+         * outer edge.
          */
         OUT, 
         /**
@@ -83,10 +83,10 @@ public enum VisionBaseCodes {
         }
         public String getDefinition() {
           switch (this) {
-            case UP: return "top";
-            case DOWN: return "bottom";
-            case IN: return "inner edge";
-            case OUT: return "outer edge";
+            case UP: return "top.";
+            case DOWN: return "bottom.";
+            case IN: return "inner edge.";
+            case OUT: return "outer edge.";
             default: return "?";
           }
         }

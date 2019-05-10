@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.demo;
 
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
-import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
+import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu2;
-import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
@@ -32,7 +32,7 @@ public class FhirServerConfigDstu2 extends BaseJavaConfigDstu2 {
 	/**
 	 * Configure FHIR properties around the the JPA server via this bean
 	 */
-	@Bean()
+	@Bean
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
 		retVal.setSubscriptionEnabled(true);
@@ -58,20 +58,19 @@ public class FhirServerConfigDstu2 extends BaseJavaConfigDstu2 {
 		return retVal;
 	}
 
-	@Bean()
+	@Override
+	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-		LocalContainerEntityManagerFactoryBean retVal = new LocalContainerEntityManagerFactoryBean();
+		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
 		retVal.setPersistenceUnitName("HAPI_PU");
 		retVal.setDataSource(dataSource());
-		retVal.setPackagesToScan("ca.uhn.fhir.jpa.entity");
-		retVal.setPersistenceProvider(new HibernatePersistenceProvider());
 		retVal.setJpaProperties(jpaProperties());
 		return retVal;
 	}
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
-		extraProperties.put("hibernate.dialect", org.hibernate.dialect.DerbyTenSevenDialect.class.getName());
+		extraProperties.put("hibernate.dialect", DerbyTenSevenHapiFhirDialect.class.getName());
 		extraProperties.put("hibernate.format_sql", "true");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
@@ -80,6 +79,7 @@ public class FhirServerConfigDstu2 extends BaseJavaConfigDstu2 {
 		extraProperties.put("hibernate.cache.use_second_level_cache", "false");
 		extraProperties.put("hibernate.cache.use_structured_entries", "false");
 		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
+		extraProperties.put("hibernate.search.model_mapping", LuceneSearchMappingFactory.class.getName());
 		extraProperties.put("hibernate.search.default.directory_provider", "filesystem");
 		extraProperties.put("hibernate.search.default.indexBase", "target/lucenefiles");
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
@@ -115,7 +115,7 @@ public class FhirServerConfigDstu2 extends BaseJavaConfigDstu2 {
 		return retVal;
 	}
 
-	@Bean()
+	@Bean
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);

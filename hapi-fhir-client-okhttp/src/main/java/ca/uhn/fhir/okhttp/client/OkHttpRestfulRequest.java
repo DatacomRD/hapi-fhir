@@ -1,6 +1,7 @@
 package ca.uhn.fhir.okhttp.client;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -8,7 +9,7 @@ import java.util.Map;
  * #%L
  * HAPI FHIR OkHttp Client
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +28,7 @@ import java.util.Map;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.util.StopWatch;
 import okhttp3.Call;
 import okhttp3.Call.Factory;
 import okhttp3.Request;
@@ -65,18 +67,19 @@ public class OkHttpRestfulRequest implements IHttpRequest {
 
     @Override
     public IHttpResponse execute() throws IOException {
-        myRequestBuilder.method(getHttpVerbName(), myRequestBody);
-        Call call = myClient.newCall(myRequestBuilder.build());
-        return new OkHttpRestfulResponse(call.execute());
+		 StopWatch responseStopWatch = new StopWatch();
+		 myRequestBuilder.method(getHttpVerbName(), myRequestBody);
+		 Call call = myClient.newCall(myRequestBuilder.build());
+		 return new OkHttpRestfulResponse(call.execute(), responseStopWatch);
     }
 
     @Override
     public Map<String, List<String>> getAllHeaders() {
-        return myRequestBuilder.build().headers().toMultimap();
+        return Collections.unmodifiableMap(myRequestBuilder.build().headers().toMultimap());
     }
 
     @Override
-    public String getRequestBodyFromStream() throws IOException {
+    public String getRequestBodyFromStream() {
         // returning null to indicate this is not supported, as documented in IHttpRequest's contract
         return null;
     }
@@ -90,5 +93,10 @@ public class OkHttpRestfulRequest implements IHttpRequest {
     public String getHttpVerbName() {
         return myRequestTypeEnum.name();
     }
+
+	@Override
+	public void removeHeaders(String theHeaderName) {
+    	myRequestBuilder.removeHeader(theHeaderName);
+	}
 
 }

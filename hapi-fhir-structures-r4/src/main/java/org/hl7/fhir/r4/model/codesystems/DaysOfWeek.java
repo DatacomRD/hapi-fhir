@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,31 +37,31 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum DaysOfWeek {
 
         /**
-         * Monday
+         * Monday.
          */
         MON, 
         /**
-         * Tuesday
+         * Tuesday.
          */
         TUE, 
         /**
-         * Wednesday
+         * Wednesday.
          */
         WED, 
         /**
-         * Thursday
+         * Thursday.
          */
         THU, 
         /**
-         * Friday
+         * Friday.
          */
         FRI, 
         /**
-         * Saturday
+         * Saturday.
          */
         SAT, 
         /**
-         * Sunday
+         * Sunday.
          */
         SUN, 
         /**
@@ -104,13 +104,13 @@ public enum DaysOfWeek {
         }
         public String getDefinition() {
           switch (this) {
-            case MON: return "Monday";
-            case TUE: return "Tuesday";
-            case WED: return "Wednesday";
-            case THU: return "Thursday";
-            case FRI: return "Friday";
-            case SAT: return "Saturday";
-            case SUN: return "Sunday";
+            case MON: return "Monday.";
+            case TUE: return "Tuesday.";
+            case WED: return "Wednesday.";
+            case THU: return "Thursday.";
+            case FRI: return "Friday.";
+            case SAT: return "Saturday.";
+            case SUN: return "Sunday.";
             default: return "?";
           }
         }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,22 +20,18 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #L%
  */
 
-import java.util.HashSet;
-import java.util.List;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 class OperationRule extends BaseRule implements IAuthRule {
-
-	public OperationRule(String theRuleName) {
-		super(theRuleName);
-	}
 
 	private String myOperationName;
 	private boolean myAppliesToServer;
@@ -44,70 +40,152 @@ class OperationRule extends BaseRule implements IAuthRule {
 	private HashSet<Class<? extends IBaseResource>> myAppliesToInstancesOfType;
 	private boolean myAppliesToAnyType;
 	private boolean myAppliesToAnyInstance;
+	private boolean myAppliesAtAnyLevel;
+	private boolean myAllowAllResponses;
 
-	/**
-	 * Must include the leading $
-	 */
-	public void setOperationName(String theOperationName) {
-		myOperationName = theOperationName;
+	OperationRule(String theRuleName) {
+		super(theRuleName);
 	}
 
-	public String getOperationName() {
-		return myOperationName;
+	void appliesAtAnyLevel(boolean theAppliesAtAnyLevel) {
+		myAppliesAtAnyLevel = theAppliesAtAnyLevel;
+	}
+
+	public void allowAllResponses() {
+		myAllowAllResponses = true;
+	}
+
+	void appliesToAnyInstance() {
+		myAppliesToAnyInstance = true;
+	}
+
+	void appliesToAnyType() {
+		myAppliesToAnyType = true;
+	}
+
+	void appliesToInstances(List<IIdType> theAppliesToIds) {
+		myAppliesToIds = theAppliesToIds;
+	}
+
+	void appliesToInstancesOfType(HashSet<Class<? extends IBaseResource>> theAppliesToTypes) {
+		myAppliesToInstancesOfType = theAppliesToTypes;
+	}
+
+	void appliesToServer() {
+		myAppliesToServer = true;
+	}
+
+	void appliesToTypes(HashSet<Class<? extends IBaseResource>> theAppliesToTypes) {
+		myAppliesToTypes = theAppliesToTypes;
 	}
 
 	@Override
-	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier) {
+	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags) {
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
+
+		if (isOtherTenant(theRequestDetails)) {
+			return null;
+		}
 
 		boolean applies = false;
 		switch (theOperation) {
-		case EXTENDED_OPERATION_SERVER:
-			if (myAppliesToServer) {
-				applies = true;
-			}
-			break;
-		case EXTENDED_OPERATION_TYPE:
-			if (myAppliesToAnyType) {
-				applies = true;
-			} else if (myAppliesToTypes != null) {
-				// TODO: Convert to a map of strings and keep the result
-				for (Class<? extends IBaseResource> next : myAppliesToTypes) {
-					String resName = ctx.getResourceDefinition(next).getName();
-					if (resName.equals(theRequestDetails.getResourceName())) {
-						applies = true;
-						break;
-					}
+			case ADD_TAGS:
+			case DELETE_TAGS:
+			case GET_TAGS:
+			case GET_PAGE:
+			case GRAPHQL_REQUEST:
+				// These things can't be tracked by the AuthorizationInterceptor
+				// at this time
+				return null;
+			case EXTENDED_OPERATION_SERVER:
+				if (myAppliesToServer || myAppliesAtAnyLevel) {
+					applies = true;
 				}
-			}
-			break;
-		case EXTENDED_OPERATION_INSTANCE:
-			if (myAppliesToAnyInstance) {
-				applies = true;
-			} else if (theInputResourceId != null) {
-				if (myAppliesToIds != null) {
-					String instanceId = theInputResourceId.toUnqualifiedVersionless().getValue();
-					for (IIdType next : myAppliesToIds) {
-						if (next.toUnqualifiedVersionless().getValue().equals(instanceId)) {
-							applies = true;
-							break;
-						}
-					}
-				}
-				if (myAppliesToInstancesOfType != null) {
+				break;
+			case EXTENDED_OPERATION_TYPE:
+				if (myAppliesToAnyType || myAppliesAtAnyLevel) {
+					applies = true;
+				} else if (myAppliesToTypes != null) {
 					// TODO: Convert to a map of strings and keep the result
-					for (Class<? extends IBaseResource> next : myAppliesToInstancesOfType) {
+					for (Class<? extends IBaseResource> next : myAppliesToTypes) {
 						String resName = ctx.getResourceDefinition(next).getName();
-						if (resName.equals(theInputResourceId.getResourceType())) {
+						if (resName.equals(theRequestDetails.getResourceName())) {
 							applies = true;
 							break;
 						}
 					}
 				}
-			}
-			break;
-		default:
-			return null;
+				break;
+			case EXTENDED_OPERATION_INSTANCE:
+				if (myAppliesToAnyInstance || myAppliesAtAnyLevel) {
+					applies = true;
+				} else {
+					IIdType requestResourceId = null;
+					if (theInputResourceId != null) {
+						requestResourceId = theInputResourceId;
+					}
+					if (requestResourceId == null && myAllowAllResponses) {
+						requestResourceId = theRequestDetails.getId();
+					}
+					if (requestResourceId != null) {
+						if (myAppliesToIds != null) {
+							String instanceId = requestResourceId .toUnqualifiedVersionless().getValue();
+							for (IIdType next : myAppliesToIds) {
+								if (next.toUnqualifiedVersionless().getValue().equals(instanceId)) {
+									applies = true;
+									break;
+								}
+							}
+						}
+						if (myAppliesToInstancesOfType != null) {
+							// TODO: Convert to a map of strings and keep the result
+							for (Class<? extends IBaseResource> next : myAppliesToInstancesOfType) {
+								String resName = ctx.getResourceDefinition(next).getName();
+								if (resName.equals(requestResourceId .getResourceType())) {
+									applies = true;
+									break;
+								}
+							}
+						}
+					}
+				}
+				break;
+			case CREATE:
+				break;
+			case DELETE:
+				break;
+			case HISTORY_INSTANCE:
+				break;
+			case HISTORY_SYSTEM:
+				break;
+			case HISTORY_TYPE:
+				break;
+			case READ:
+				break;
+			case SEARCH_SYSTEM:
+				break;
+			case SEARCH_TYPE:
+				break;
+			case TRANSACTION:
+				break;
+			case UPDATE:
+				break;
+			case VALIDATE:
+				break;
+			case VREAD:
+				break;
+			case METADATA:
+				break;
+			case META_ADD:
+				break;
+			case META:
+				break;
+			case META_DELETE:
+				break;
+			case PATCH:
+				break;
+			default:
+				return null;
 		}
 
 		if (!applies) {
@@ -118,31 +196,22 @@ class OperationRule extends BaseRule implements IAuthRule {
 			return null;
 		}
 
+		if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
+			return null;
+		}
+
 		return newVerdict();
 	}
 
-	public void appliesToServer() {
-		myAppliesToServer = true;
+	public String getOperationName() {
+		return myOperationName;
 	}
 
-	public void appliesToTypes(HashSet<Class<? extends IBaseResource>> theAppliesToTypes) {
-		myAppliesToTypes = theAppliesToTypes;
-	}
-
-	public void appliesToInstances(List<IIdType> theAppliesToIds) {
-		myAppliesToIds = theAppliesToIds;
-	}
-
-	public void appliesToInstancesOfType(HashSet<Class<? extends IBaseResource>> theAppliesToTypes) {
-		myAppliesToInstancesOfType = theAppliesToTypes;
-	}
-
-	public void appliesToAnyInstance() {
-		myAppliesToAnyInstance = true;		
-	}
-
-	public void appliesToAnyType() {
-		myAppliesToAnyType = true;
+	/**
+	 * Must include the leading $
+	 */
+	public void setOperationName(String theOperationName) {
+		myOperationName = theOperationName;
 	}
 
 }

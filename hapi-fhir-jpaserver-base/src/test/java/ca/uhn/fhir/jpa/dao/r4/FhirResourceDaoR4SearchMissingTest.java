@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -45,7 +45,6 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		org.setActive(true);
 		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
-		assertThat(mySearchParamDao.findAll(), empty());
 		assertThat(mySearchParamPresentDao.findAll(), empty());
 		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
 		assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
@@ -66,7 +65,7 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		IIdType tid1;
 		{
 			Task task = new Task();
-			task.getRequester().setOnBehalfOf(new Reference(oid1));
+			task.setRequester(new Reference(oid1));
 			tid1 = myTaskDao.create(task, mySrd).getId().toUnqualifiedVersionless();
 		}
 		IIdType tid2;
@@ -86,7 +85,7 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		IIdType tid3;
 		{
 			Task task = new Task();
-			task.getRequester().setOnBehalfOf(new Reference(oid2));
+			task.setRequester(new Reference(oid2));
 			tid3 = myTaskDao.create(task, mySrd).getId().toUnqualifiedVersionless();
 		}
 
@@ -101,17 +100,17 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		ourLog.info("Starting Search 2");
 
 		map = new SearchParameterMap();
-		map.add(Task.SP_ORGANIZATION, new ReferenceParam("Organization", "name:missing", "true"));
+		map.add(Task.SP_REQUESTER, new ReferenceParam("Organization", "name:missing", "true"));
 		ids = toUnqualifiedVersionlessIds(myTaskDao.search(map));
 		assertThat(ids, contains(tid1)); // NOT tid2
 
 		map = new SearchParameterMap();
-		map.add(Task.SP_ORGANIZATION, new ReferenceParam("Organization", "name:missing", "false"));
+		map.add(Task.SP_REQUESTER, new ReferenceParam("Organization", "name:missing", "false"));
 		ids = toUnqualifiedVersionlessIds(myTaskDao.search(map));
 		assertThat(ids, contains(tid3));
 
 		map = new SearchParameterMap();
-		map.add(Task.SP_ORGANIZATION, new ReferenceParam("Organization", "name:missing", "true"));
+		map.add(Patient.SP_ORGANIZATION, new ReferenceParam("Organization", "name:missing", "true"));
 		ids = toUnqualifiedVersionlessIds(myPatientDao.search(map));
 		assertThat(ids, empty());
 

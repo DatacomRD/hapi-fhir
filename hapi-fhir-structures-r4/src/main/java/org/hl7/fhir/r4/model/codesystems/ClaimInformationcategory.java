@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,7 +49,7 @@ public enum ClaimInformationcategory {
          */
         ONSET, 
         /**
-         * Nature and date of the related event eg. Last exam, service, Xray etc.
+         * Nature and date of the related event e.g. Last exam, service, X-ray etc.
          */
         RELATED, 
         /**
@@ -57,7 +57,7 @@ public enum ClaimInformationcategory {
          */
         EXCEPTION, 
         /**
-         * Materials being forwarded, eg. Models, molds, images, documents.
+         * Materials being forwarded, e.g. Models, molds, images, documents.
          */
         MATERIAL, 
         /**
@@ -76,6 +76,22 @@ public enum ClaimInformationcategory {
          * Other information identified by the type.system.
          */
         OTHER, 
+        /**
+         * An indication that the patient was hospitalized, the period if known otherwise a Yes/No (boolean).
+         */
+        HOSPITALIZED, 
+        /**
+         * An indication that the patient was unable to work, the period if known otherwise a Yes/No (boolean).
+         */
+        EMPLOYMENTIMPACTED, 
+        /**
+         * The external cause of an illness or injury.
+         */
+        EXTERNALCAUSE, 
+        /**
+         * The reason for the patient visit.
+         */
+        PATIENTREASONFORVISIT, 
         /**
          * added to help the parsers
          */
@@ -103,6 +119,14 @@ public enum ClaimInformationcategory {
           return PROSTHESIS;
         if ("other".equals(codeString))
           return OTHER;
+        if ("hospitalized".equals(codeString))
+          return HOSPITALIZED;
+        if ("employmentimpacted".equals(codeString))
+          return EMPLOYMENTIMPACTED;
+        if ("externalcause".equals(codeString))
+          return EXTERNALCAUSE;
+        if ("patientreasonforvisit".equals(codeString))
+          return PATIENTREASONFORVISIT;
         throw new FHIRException("Unknown ClaimInformationcategory code '"+codeString+"'");
         }
         public String toCode() {
@@ -117,24 +141,32 @@ public enum ClaimInformationcategory {
             case MISSINGTOOTH: return "missingtooth";
             case PROSTHESIS: return "prosthesis";
             case OTHER: return "other";
+            case HOSPITALIZED: return "hospitalized";
+            case EMPLOYMENTIMPACTED: return "employmentimpacted";
+            case EXTERNALCAUSE: return "externalcause";
+            case PATIENTREASONFORVISIT: return "patientreasonforvisit";
             default: return "?";
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/claiminformationcategory";
+          return "http://terminology.hl7.org/CodeSystem/claiminformationcategory";
         }
         public String getDefinition() {
           switch (this) {
             case INFO: return "Codes conveying additional situation and condition information.";
             case DISCHARGE: return "Discharge status and discharge to locations.";
             case ONSET: return "Period, start or end dates of aspects of the Condition.";
-            case RELATED: return "Nature and date of the related event eg. Last exam, service, Xray etc.";
+            case RELATED: return "Nature and date of the related event e.g. Last exam, service, X-ray etc.";
             case EXCEPTION: return "Insurance policy exceptions.";
-            case MATERIAL: return "Materials being forwarded, eg. Models, molds, images, documents.";
+            case MATERIAL: return "Materials being forwarded, e.g. Models, molds, images, documents.";
             case ATTACHMENT: return "Materials attached such as images, documents and resources.";
             case MISSINGTOOTH: return "Teeth which are missing for any reason, for example: prior extraction, never developed.";
             case PROSTHESIS: return "The type of prosthesis and date of supply if a previously supplied prosthesis.";
             case OTHER: return "Other information identified by the type.system.";
+            case HOSPITALIZED: return "An indication that the patient was hospitalized, the period if known otherwise a Yes/No (boolean).";
+            case EMPLOYMENTIMPACTED: return "An indication that the patient was unable to work, the period if known otherwise a Yes/No (boolean).";
+            case EXTERNALCAUSE: return "The external cause of an illness or injury.";
+            case PATIENTREASONFORVISIT: return "The reason for the patient visit.";
             default: return "?";
           }
         }
@@ -150,6 +182,10 @@ public enum ClaimInformationcategory {
             case MISSINGTOOTH: return "Missing Tooth";
             case PROSTHESIS: return "Prosthesis";
             case OTHER: return "Other";
+            case HOSPITALIZED: return "Hospitalized";
+            case EMPLOYMENTIMPACTED: return "EmploymentImpacted";
+            case EXTERNALCAUSE: return "External Caause";
+            case PATIENTREASONFORVISIT: return "Patient Reason for Visit";
             default: return "?";
           }
     }

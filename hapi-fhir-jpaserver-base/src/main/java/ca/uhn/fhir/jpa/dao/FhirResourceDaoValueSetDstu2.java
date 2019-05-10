@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,9 @@ import java.util.*;
 
 import javax.annotation.PostConstruct;
 
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import org.apache.commons.codec.binary.StringUtils;
+import org.hl7.fhir.instance.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.instance.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -36,7 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
@@ -62,7 +64,7 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 	@Qualifier("myFhirContextDstu2Hl7Org")
 	private FhirContext myRiCtx;
 
-	private ValidationSupportChain myValidationSupport;
+	private CachingValidationSupport myValidationSupport;
 
 	private void addCompose(String theFilter, ValueSet theValueSetToPopulate, ValueSet theSourceValueSet, CodeSystemConcept theConcept) {
 		if (isBlank(theFilter)) {
@@ -194,7 +196,7 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 				retVal.setSearchedForSystem(system);
 				retVal.setFound(true);
 				if (nextCode.getAbstract() != null) {
-					retVal.setCodeIsAbstract(nextCode.getAbstract().booleanValue());
+					retVal.setCodeIsAbstract(nextCode.getAbstract());
 				}
 				retVal.setCodeDisplay(nextCode.getDisplay());
 				retVal.setCodeSystemVersion(nextCode.getVersion());
@@ -252,7 +254,7 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 	public void postConstruct() {
 		super.postConstruct();
 		myDefaultProfileValidationSupport = new DefaultProfileValidationSupport();
-		myValidationSupport = new ValidationSupportChain(myDefaultProfileValidationSupport, myJpaValidationSupport);
+		myValidationSupport = new CachingValidationSupport(new ValidationSupportChain(myDefaultProfileValidationSupport, myJpaValidationSupport));
 	}
 
 	@Override

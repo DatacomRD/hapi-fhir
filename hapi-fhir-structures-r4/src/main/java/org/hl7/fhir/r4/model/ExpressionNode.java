@@ -1,5 +1,26 @@
 package org.hl7.fhir.r4.model;
 
+/*-
+ * #%L
+ * org.hl7.fhir.r4
+ * %%
+ * Copyright (C) 2014 - 2019 Health Level 7
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,8 +28,8 @@ import org.hl7.fhir.utilities.Utilities;
 
 public class ExpressionNode {
 
-	public enum Kind {
-		Name, Function, Constant, Group
+  public enum Kind {
+		Name, Function, Constant, Group, Unary
 	}
 	public static class SourceLocation {
 		private int line;
@@ -38,9 +59,11 @@ public class ExpressionNode {
   public enum Function {
     Custom, 
     
-    Empty, Not, Exists, SubsetOf, SupersetOf, IsDistinct, Distinct, Count, Where, Select, All, Repeat, Item /*implicit from name[]*/, As, Is, Single,
-    First, Last, Tail, Skip, Take, Iif, ToInteger, ToDecimal, ToString, Substring, StartsWith, EndsWith, Matches, ReplaceMatches, Contains, Replace, Length,  
-    Children, Descendants, MemberOf, Trace, Today, Now, Resolve, Extension, HasValue, AliasAs, Alias;
+    Empty, Not, Exists, SubsetOf, SupersetOf, IsDistinct, Distinct, Count, Where, Select, All, Repeat, Aggregate, Item /*implicit from name[]*/, As, Is, Single,
+    First, Last, Tail, Skip, Take, Union, Combine, Intersect, Exclude, Iif, Upper, Lower, ToChars, Substring, StartsWith, EndsWith, Matches, ReplaceMatches, Contains, Replace, Length,  
+    Children, Descendants, MemberOf, Trace, Today, Now, Resolve, Extension, AllFalse, AnyFalse, AllTrue, AnyTrue,
+    HasValue, AliasAs, Alias, HtmlChecks, OfType, Type,
+    ConvertsToBoolean, ConvertsToInteger, ConvertsToString, ConvertsToDecimal, ConvertsToQuantity, ConvertsToDateTime, ConvertsToTime, ToBoolean, ToInteger, ToString, ToDecimal, ToQuantity, ToDateTime, ToTime, ConformsTo;
 
     public static Function fromCode(String name) {
       if (name.equals("empty")) return Function.Empty;
@@ -55,6 +78,7 @@ public class ExpressionNode {
       if (name.equals("select")) return Function.Select;
       if (name.equals("all")) return Function.All;
       if (name.equals("repeat")) return Function.Repeat;
+      if (name.equals("aggregate")) return Function.Aggregate;      
       if (name.equals("item")) return Function.Item;
       if (name.equals("as")) return Function.As;
       if (name.equals("is")) return Function.Is;
@@ -64,10 +88,14 @@ public class ExpressionNode {
       if (name.equals("tail")) return Function.Tail;
       if (name.equals("skip")) return Function.Skip;
       if (name.equals("take")) return Function.Take;
+      if (name.equals("union")) return Function.Union;
+      if (name.equals("combine")) return Function.Combine;
+      if (name.equals("intersect")) return Function.Intersect;
+      if (name.equals("exclude")) return Function.Exclude;
       if (name.equals("iif")) return Function.Iif;
-      if (name.equals("toInteger")) return Function.ToInteger;
-      if (name.equals("toDecimal")) return Function.ToDecimal;
-      if (name.equals("toString")) return Function.ToString;
+      if (name.equals("lower")) return Function.Lower;
+      if (name.equals("upper")) return Function.Upper;
+      if (name.equals("toChars")) return Function.ToChars;
       if (name.equals("substring")) return Function.Substring;
       if (name.equals("startsWith")) return Function.StartsWith;
       if (name.equals("endsWith")) return Function.EndsWith;
@@ -84,9 +112,31 @@ public class ExpressionNode {
       if (name.equals("now")) return Function.Now;
       if (name.equals("resolve")) return Function.Resolve;
       if (name.equals("extension")) return Function.Extension;
+      if (name.equals("allFalse")) return Function.AllFalse;
+      if (name.equals("anyFalse")) return Function.AnyFalse;
+      if (name.equals("allTrue")) return Function.AllTrue;
+      if (name.equals("anyTrue")) return Function.AnyTrue;
       if (name.equals("hasValue")) return Function.HasValue;
       if (name.equals("alias")) return Function.Alias;
       if (name.equals("aliasAs")) return Function.AliasAs;
+      if (name.equals("htmlChecks")) return Function.HtmlChecks;
+      if (name.equals("ofType")) return Function.OfType;      
+      if (name.equals("type")) return Function.Type;      
+      if (name.equals("toInteger")) return Function.ToInteger;
+      if (name.equals("toDecimal")) return Function.ToDecimal;
+      if (name.equals("toString")) return Function.ToString;
+      if (name.equals("toQuantity")) return Function.ToQuantity;
+      if (name.equals("toBoolean")) return Function.ToBoolean;
+      if (name.equals("toDateTime")) return Function.ToDateTime;
+      if (name.equals("toTime")) return Function.ToTime;
+      if (name.equals("convertsToInteger")) return Function.ConvertsToInteger;
+      if (name.equals("convertsToDecimal")) return Function.ConvertsToDecimal;
+      if (name.equals("convertsToString")) return Function.ConvertsToString;
+      if (name.equals("convertsToQuantity")) return Function.ConvertsToQuantity;
+      if (name.equals("convertsToBoolean")) return Function.ConvertsToBoolean;
+      if (name.equals("convertsToDateTime")) return Function.ConvertsToDateTime;
+      if (name.equals("convertsToTime")) return Function.ConvertsToTime;
+      if (name.equals("conformsTo")) return Function.ConformsTo;
       return null;
     }
     public String toCode() {
@@ -103,6 +153,7 @@ public class ExpressionNode {
       case Select : return "select";
       case All : return "all";
       case Repeat : return "repeat";
+      case Aggregate : return "aggregate";
       case Item : return "item";
       case As : return "as";
       case Is : return "is";
@@ -112,10 +163,14 @@ public class ExpressionNode {
       case Tail : return "tail";
       case Skip : return "skip";
       case Take : return "take";
+      case Union : return "union";
+      case Combine : return "combine";
+      case Intersect : return "intersect";
+      case Exclude : return "exclude";
       case Iif : return "iif";
-      case ToInteger : return "toInteger";
-      case ToDecimal : return "toDecimal";
-      case ToString : return "toString";
+      case ToChars : return "toChars";
+      case Lower : return "lower";
+      case Upper : return "upper";
       case Substring : return "substring";
       case StartsWith : return "startsWith";
       case EndsWith : return "endsWith";
@@ -132,16 +187,38 @@ public class ExpressionNode {
       case Now : return "now";
       case Resolve : return "resolve";
       case Extension : return "extension";
+      case AllFalse : return "allFalse";
+      case AnyFalse : return "anyFalse";
+      case AllTrue : return "allTrue";
+      case AnyTrue : return "anyTrue";
       case HasValue : return "hasValue";
       case Alias : return "alias";
       case AliasAs : return "aliasAs";
+      case HtmlChecks : return "htmlChecks";
+      case OfType : return "ofType";
+      case Type : return "type";
+      case ToInteger : return "toInteger";
+      case ToDecimal : return "toDecimal";
+      case ToString : return "toString";
+      case ToBoolean : return "toBoolean";
+      case ToQuantity : return "toQuantity";
+      case ToDateTime : return "toDateTime";
+      case ToTime : return "toTime";
+      case ConvertsToInteger : return "convertsToInteger";
+      case ConvertsToDecimal : return "convertsToDecimal";
+      case ConvertsToString : return "convertsToString";
+      case ConvertsToBoolean : return "convertsToBoolean";
+      case ConvertsToQuantity : return "convertsToQuantity";
+      case ConvertsToDateTime : return "convertsToDateTime";
+      case ConvertsToTime : return "isTime";
+      case ConformsTo : return "conformsTo";
       default: return "??";
       }
     }
   }
 
 	public enum Operation {
-		Equals, Equivalent, NotEquals, NotEquivalent, LessThen, Greater, LessOrEqual, GreaterOrEqual, Is, As, Union, Or, And, Xor, Implies, 
+		Equals, Equivalent, NotEquals, NotEquivalent, LessThan, Greater, LessOrEqual, GreaterOrEqual, Is, As, Union, Or, And, Xor, Implies, 
 		Times, DivideBy, Plus, Minus, Concatenate, Div, Mod, In, Contains, MemberOf;
 
 		public static Operation fromCode(String name) {
@@ -158,7 +235,7 @@ public class ExpressionNode {
 			if (name.equals(">"))
 				return Operation.Greater;
 			if (name.equals("<"))
-				return Operation.LessThen;
+				return Operation.LessThan;
 			if (name.equals(">="))
 				return Operation.GreaterOrEqual;
 			if (name.equals("<="))
@@ -207,7 +284,7 @@ public class ExpressionNode {
 			case NotEquals : return "!=";
 			case NotEquivalent : return "!~";
 			case Greater : return ">";
-			case LessThen : return "<";
+			case LessThan : return "<";
 			case GreaterOrEqual : return ">=";
 			case LessOrEqual : return "<=";
 			case Union : return "|";
@@ -240,7 +317,7 @@ public class ExpressionNode {
 	private String uniqueId;
 	private Kind kind;
 	private String name;
-	private String constant;
+	private Base constant;
 	private Function function;
 	private List<ExpressionNode> parameters; // will be created if there is a function
 	private ExpressionNode inner;
@@ -289,10 +366,16 @@ public class ExpressionNode {
 			}
 			break;
 		case Constant:
-		  if (Utilities.isInteger(constant) || Utilities.existsInList(constant, "true", "false"))
-	      b.append(Utilities.escapeJava(constant));
-		  else 
-		    b.append(Utilities.escapeJava(constant));
+		  if (constant instanceof StringType)
+	      b.append("'"+Utilities.escapeJson(constant.primitiveValue())+"'");
+		  else if (constant instanceof Quantity) {
+		    Quantity q = (Quantity) constant;
+        b.append(Utilities.escapeJson(q.getValue().toPlainString()));
+        b.append(" '");
+        b.append(Utilities.escapeJson(q.getUnit()));
+        b.append("'");
+		  } else
+		    b.append(Utilities.escapeJson(constant.primitiveValue()));
 			break;
 		case Group:
 			b.append("(");
@@ -319,12 +402,13 @@ public class ExpressionNode {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public String getConstant() {
+	public Base getConstant() {
 		return constant;
 	}
-	public void setConstant(String constant) {
+	public void setConstant(Base constant) {
 		this.constant = constant;
 	}
+	
 	public Function getFunction() {
 		return function;
 	}
@@ -365,7 +449,7 @@ public class ExpressionNode {
 		if (!name.startsWith("$"))
 			return true;
 		else
-			return name.equals("$this");  
+			return Utilities.existsInList(name, "$this", "$total");  
 	}
 
 	public Kind getKind() {
@@ -504,8 +588,10 @@ public class ExpressionNode {
 
 			break;
 
+		case Unary:
+		  break;
 		case Constant:
-			if (Utilities.noString(constant)) 
+			if (constant == null) 
 				return "No Constant provided @ "+location();
 			break;
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,30 +20,65 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-public class VersionIndependentConcept {
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-	private String mySystem;
-	private String myCode;
+public class VersionIndependentConcept implements Comparable<VersionIndependentConcept> {
 
+	private final String mySystem;
+	private final String myCode;
+	private int myHashCode;
+
+	/**
+	 * Constructor
+	 */
 	public VersionIndependentConcept(String theSystem, String theCode) {
-		setSystem(theSystem);
-		setCode(theCode);
+		mySystem = theSystem;
+		myCode = theCode;
+		myHashCode = new HashCodeBuilder(17, 37)
+			.append(mySystem)
+			.append(myCode)
+			.toHashCode();
 	}
 
 	public String getSystem() {
 		return mySystem;
 	}
 
-	public void setSystem(String theSystem) {
-		mySystem = theSystem;
-	}
 
 	public String getCode() {
 		return myCode;
 	}
 
-	public void setCode(String theCode) {
-		myCode = theCode;
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) {
+			return true;
+		}
+
+		if (theO == null || getClass() != theO.getClass()) {
+			return false;
+		}
+
+		VersionIndependentConcept that = (VersionIndependentConcept) theO;
+
+		return new EqualsBuilder()
+			.append(mySystem, that.mySystem)
+			.append(myCode, that.myCode)
+			.isEquals();
 	}
 
+	@Override
+	public int hashCode() {
+		return myHashCode;
+	}
+
+	@Override
+	public int compareTo(VersionIndependentConcept theOther) {
+		CompareToBuilder b = new CompareToBuilder();
+		b.append(mySystem, theOther.getSystem());
+		b.append(myCode, theOther.getCode());
+		return b.toComparison();
+	}
 }

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -121,7 +121,7 @@ public enum FlagCategory {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/flag-category";
+          return "http://terminology.hl7.org/CodeSystem/flag-category";
         }
         public String getDefinition() {
           switch (this) {
@@ -144,7 +144,7 @@ public enum FlagCategory {
             case DRUG: return "Drug";
             case LAB: return "Lab";
             case ADMIN: return "Administrative";
-            case CONTACT: return "Subject contact";
+            case CONTACT: return "Subject Contact";
             case CLINICAL: return "Clinical";
             case BEHAVIORAL: return "Behavioral";
             case RESEARCH: return "Research";

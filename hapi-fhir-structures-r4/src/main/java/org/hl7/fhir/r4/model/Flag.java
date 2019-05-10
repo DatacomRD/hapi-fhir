@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -45,20 +45,20 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Prospective warnings of potential issues when providing care to the patient.
  */
-@ResourceDef(name="Flag", profile="http://hl7.org/fhir/Profile/Flag")
+@ResourceDef(name="Flag", profile="http://hl7.org/fhir/StructureDefinition/Flag")
 public class Flag extends DomainResource {
 
     public enum FlagStatus {
         /**
-         * A current flag that should be displayed to a user. A system may use the category to determine which roles should view the flag.
+         * A current flag that should be displayed to a user. A system may use the category to determine which user roles should view the flag.
          */
         ACTIVE, 
         /**
-         * The flag does not need to be displayed any more.
+         * The flag no longer needs to be displayed.
          */
         INACTIVE, 
         /**
-         * The flag was added in error, and should no longer be displayed.
+         * The flag was added in error and should no longer be displayed.
          */
         ENTEREDINERROR, 
         /**
@@ -97,9 +97,9 @@ public class Flag extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIVE: return "A current flag that should be displayed to a user. A system may use the category to determine which roles should view the flag.";
-            case INACTIVE: return "The flag does not need to be displayed any more.";
-            case ENTEREDINERROR: return "The flag was added in error, and should no longer be displayed.";
+            case ACTIVE: return "A current flag that should be displayed to a user. A system may use the category to determine which user roles should view the flag.";
+            case INACTIVE: return "The flag no longer needs to be displayed.";
+            case ENTEREDINERROR: return "The flag was added in error and should no longer be displayed.";
             default: return "?";
           }
         }
@@ -157,10 +157,10 @@ public class Flag extends DomainResource {
     }
 
     /**
-     * Identifier assigned to the flag for external use (outside the FHIR environment).
+     * Business identifiers assigned to this flag by the performer or other systems which remain constant as the resource is updated and propagates from server to server.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Business identifier", formalDefinition="Identifier assigned to the flag for external use (outside the FHIR environment)." )
+    @Description(shortDefinition="Business identifier", formalDefinition="Business identifiers assigned to this flag by the performer or other systems which remain constant as the resource is updated and propagates from server to server." )
     protected List<Identifier> identifier;
 
     /**
@@ -172,10 +172,10 @@ public class Flag extends DomainResource {
     protected Enumeration<FlagStatus> status;
 
     /**
-     * Allows an flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context.
+     * Allows a flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context.
      */
     @Child(name = "category", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Clinical, administrative, etc.", formalDefinition="Allows an flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context." )
+    @Description(shortDefinition="Clinical, administrative, etc.", formalDefinition="Allows a flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/flag-category")
     protected List<CodeableConcept> category;
 
@@ -188,14 +188,14 @@ public class Flag extends DomainResource {
     protected CodeableConcept code;
 
     /**
-     * The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with.
+     * The patient, location, group, organization, or practitioner etc. this is about record this flag is associated with.
      */
     @Child(name = "subject", type = {Patient.class, Location.class, Group.class, Organization.class, Practitioner.class, PlanDefinition.class, Medication.class, Procedure.class}, order=4, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Who/What is flag about?", formalDefinition="The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with." )
+    @Description(shortDefinition="Who/What is flag about?", formalDefinition="The patient, location, group, organization, or practitioner etc. this is about record this flag is associated with." )
     protected Reference subject;
 
     /**
-     * The actual object that is the target of the reference (The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with.)
+     * The actual object that is the target of the reference (The patient, location, group, organization, or practitioner etc. this is about record this flag is associated with.)
      */
     protected Resource subjectTarget;
 
@@ -221,7 +221,7 @@ public class Flag extends DomainResource {
     /**
      * The person, organization or device that created the flag.
      */
-    @Child(name = "author", type = {Device.class, Organization.class, Patient.class, Practitioner.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "author", type = {Device.class, Organization.class, Patient.class, Practitioner.class, PractitionerRole.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Flag creator", formalDefinition="The person, organization or device that created the flag." )
     protected Reference author;
 
@@ -250,7 +250,7 @@ public class Flag extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Identifier assigned to the flag for external use (outside the FHIR environment).)
+     * @return {@link #identifier} (Business identifiers assigned to this flag by the performer or other systems which remain constant as the resource is updated and propagates from server to server.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -348,7 +348,7 @@ public class Flag extends DomainResource {
     }
 
     /**
-     * @return {@link #category} (Allows an flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context.)
+     * @return {@link #category} (Allows a flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context.)
      */
     public List<CodeableConcept> getCategory() { 
       if (this.category == null)
@@ -425,7 +425,7 @@ public class Flag extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} (The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with.)
+     * @return {@link #subject} (The patient, location, group, organization, or practitioner etc. this is about record this flag is associated with.)
      */
     public Reference getSubject() { 
       if (this.subject == null)
@@ -441,7 +441,7 @@ public class Flag extends DomainResource {
     }
 
     /**
-     * @param value {@link #subject} (The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with.)
+     * @param value {@link #subject} (The patient, location, group, organization, or practitioner etc. this is about record this flag is associated with.)
      */
     public Flag setSubject(Reference value) { 
       this.subject = value;
@@ -449,14 +449,14 @@ public class Flag extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with.)
+     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient, location, group, organization, or practitioner etc. this is about record this flag is associated with.)
      */
     public Resource getSubjectTarget() { 
       return this.subjectTarget;
     }
 
     /**
-     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with.)
+     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient, location, group, organization, or practitioner etc. this is about record this flag is associated with.)
      */
     public Flag setSubjectTarget(Resource value) { 
       this.subjectTarget = value;
@@ -572,27 +572,27 @@ public class Flag extends DomainResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("identifier", "Identifier", "Identifier assigned to the flag for external use (outside the FHIR environment).", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("identifier", "Identifier", "Business identifiers assigned to this flag by the performer or other systems which remain constant as the resource is updated and propagates from server to server.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "Supports basic workflow.", 0, 1, status));
-        children.add(new Property("category", "CodeableConcept", "Allows an flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context.", 0, java.lang.Integer.MAX_VALUE, category));
+        children.add(new Property("category", "CodeableConcept", "Allows a flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context.", 0, java.lang.Integer.MAX_VALUE, category));
         children.add(new Property("code", "CodeableConcept", "The coded value or textual component of the flag to display to the user.", 0, 1, code));
-        children.add(new Property("subject", "Reference(Patient|Location|Group|Organization|Practitioner|PlanDefinition|Medication|Procedure)", "The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with.", 0, 1, subject));
+        children.add(new Property("subject", "Reference(Patient|Location|Group|Organization|Practitioner|PlanDefinition|Medication|Procedure)", "The patient, location, group, organization, or practitioner etc. this is about record this flag is associated with.", 0, 1, subject));
         children.add(new Property("period", "Period", "The period of time from the activation of the flag to inactivation of the flag. If the flag is active, the end of the period should be unspecified.", 0, 1, period));
         children.add(new Property("encounter", "Reference(Encounter)", "This alert is only relevant during the encounter.", 0, 1, encounter));
-        children.add(new Property("author", "Reference(Device|Organization|Patient|Practitioner)", "The person, organization or device that created the flag.", 0, 1, author));
+        children.add(new Property("author", "Reference(Device|Organization|Patient|Practitioner|PractitionerRole)", "The person, organization or device that created the flag.", 0, 1, author));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier assigned to the flag for external use (outside the FHIR environment).", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Business identifiers assigned to this flag by the performer or other systems which remain constant as the resource is updated and propagates from server to server.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "Supports basic workflow.", 0, 1, status);
-        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Allows an flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context.", 0, java.lang.Integer.MAX_VALUE, category);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Allows a flag to be divided into different categories like clinical, administrative etc. Intended to be used as a means of filtering which flags are displayed to particular user or in a given context.", 0, java.lang.Integer.MAX_VALUE, category);
         case 3059181: /*code*/  return new Property("code", "CodeableConcept", "The coded value or textual component of the flag to display to the user.", 0, 1, code);
-        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Location|Group|Organization|Practitioner|PlanDefinition|Medication|Procedure)", "The patient, location, group , organization , or practitioner, etc. this is about record this flag is associated with.", 0, 1, subject);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Location|Group|Organization|Practitioner|PlanDefinition|Medication|Procedure)", "The patient, location, group, organization, or practitioner etc. this is about record this flag is associated with.", 0, 1, subject);
         case -991726143: /*period*/  return new Property("period", "Period", "The period of time from the activation of the flag to inactivation of the flag. If the flag is active, the end of the period should be unspecified.", 0, 1, period);
         case 1524132147: /*encounter*/  return new Property("encounter", "Reference(Encounter)", "This alert is only relevant during the encounter.", 0, 1, encounter);
-        case -1406328437: /*author*/  return new Property("author", "Reference(Device|Organization|Patient|Practitioner)", "The person, organization or device that created the flag.", 0, 1, author);
+        case -1406328437: /*author*/  return new Property("author", "Reference(Device|Organization|Patient|Practitioner|PractitionerRole)", "The person, organization or device that created the flag.", 0, 1, author);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -770,24 +770,24 @@ public class Flag extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof Flag))
+        if (!(other_ instanceof Flag))
           return false;
-        Flag o = (Flag) other;
+        Flag o = (Flag) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(category, o.category, true)
            && compareDeep(code, o.code, true) && compareDeep(subject, o.subject, true) && compareDeep(period, o.period, true)
            && compareDeep(encounter, o.encounter, true) && compareDeep(author, o.author, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof Flag))
+        if (!(other_ instanceof Flag))
           return false;
-        Flag o = (Flag) other;
+        Flag o = (Flag) other_;
         return compareValues(status, o.status, true);
       }
 
@@ -875,7 +875,7 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Flag.subject", description="The identity of a subject to list flags for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="Flag.subject.where(resolve() is Patient)", description="The identity of a subject to list flags for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -901,7 +901,7 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="Flag.author", description="Flag creator", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Device.class, Organization.class, Patient.class, Practitioner.class } )
+  @SearchParamDefinition(name="author", path="Flag.author", description="Flag creator", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Device.class, Organization.class, Patient.class, Practitioner.class, PractitionerRole.class } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>

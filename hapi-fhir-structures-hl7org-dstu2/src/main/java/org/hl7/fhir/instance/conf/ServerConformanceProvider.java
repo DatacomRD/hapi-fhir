@@ -21,16 +21,17 @@ package org.hl7.fhir.instance.conf;
  */
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.*;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.jar.Manifest;
+import java.util.concurrent.Callable;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.*;
 import org.hl7.fhir.instance.model.Conformance.*;
@@ -49,6 +50,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.method.*;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding.ReturnType;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 /**
  * Server FHIR Provider which serves the conformance statement for a RESTful
@@ -70,25 +72,41 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	private IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName;
 	private HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings;
 	private String myPublisher = "Not provided";
-	private RestfulServer myRestfulServer;
+  private Callable<RestulfulServerConfiguration> myServerConfiguration;
 
-	public ServerConformanceProvider(RestfulServer theRestfulServer) {
-		myRestfulServer = theRestfulServer;
-	}
-	
-	/*
-	 * Add a no-arg constructor and seetter so that the
-	 * ServerConfirmanceProvider can be Spring-wired with
-	 * the RestfulService avoiding the potential reference
-	 * cycle that would happen.
-	 */
-	public ServerConformanceProvider () {
-		super();
-	}
-	
-	public void setRestfulServer (RestfulServer theRestfulServer) {
-		myRestfulServer = theRestfulServer;
-	}
+  /**
+   * No-arg constructor and seetter so that the ServerConfirmanceProvider can be Spring-wired with the RestfulService avoiding the potential reference cycle that would happen.
+   */
+  public ServerConformanceProvider() {
+    super();
+  }
+
+  /**
+   * Constructor
+   */
+  public ServerConformanceProvider(RestfulServer theRestfulServer) {
+    this.myServerConfiguration = theRestfulServer::createConfiguration;
+  }
+
+  /**
+   * Constructor
+   */
+  public ServerConformanceProvider(RestulfulServerConfiguration theServerConfiguration) {
+    this.myServerConfiguration = () -> theServerConfiguration;
+  }
+
+   @Override
+   public void setRestfulServer (RestfulServer theRestfulServer) {
+     myServerConfiguration = theRestfulServer::createConfiguration;
+   }
+
+  RestulfulServerConfiguration getServerConfiguration() {
+    try {
+      return myServerConfiguration.call();
+    } catch (Exception e) {
+      throw new InternalErrorException(e);
+    }
+  }
 
   private void checkBindingForSystemOps(ConformanceRestComponent rest, Set<SystemRestfulInteraction> systemOps,
       BaseMethodBinding<?> nextMethodBinding) {
@@ -114,7 +132,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
   private Map<String, List<BaseMethodBinding<?>>> collectMethodBindings() {
     Map<String, List<BaseMethodBinding<?>>> resourceToMethods = new TreeMap<String, List<BaseMethodBinding<?>>>();
-    for (ResourceBinding next : myRestfulServer.getResourceBindings()) {
+    for (ResourceBinding next : getServerConfiguration().getResourceBindings()) {
       String resourceName = next.getResourceName();
       for (BaseMethodBinding<?> nextMethodBinding : next.getMethodBindings()) {
         if (resourceToMethods.containsKey(resourceName) == false) {
@@ -123,7 +141,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
         resourceToMethods.get(resourceName).add(nextMethodBinding);
       }
     }
-    for (BaseMethodBinding<?> nextMethodBinding : myRestfulServer.getServerBindings()) {
+    for (BaseMethodBinding<?> nextMethodBinding : getServerConfiguration().getServerBindings()) {
       String resourceName = "";
       if (resourceToMethods.containsKey(resourceName) == false) {
         resourceToMethods.put(resourceName, new ArrayList<BaseMethodBinding<?>>());
@@ -158,15 +176,15 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
     Conformance retVal = new Conformance();
 
     retVal.setPublisher(myPublisher);
-    retVal.setDate(conformanceDate());
+    retVal.setDateElement(conformanceDate());
     retVal.setFhirVersion(FhirVersionEnum.DSTU2_HL7ORG.getFhirVersionString());
     retVal.setAcceptUnknown(UnknownContentCode.EXTENSIONS); // TODO: make this configurable - this is a fairly big effort since the parser
     // needs to be modified to actually allow it
 
-    retVal.getImplementation().setDescription(myRestfulServer.getImplementationDescription());
+    retVal.getImplementation().setDescription(getServerConfiguration().getImplementationDescription());
     retVal.setKind(ConformanceStatementKind.INSTANCE);
-    retVal.getSoftware().setName(myRestfulServer.getServerName());
-    retVal.getSoftware().setVersion(myRestfulServer.getServerVersion());
+    retVal.getSoftware().setName(getServerConfiguration().getServerName());
+    retVal.getSoftware().setVersion(getServerConfiguration().getServerVersion());
     retVal.addFormat(Constants.CT_FHIR_XML);
     retVal.addFormat(Constants.CT_FHIR_JSON);
 
@@ -183,12 +201,13 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
         Set<TypeRestfulInteraction> resourceOps = new HashSet<TypeRestfulInteraction>();
         ConformanceRestResourceComponent resource = rest.addResource();
         String resourceName = nextEntry.getKey();
-        RuntimeResourceDefinition def = myRestfulServer.getFhirContext().getResourceDefinition(resourceName);
+        RuntimeResourceDefinition def = getServerConfiguration().getFhirContext().getResourceDefinition(resourceName);
         resource.getTypeElement().setValue(def.getName());
-        resource.getProfile()
-            .setReference((def.getResourceProfile(myRestfulServer.getServerBaseForRequest(theRequest))));
+        ServletContext servletContext = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
+        String serverBase = getServerConfiguration().getServerAddressStrategy().determineServerBase(servletContext, theRequest);
+        resource.getProfile().setReference((def.getResourceProfile(serverBase)));
 
-        TreeSet<String> includes = new TreeSet<String>();
+        TreeSet<String> includes = new TreeSet<>();
 
         // Map<String, Conformance.RestResourceSearchParam> nameToSearchParam =
         // new HashMap<String,
@@ -241,8 +260,6 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
           if (nextMethodBinding instanceof SearchMethodBinding) {
             handleSearchMethodBinding(rest, resource, resourceName, def, includes,
                 (SearchMethodBinding) nextMethodBinding);
-          } else if (nextMethodBinding instanceof DynamicSearchMethodBinding) {
-            handleDynamicSearchMethodBinding(resource, def, includes, (DynamicSearchMethodBinding) nextMethodBinding);
           } else if (nextMethodBinding instanceof OperationMethodBinding) {
             OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
             String opName = myOperationBindingToName.get(methodBinding);
@@ -295,78 +312,16 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
     return retVal;
   }
 
-  private Date conformanceDate() {
-    String buildDate = getBuildDateFromManifest();
-    if (buildDate != null) {
-      DateFormat dateFormat = new SimpleDateFormat();
+  private DateTimeType conformanceDate() {
+    IPrimitiveType<Date> buildDate = getServerConfiguration().getConformanceDate();
+    if (buildDate != null && buildDate.getValue() != null) {
       try {
-        return dateFormat.parse(buildDate);
-      } catch (ParseException e) {
+        return new DateTimeType(buildDate.getValueAsString());
+      } catch (DataFormatException e) {
         // fall through
       }
     }
-    return new Date();
-  }
-
-  private String getBuildDateFromManifest() {
-    if (myRestfulServer != null && myRestfulServer.getServletContext() != null) {
-      InputStream inputStream = myRestfulServer.getServletContext().getResourceAsStream("/META-INF/MANIFEST.MF");
-      if (inputStream != null) {
-        try {
-          Manifest manifest = new Manifest(inputStream);
-          return manifest.getMainAttributes().getValue("Build-Time");
-        } catch (IOException e) {
-          // fall through
-        }
-      }
-    }
-    return null;
-  }
-
-  private void handleDynamicSearchMethodBinding(ConformanceRestResourceComponent resource,
-      RuntimeResourceDefinition def, TreeSet<String> includes, DynamicSearchMethodBinding searchMethodBinding) {
-    includes.addAll(searchMethodBinding.getIncludes());
-
-    List<RuntimeSearchParam> searchParameters = new ArrayList<RuntimeSearchParam>();
-    searchParameters.addAll(searchMethodBinding.getSearchParams());
-    sortRuntimeSearchParameters(searchParameters);
-
-    if (!searchParameters.isEmpty()) {
-
-      for (RuntimeSearchParam nextParameter : searchParameters) {
-
-        String nextParamName = nextParameter.getName();
-
-        // String chain = null;
-        String nextParamUnchainedName = nextParamName;
-        if (nextParamName.contains(".")) {
-          // chain = nextParamName.substring(nextParamName.indexOf('.') + 1);
-          nextParamUnchainedName = nextParamName.substring(0, nextParamName.indexOf('.'));
-        }
-
-        String nextParamDescription = nextParameter.getDescription();
-
-        /*
-         * If the parameter has no description, default to the one from the
-         * resource
-         */
-        if (StringUtils.isBlank(nextParamDescription)) {
-          RuntimeSearchParam paramDef = def.getSearchParam(nextParamUnchainedName);
-          if (paramDef != null) {
-            nextParamDescription = paramDef.getDescription();
-          }
-        }
-
-        ConformanceRestResourceSearchParamComponent param = resource.addSearchParam();
-
-        param.setName(nextParamName);
-        // if (StringUtils.isNotBlank(chain)) {
-        // param.addChain(chain);
-        // }
-        param.setDocumentation(nextParamDescription);
-        // param.setType(nextParameter.getParamType());
-      }
-    }
+    return DateTimeType.now();
   }
 
   private void handleSearchMethodBinding(ConformanceRestComponent rest, ConformanceRestResourceComponent resource,
@@ -433,7 +388,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
           param.getTypeElement().setValueAsString(nextParameter.getParamType().getCode());
         }
         for (Class<? extends IBaseResource> nextTarget : nextParameter.getDeclaredTypes()) {
-          RuntimeResourceDefinition targetDef = myRestfulServer.getFhirContext().getResourceDefinition(nextTarget);
+          RuntimeResourceDefinition targetDef = getServerConfiguration().getFhirContext().getResourceDefinition(nextTarget);
           if (targetDef != null) {
             ResourceType code;
             try {
@@ -452,8 +407,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
   @Initialize
   public void initializeOperations() {
-    myOperationBindingToName = new IdentityHashMap<OperationMethodBinding, String>();
-    myOperationNameToBindings = new HashMap<String, List<OperationMethodBinding>>();
+    myOperationBindingToName = new IdentityHashMap<>();
+    myOperationNameToBindings = new HashMap<>();
 
     Map<String, List<BaseMethodBinding<?>>> resourceToMethods = collectMethodBindings();
     for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
@@ -468,7 +423,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
           String name = createOperationName(methodBinding);
           myOperationBindingToName.put(methodBinding, name);
           if (myOperationNameToBindings.containsKey(name) == false) {
-            myOperationNameToBindings.put(name, new ArrayList<OperationMethodBinding>());
+            myOperationNameToBindings.put(name, new ArrayList<>());
           }
           myOperationNameToBindings.get(name).add(methodBinding);
         }
@@ -490,8 +445,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
     op.setStatus(ConformanceResourceStatus.ACTIVE);
     op.setIdempotent(true);
 
-    Set<String> inParams = new HashSet<String>();
-    Set<String> outParams = new HashSet<String>();
+    Set<String> inParams = new HashSet<>();
+    Set<String> outParams = new HashSet<>();
 
     for (OperationMethodBinding sharedDescription : sharedDescriptions) {
       if (isNotBlank(sharedDescription.getDescription())) {

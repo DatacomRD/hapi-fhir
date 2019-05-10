@@ -58,9 +58,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 	@Before
 	public void before() {
 		myReturnResource = null;
-		while (ourServlet.getInterceptors().size() > 0) {
-			ourServlet.unregisterInterceptor(ourServlet.getInterceptors().get(0));
-		}
+		ourServlet.getInterceptorService().unregisterAllInterceptors();
 
 		myInterceptor = new ResponseValidatingInterceptor();
 		// myInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
@@ -86,7 +84,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.setIgnoreValidatorExceptions(false);
 
-		Mockito.doThrow(NullPointerException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
+		Mockito.doThrow(new NullPointerException("SOME MESSAGE")).when(module).validateResource(Mockito.any(IValidationContext.class));
 		
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
 		HttpResponse status = ourClient.execute(httpPost);
@@ -98,7 +96,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		Assert.assertEquals(500, status.getStatusLine().getStatusCode());
-		Assert.assertThat(responseContent, Matchers.containsString("<diagnostics value=\"java.lang.NullPointerException\"/>"));
+		Assert.assertThat(responseContent, Matchers.containsString("<diagnostics value=\"SOME MESSAGE\"/>"));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -286,7 +284,6 @@ public class ResponseValidatingInterceptorDstu3Test {
 	 * Ignored until #264 is fixed
 	 */
 	@Test
-	@Ignore
 	public void testSearchJsonInvalidNoValidatorsSpecified() throws Exception {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
@@ -305,7 +302,6 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		Assert.assertEquals(422, status.getStatusLine().getStatusCode());
-		Assert.assertThat(status.toString(), Matchers.containsString("X-FHIR-Response-Validation"));
 		Assert.assertThat(responseContent, Matchers.containsString("<severity value=\"error\"/>"));
 	}
 
@@ -384,7 +380,6 @@ public class ResponseValidatingInterceptorDstu3Test {
 	 * Ignored until #264 is fixed
 	 */
 	@Test
-	@Ignore
 	public void testSearchXmlInvalidNoValidatorsSpecified() throws Exception {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
@@ -403,7 +398,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		Assert.assertEquals(422, status.getStatusLine().getStatusCode());
-		Assert.assertThat(status.toString(), Matchers.containsString("X-FHIR-Response-Validation"));
+		Assert.assertThat(responseContent, Matchers.containsString("<severity value=\"error\"/>"));
 	}
 
 	@Test

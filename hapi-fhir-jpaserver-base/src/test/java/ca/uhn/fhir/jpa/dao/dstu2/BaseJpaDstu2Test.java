@@ -4,25 +4,33 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestDstu2Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
+import ca.uhn.fhir.jpa.util.ResourceCountCache;
+import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -32,6 +40,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -39,17 +48,29 @@ import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.fail;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestDstu2Config.class})
 public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
+	@Qualifier("myResourceCountsCache")
+	protected ResourceCountCache myResourceCountsCache;
+	@Autowired
+	protected ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
 	protected ApplicationContext myAppCtx;
+	@Autowired
+	protected IResourceReindexingSvc myResourceReindexingSvc;
 	@Autowired
 	@Qualifier("myAppointmentDaoDstu2")
 	protected IFhirResourceDao<Appointment> myAppointmentDao;
+	@Autowired
+	@Qualifier("mySearchParameterDaoDstu2")
+	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;
+	@Autowired
+	@Qualifier("myCommunicationDaoDstu2")
+	protected IFhirResourceDao<Communication> myCommunicationDao;
 	@Autowired
 	@Qualifier("myBundleDaoDstu2")
 	protected IFhirResourceDao<Bundle> myBundleDao;
@@ -59,6 +80,8 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	protected DaoConfig myDaoConfig;
 	@Autowired
+	protected ModelConfig myModelConfig;
+	@Autowired
 	@Qualifier("myDeviceDaoDstu2")
 	protected IFhirResourceDao<Device> myDeviceDao;
 	@Autowired
@@ -67,6 +90,9 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myDiagnosticReportDaoDstu2")
 	protected IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;
+	@Autowired
+	@Qualifier("myBinaryDaoDstu2")
+	protected IFhirResourceDao<Binary> myBinaryDao;
 	@Autowired
 	@Qualifier("myEncounterDaoDstu2")
 	protected IFhirResourceDao<Encounter> myEncounterDao;
@@ -79,7 +105,6 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myImmunizationDaoDstu2")
 	protected IFhirResourceDao<Immunization> myImmunizationDao;
-	protected IServerInterceptor myInterceptor;
 	@Autowired
 	@Qualifier("myLocationDaoDstu2")
 	protected IFhirResourceDao<Location> myLocationDao;
@@ -107,6 +132,9 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Qualifier("myPatientDaoDstu2")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
 	@Autowired
+	@Qualifier("myGroupDaoDstu2")
+	protected IFhirResourceDao<Group> myGroupDao;
+	@Autowired
 	@Qualifier("myPractitionerDaoDstu2")
 	protected IFhirResourceDao<Practitioner> myPractitionerDao;
 	@Autowired
@@ -117,7 +145,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
 	@Autowired
 	@Qualifier("myResourceProvidersDstu2")
-	protected Object myResourceProviders;
+	protected ResourceProviderFactory myResourceProviders;
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired(required = false)
@@ -136,6 +164,10 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
 	@Autowired
+	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
+	@Autowired
+	protected IResourceLinkDao myResourceLinkDao;
+	@Autowired
 	protected IResourceTableDao myResourceTableDao;
 	@Autowired
 	@Qualifier("mySystemDaoDstu2")
@@ -149,21 +181,16 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Qualifier("myValueSetDaoDstu2")
 	protected IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> myValueSetDao;
 	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
+	protected SubscriptionLoader mySubscriptionLoader;
 
 	@Before
-	public void beforeCreateInterceptor() {
-		myInterceptor = mock(IServerInterceptor.class);
-		myDaoConfig.setInterceptors(myInterceptor);
-	}
-
-	@Before
-	@Transactional
 	public void beforeFlushFT() {
-		FullTextEntityManager ftem = Search.getFullTextEntityManager(myEntityManager);
-		ftem.purgeAll(ResourceTable.class);
-		ftem.purgeAll(ResourceIndexedSearchParamString.class);
-		ftem.flushToIndexes();
+		runInTransaction(() -> {
+			FullTextEntityManager ftem = Search.getFullTextEntityManager(myEntityManager);
+			ftem.purgeAll(ResourceTable.class);
+			ftem.purgeAll(ResourceIndexedSearchParamString.class);
+			ftem.flushToIndexes();
+		});
 
 		myDaoConfig.setSchedulingDisabled(true);
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
@@ -172,8 +199,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Before
 	@Transactional()
 	public void beforePurgeDatabase() {
-		final EntityManager entityManager = this.myEntityManager;
-		purgeDatabase(entityManager, myTxManager, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
+		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
 	}
 
 	@Before
@@ -184,9 +210,19 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 	}
 
+	@After
+	public void afterResetInterceptors() {
+		myInterceptorRegistry.unregisterAllInterceptors();
+	}
+
 	@Override
 	protected FhirContext getContext() {
 		return myFhirCtx;
+	}
+
+	@Override
+	protected PlatformTransactionManager getTxManager() {
+		return myTxManager;
 	}
 
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
@@ -199,13 +235,15 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 		return newJsonParser.parseResource(type, string);
 	}
 
+	@Override
 	public TransactionTemplate newTxTemplate() {
 		TransactionTemplate retVal = new TransactionTemplate(myTxManager);
-		retVal.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		retVal.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		retVal.afterPropertiesSet();
 		return retVal;
 	}
 
+	@SuppressWarnings("RedundantThrows")
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
 		TestUtil.clearAllStaticFieldsForUnitTest();

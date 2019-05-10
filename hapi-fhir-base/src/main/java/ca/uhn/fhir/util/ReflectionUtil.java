@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
-import javassist.Modifier;
 
 public class ReflectionUtil {
 
@@ -87,7 +86,7 @@ public class ReflectionUtil {
 	public static Class<?> getGenericCollectionTypeOfMethodParameter(Method theMethod, int theParamIndex) {
 		Class<?> type;
 		Type genericParameterType = theMethod.getGenericParameterTypes()[theParamIndex];
-		if (Class.class.equals(genericParameterType)) {
+		if (Class.class.equals(genericParameterType) || Class.class.equals(genericParameterType.getClass())) {
 			return null;
 		}
 		ParameterizedType collectionType = (ParameterizedType) genericParameterType;

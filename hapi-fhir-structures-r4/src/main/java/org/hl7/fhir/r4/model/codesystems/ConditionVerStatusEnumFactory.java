@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -51,8 +51,6 @@ public class ConditionVerStatusEnumFactory implements EnumFactory<ConditionVerSt
       return ConditionVerStatus.REFUTED;
     if ("entered-in-error".equals(codeString))
       return ConditionVerStatus.ENTEREDINERROR;
-    if ("unknown".equals(codeString))
-      return ConditionVerStatus.UNKNOWN;
     throw new IllegalArgumentException("Unknown ConditionVerStatus code '"+codeString+"'");
   }
 
@@ -69,8 +67,6 @@ public class ConditionVerStatusEnumFactory implements EnumFactory<ConditionVerSt
       return "refuted";
     if (code == ConditionVerStatus.ENTEREDINERROR)
       return "entered-in-error";
-    if (code == ConditionVerStatus.UNKNOWN)
-      return "unknown";
     return "?";
   }
 

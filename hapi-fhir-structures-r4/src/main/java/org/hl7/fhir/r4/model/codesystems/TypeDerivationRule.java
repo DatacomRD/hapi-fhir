@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum TypeDerivationRule {
 
         /**
-         * This definition defines a new type that adds additional elements to the base type
+         * This definition defines a new type that adds additional elements to the base type.
          */
         SPECIALIZATION, 
         /**
-         * This definition adds additional rules to an existing concrete type
+         * This definition adds additional rules to an existing concrete type.
          */
         CONSTRAINT, 
         /**
@@ -69,8 +69,8 @@ public enum TypeDerivationRule {
         }
         public String getDefinition() {
           switch (this) {
-            case SPECIALIZATION: return "This definition defines a new type that adds additional elements to the base type";
-            case CONSTRAINT: return "This definition adds additional rules to an existing concrete type";
+            case SPECIALIZATION: return "This definition defines a new type that adds additional elements to the base type.";
+            case CONSTRAINT: return "This definition adds additional rules to an existing concrete type.";
             default: return "?";
           }
         }

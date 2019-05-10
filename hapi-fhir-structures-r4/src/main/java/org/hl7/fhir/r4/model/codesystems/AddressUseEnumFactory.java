@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -47,6 +47,8 @@ public class AddressUseEnumFactory implements EnumFactory<AddressUse> {
       return AddressUse.TEMP;
     if ("old".equals(codeString))
       return AddressUse.OLD;
+    if ("billing".equals(codeString))
+      return AddressUse.BILLING;
     throw new IllegalArgumentException("Unknown AddressUse code '"+codeString+"'");
   }
 
@@ -59,6 +61,8 @@ public class AddressUseEnumFactory implements EnumFactory<AddressUse> {
       return "temp";
     if (code == AddressUse.OLD)
       return "old";
+    if (code == AddressUse.BILLING)
+      return "billing";
     return "?";
   }
 

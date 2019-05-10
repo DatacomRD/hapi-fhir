@@ -4,12 +4,12 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>3.1.0-SNAPSHOT</version>
+		<version>3.8.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-structures-dstu2</artifactId>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 
 	<name>HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)</name>
 
@@ -102,14 +102,36 @@
 			<artifactId>thymeleaf</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- Dependencies for Schematron -->
 		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-schematron</artifactId>
-			<scope>test</scope><!-- <exclusions> <exclusion> <artifactId>Saxon-HE</artifactId> <groupId>net.sf.saxon</groupId> </exclusion> </exclusions> -->
+			<groupId>com.helger</groupId>
+			<artifactId>ph-schematron</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-commons</artifactId>
+			<groupId>javax.activation</groupId>
+			<artifactId>javax.activation-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>com.sun.xml.bind</groupId>-->
+			<!--<artifactId>jaxb-core</artifactId>-->
+			<!--<scope>test</scope>-->
+		<!--</dependency>-->
+		<!--<dependency>-->
+			<!--<groupId>com.sun.xml.bind</groupId>-->
+			<!--<artifactId>jaxb-impl</artifactId>-->
+			<!--<scope>test</scope>-->
+		<!--</dependency>-->
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -172,7 +194,11 @@
 			<artifactId>guava</artifactId>
 			<scope>test</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava-testlib</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
@@ -186,18 +212,18 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
-					<classFolders>
-						<classFolder>${basedir}/target/classes</classFolder>
-						<classFolder>${basedir}/../hapi-fhir-base/target/classes</classFolder>
-						<classFolder>${basedir}/../hapi-fhir-client/target/classes</classFolder>
-						<classFolder>${basedir}/../hapi-fhir-server/target/classes</classFolder>
-					</classFolders>
-					<sourceFolders>
-						<sourceFolder>${basedir}/src/main/java</sourceFolder>
-						<sourceFolder>${basedir}/../hapi-fhir-base/src/main/java</sourceFolder>
-						<sourceFolder>${basedir}/../hapi-fhir-client/src/main/java</sourceFolder>
-						<sourceFolder>${basedir}/../hapi-fhir-server/src/main/java</sourceFolder>
-					</sourceFolders>
+					<!--<classFolders>-->
+						<!--<classFolder>${basedir}/target/classes</classFolder>-->
+						<!--<classFolder>${basedir}/../hapi-fhir-base/target/classes</classFolder>-->
+						<!--<classFolder>${basedir}/../hapi-fhir-client/target/classes</classFolder>-->
+						<!--<classFolder>${basedir}/../hapi-fhir-server/target/classes</classFolder>-->
+					<!--</classFolders>-->
+					<!--<sourceFolders>-->
+						<!--<sourceFolder>${basedir}/src/main/java</sourceFolder>-->
+						<!--<sourceFolder>${basedir}/../hapi-fhir-base/src/main/java</sourceFolder>-->
+						<!--<sourceFolder>${basedir}/../hapi-fhir-client/src/main/java</sourceFolder>-->
+						<!--<sourceFolder>${basedir}/../hapi-fhir-server/src/main/java</sourceFolder>-->
+					<!--</sourceFolders>-->
 					<dumpOnExit>true</dumpOnExit>
 				</configuration>
 				<executions>
@@ -326,17 +352,20 @@
 									<baseResourceName>test</baseResourceName>
 								-->
 								<baseResourceName>testscript</baseResourceName>
-								<baseResourceName>user</baseResourceName>
-								<baseResourceName>valueset</baseResourceName>
-								<baseResourceName>visionprescription</baseResourceName>
-							</baseResourceNames>
-							<package>ca.uhn.fhir.model.dstu2</package>
-							<version>dstu2</version>
-							<buildDatatypes>true</buildDatatypes>
+								<!-- Removed in HAPI 3.4.0 as this isn't a real resource
+                       	<baseResourceName>user</baseResourceName>
+                       	-->
+                       <baseResourceName>valueset</baseResourceName>
+                       <baseResourceName>visionprescription</baseResourceName>
+                   </baseResourceNames>
+                   <package>ca.uhn.fhir.model.dstu2</package>
+                   <version>dstu2</version>
+                   <buildDatatypes>true</buildDatatypes>
+							<packageName>ca.uhn.fhir.model.dstu2</packageName>
 						</configuration>
-					</execution>
-					<!-- <execution> <id>clean_source</id> <goals> <goal>minimize-resources</goal> </goals> <configuration> <fhirVersion>DSTU2</fhirVersion> <targetDirectory>${project.baseDir}/../hapi-tinder-plugin/</targetDirectory> 
-						</configuration> </execution> -->
+           </execution>
+           <!-- <execution> <id>clean_source</id> <goals> <goal>minimize-resources</goal> </goals> <configuration> <fhirVersion>DSTU2</fhirVersion> <targetDirectory>${project.baseDir}/../hapi-tinder-plugin/</targetDirectory>
+               </configuration> </execution> -->
 				</executions>
 			</plugin>
 			<plugin>
@@ -356,6 +385,22 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Fragment-Host>
+							ca.uhn.hapi.fhir.hapi-fhir-base
+						</Fragment-Host>
+						<Import-Package>
+							javax.servlet*;resolution:=optional,
+							*
+						</Import-Package>
+					</instructions>
+				</configuration>
 			</plugin>
 		</plugins>
 		<pluginManagement>
@@ -402,7 +447,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>${maven_javadoc_plugin_version}</version>
 				<configuration>
 				</configuration>
 			</plugin>

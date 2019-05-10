@@ -1,9 +1,9 @@
 package ca.uhn.fhir.rest.client;
 
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Map;
@@ -44,10 +44,10 @@ public class RestfulClientFactoryDstu2Test {
 		when(ctx.getVersion()).thenReturn(FhirVersionEnum.DSTU2.getVersionImplementation());
 		when(ctx.getRestfulClientFactory()).thenReturn(restfulClientFactory);
 
-		when(restfulClientFactory.getHttpClient(any(StringBuilder.class), (Map<String, List<String>>)any(Map.class), any(String.class), any(RequestTypeEnum.class), any(List.class))).thenReturn(httpClient);
+		when(restfulClientFactory.getHttpClient(nullable(StringBuilder.class), (Map<String, List<String>>)nullable(Map.class), nullable(String.class), nullable(RequestTypeEnum.class), nullable(List.class))).thenReturn(httpClient);
 		
 		IHttpRequest httpRequest = mock(IHttpRequest.class);
-		when(httpClient.createGetRequest(any(FhirContext.class), any(EncodingEnum.class))).thenReturn(httpRequest);
+		when(httpClient.createGetRequest(any(FhirContext.class), nullable(EncodingEnum.class))).thenReturn(httpRequest);
 	
 		IHttpResponse httpResponse = mock(IHttpResponse.class);
 		when(httpRequest.execute()).thenReturn(httpResponse);
@@ -55,8 +55,8 @@ public class RestfulClientFactoryDstu2Test {
 		when(httpResponse.getStatus()).thenReturn(404);
 		
 		ApacheRestfulClientFactory cf = new ApacheRestfulClientFactory(ctx);
-		IHttpClient client = mock(IHttpClient.class);
-		BaseClient baseClient = mock(BaseClient.class);
+		IHttpClient client = mock(IHttpClient.class, withSettings().defaultAnswer(RETURNS_DEEP_STUBS));
+		BaseClient baseClient = mock(BaseClient.class, withSettings().defaultAnswer(RETURNS_DEEP_STUBS));
 		
 		try {
 			cf.validateServerBase("http://localhost:9999", client, baseClient);

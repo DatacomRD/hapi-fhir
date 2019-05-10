@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,7 +41,11 @@ public enum MedicationAdminStatus {
          */
         INPROGRESS, 
         /**
-         * Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called "suspended".
+         * The administration was terminated prior to any impact on the subject (though preparatory actions may have been taken)
+         */
+        NOTDONE, 
+        /**
+         * Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called 'suspended'.
          */
         ONHOLD, 
         /**
@@ -57,7 +61,7 @@ public enum MedicationAdminStatus {
          */
         STOPPED, 
         /**
-         * The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply, it's just not known which one.
+         * The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for 'other' - one of the listed statuses is presumed to apply, it's just not known which one.
          */
         UNKNOWN, 
         /**
@@ -69,6 +73,8 @@ public enum MedicationAdminStatus {
                 return null;
         if ("in-progress".equals(codeString))
           return INPROGRESS;
+        if ("not-done".equals(codeString))
+          return NOTDONE;
         if ("on-hold".equals(codeString))
           return ONHOLD;
         if ("completed".equals(codeString))
@@ -84,6 +90,7 @@ public enum MedicationAdminStatus {
         public String toCode() {
           switch (this) {
             case INPROGRESS: return "in-progress";
+            case NOTDONE: return "not-done";
             case ONHOLD: return "on-hold";
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
@@ -93,22 +100,24 @@ public enum MedicationAdminStatus {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/medication-admin-status";
+          return "http://terminology.hl7.org/CodeSystem/medication-admin-status";
         }
         public String getDefinition() {
           switch (this) {
             case INPROGRESS: return "The administration has started but has not yet completed.";
-            case ONHOLD: return "Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called \"suspended\".";
+            case NOTDONE: return "The administration was terminated prior to any impact on the subject (though preparatory actions may have been taken)";
+            case ONHOLD: return "Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called 'suspended'.";
             case COMPLETED: return "All actions that are implied by the administration have occurred.";
             case ENTEREDINERROR: return "The administration was entered in error and therefore nullified.";
             case STOPPED: return "Actions implied by the administration have been permanently halted, before all of them occurred.";
-            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
+            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for 'other' - one of the listed statuses is presumed to apply, it's just not known which one.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
             case INPROGRESS: return "In Progress";
+            case NOTDONE: return "Not Done";
             case ONHOLD: return "On Hold";
             case COMPLETED: return "Completed";
             case ENTEREDINERROR: return "Entered in Error";

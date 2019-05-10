@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -99,6 +99,8 @@ public class V3ObservationInterpretationEnumFactory implements EnumFactory<V3Obs
       return V3ObservationInterpretation.I;
     if ("MS".equals(codeString))
       return V3ObservationInterpretation.MS;
+    if ("NCL".equals(codeString))
+      return V3ObservationInterpretation.NCL;
     if ("NS".equals(codeString))
       return V3ObservationInterpretation.NS;
     if ("R".equals(codeString))
@@ -215,6 +217,8 @@ public class V3ObservationInterpretationEnumFactory implements EnumFactory<V3Obs
       return "I";
     if (code == V3ObservationInterpretation.MS)
       return "MS";
+    if (code == V3ObservationInterpretation.NCL)
+      return "NCL";
     if (code == V3ObservationInterpretation.NS)
       return "NS";
     if (code == V3ObservationInterpretation.R)

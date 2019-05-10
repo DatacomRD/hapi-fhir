@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,7 +45,7 @@ public enum MedicationStatementStatus {
          */
         COMPLETED, 
         /**
-         * The statement was recorded incorrectly.
+         * Some of the actions that are implied by the medication statement may have occurred.  For example, the patient may have taken some of the medication.  Clinical decision support systems should take this status into account.
          */
         ENTEREDINERROR, 
         /**
@@ -53,17 +53,21 @@ public enum MedicationStatementStatus {
          */
         INTENDED, 
         /**
-         * Actions implied by the statement have been permanently halted, before all of them occurred.
+         * Actions implied by the statement have been permanently halted, before all of them occurred. This should not be used if the statement was entered in error.
          */
         STOPPED, 
         /**
-         * Actions implied by the statement have been temporarily halted, but are expected to continue later. May also be called "suspended".
+         * Actions implied by the statement have been temporarily halted, but are expected to continue later. May also be called 'suspended'.
          */
         ONHOLD, 
         /**
          * The state of the medication use is not currently known.
          */
         UNKNOWN, 
+        /**
+         * The medication was not consumed by the patient
+         */
+        NOTTAKEN, 
         /**
          * added to help the parsers
          */
@@ -85,6 +89,8 @@ public enum MedicationStatementStatus {
           return ONHOLD;
         if ("unknown".equals(codeString))
           return UNKNOWN;
+        if ("not-taken".equals(codeString))
+          return NOTTAKEN;
         throw new FHIRException("Unknown MedicationStatementStatus code '"+codeString+"'");
         }
         public String toCode() {
@@ -96,21 +102,23 @@ public enum MedicationStatementStatus {
             case STOPPED: return "stopped";
             case ONHOLD: return "on-hold";
             case UNKNOWN: return "unknown";
+            case NOTTAKEN: return "not-taken";
             default: return "?";
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/medication-statement-status";
+          return "http://hl7.org/fhir/CodeSystem/medication-statement-status";
         }
         public String getDefinition() {
           switch (this) {
             case ACTIVE: return "The medication is still being taken.";
             case COMPLETED: return "The medication is no longer being taken.";
-            case ENTEREDINERROR: return "The statement was recorded incorrectly.";
+            case ENTEREDINERROR: return "Some of the actions that are implied by the medication statement may have occurred.  For example, the patient may have taken some of the medication.  Clinical decision support systems should take this status into account.";
             case INTENDED: return "The medication may be taken at some time in the future.";
-            case STOPPED: return "Actions implied by the statement have been permanently halted, before all of them occurred.";
-            case ONHOLD: return "Actions implied by the statement have been temporarily halted, but are expected to continue later. May also be called \"suspended\".";
+            case STOPPED: return "Actions implied by the statement have been permanently halted, before all of them occurred. This should not be used if the statement was entered in error.";
+            case ONHOLD: return "Actions implied by the statement have been temporarily halted, but are expected to continue later. May also be called 'suspended'.";
             case UNKNOWN: return "The state of the medication use is not currently known.";
+            case NOTTAKEN: return "The medication was not consumed by the patient";
             default: return "?";
           }
         }
@@ -123,6 +131,7 @@ public enum MedicationStatementStatus {
             case STOPPED: return "Stopped";
             case ONHOLD: return "On Hold";
             case UNKNOWN: return "Unknown";
+            case NOTTAKEN: return "Not Taken";
             default: return "?";
           }
     }

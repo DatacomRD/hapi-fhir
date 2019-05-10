@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ContractDataMeaning {
 
         /**
-         * The consent applies directly to the instance of the resource
+         * The consent applies directly to the instance of the resource.
          */
         INSTANCE, 
         /**
-         * The consent applies directly to the instance of the resource and instances it refers to
+         * The consent applies directly to the instance of the resource and instances it refers to.
          */
         RELATED, 
         /**
-         * The consent applies directly to the instance of the resource and instances that refer to it
+         * The consent applies directly to the instance of the resource and instances that refer to it.
          */
         DEPENDENTS, 
         /**
-         * The consent applies to instances of resources that are authored by
+         * The consent applies to instances of resources that are authored by.
          */
         AUTHOREDBY, 
         /**
@@ -79,14 +79,14 @@ public enum ContractDataMeaning {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/contract-data-meaning";
+          return "http://terminology.hl7.org/CodeSystem/contract-data-meaning";
         }
         public String getDefinition() {
           switch (this) {
-            case INSTANCE: return "The consent applies directly to the instance of the resource";
-            case RELATED: return "The consent applies directly to the instance of the resource and instances it refers to";
-            case DEPENDENTS: return "The consent applies directly to the instance of the resource and instances that refer to it";
-            case AUTHOREDBY: return "The consent applies to instances of resources that are authored by";
+            case INSTANCE: return "The consent applies directly to the instance of the resource.";
+            case RELATED: return "The consent applies directly to the instance of the resource and instances it refers to.";
+            case DEPENDENTS: return "The consent applies directly to the instance of the resource and instances that refer to it.";
+            case AUTHOREDBY: return "The consent applies to instances of resources that are authored by.";
             default: return "?";
           }
         }

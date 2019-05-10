@@ -5,19 +5,30 @@ import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
-import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
+import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
+import ca.uhn.fhir.jpa.searchparam.registry.BaseSearchParamRegistry;
+import ca.uhn.fhir.jpa.subscription.SubscriptionInterceptorLoader;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.util.ResourceCountCache;
+import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -27,6 +38,10 @@ import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
+import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
+import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
+import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -36,28 +51,30 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4Config.class})
 public abstract class BaseJpaR4Test extends BaseJpaTest {
-
 	private static JpaValidationSupportChainR4 ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
 	@Autowired
-	protected ISearchParamDao mySearchParamDao;
+	@Qualifier("myResourceCountsCache")
+	protected ResourceCountCache myResourceCountsCache;
+	@Autowired
+	protected IResourceLinkDao myResourceLinkDao;
 	@Autowired
 	protected ISearchParamPresentDao mySearchParamPresentDao;
 	@Autowired
@@ -85,6 +102,12 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myBundleDaoR4")
 	protected IFhirResourceDao<Bundle> myBundleDao;
 	@Autowired
+	@Qualifier("myCommunicationDaoR4")
+	protected IFhirResourceDao<Communication> myCommunicationDao;
+	@Autowired
+	@Qualifier("myCommunicationRequestDaoR4")
+	protected IFhirResourceDao<CommunicationRequest> myCommunicationRequestDao;
+	@Autowired
 	@Qualifier("myCarePlanDaoR4")
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
 	@Autowired
@@ -95,12 +118,16 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
 	@Autowired
 	@Qualifier("myConceptMapDaoR4")
-	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
+	protected IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
+	@Autowired
+	protected ITermConceptDao myTermConceptDao;
 	@Autowired
 	@Qualifier("myConditionDaoR4")
 	protected IFhirResourceDao<Condition> myConditionDao;
 	@Autowired
 	protected DaoConfig myDaoConfig;
+	@Autowired
+	protected ModelConfig myModelConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoR4")
 	protected IFhirResourceDao<Device> myDeviceDao;
@@ -119,12 +146,20 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myGroupDaoR4")
 	protected IFhirResourceDao<Group> myGroupDao;
 	@Autowired
+	@Qualifier("myMolecularSequenceDaoR4")
+	protected IFhirResourceDao<MolecularSequence> myMolecularSequenceDao;
+	@Autowired
 	@Qualifier("myImmunizationDaoR4")
 	protected IFhirResourceDao<Immunization> myImmunizationDao;
 	@Autowired
 	@Qualifier("myImmunizationRecommendationDaoR4")
 	protected IFhirResourceDao<ImmunizationRecommendation> myImmunizationRecommendationDao;
+	@Autowired
+	@Qualifier("myRiskAssessmentDaoR4")
+	protected IFhirResourceDao<RiskAssessment> myRiskAssessmentDao;
 	protected IServerInterceptor myInterceptor;
+	@Autowired
+	protected IInterceptorService myInterceptorRegistry;
 	@Autowired
 	@Qualifier("myLocationDaoR4")
 	protected IFhirResourceDao<Location> myLocationDao;
@@ -141,8 +176,14 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myMedicationRequestDaoR4")
 	protected IFhirResourceDao<MedicationRequest> myMedicationRequestDao;
 	@Autowired
+	@Qualifier("myProcedureDaoR4")
+	protected IFhirResourceDao<Procedure> myProcedureDao;
+	@Autowired
 	@Qualifier("myNamingSystemDaoR4")
 	protected IFhirResourceDao<NamingSystem> myNamingSystemDao;
+	@Autowired
+	@Qualifier("myChargeItemDaoR4")
+	protected IFhirResourceDao<ChargeItem> myChargeItemDao;
 	@Autowired
 	@Qualifier("myObservationDaoR4")
 	protected IFhirResourceDao<Observation> myObservationDao;
@@ -155,8 +196,17 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	protected DatabaseBackedPagingProvider myPagingProvider;
 	@Autowired
+	@Qualifier("myBinaryDaoR4")
+	protected IFhirResourceDao<Binary> myBinaryDao;
+	@Autowired
 	@Qualifier("myPatientDaoR4")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
+	@Autowired
+	protected IResourceTableDao myResourceTableDao;
+	@Autowired
+	protected IResourceHistoryTableDao myResourceHistoryTableDao;
+	@Autowired
+	protected IForcedIdDao myForcedIdDao;
 	@Autowired
 	@Qualifier("myCoverageDaoR4")
 	protected IFhirResourceDao<Coverage> myCoverageDao;
@@ -164,8 +214,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myPractitionerDaoR4")
 	protected IFhirResourceDao<Practitioner> myPractitionerDao;
 	@Autowired
-	@Qualifier("myProcedureRequestDaoR4")
-	protected IFhirResourceDao<ProcedureRequest> myProcedureRequestDao;
+	@Qualifier("myServiceRequestDaoR4")
+	protected IFhirResourceDao<ServiceRequest> myServiceRequestDao;
 	@Autowired
 	@Qualifier("myQuestionnaireDaoR4")
 	protected IFhirResourceDao<Questionnaire> myQuestionnaireDao;
@@ -174,9 +224,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
 	@Autowired
 	@Qualifier("myResourceProvidersR4")
-	protected Object myResourceProviders;
-	@Autowired
-	protected IResourceTableDao myResourceTableDao;
+	protected ResourceProviderFactory myResourceProviders;
 	@Autowired
 	protected IResourceTagDao myResourceTagDao;
 	@Autowired
@@ -186,17 +234,24 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	protected ISearchDao mySearchEntityDao;
 	@Autowired
+	protected ISearchResultDao mySearchResultDao;
+	@Autowired
+	protected ISearchIncludeDao mySearchIncludeDao;
+	@Autowired
+	protected IResourceReindexJobDao myResourceReindexJobDao;
+	@Autowired
 	@Qualifier("mySearchParameterDaoR4")
 	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;
 	@Autowired
-	protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
-	@Autowired
-	protected ISearchParamRegistry mySearchParamRegsitry;
+	protected BaseSearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	protected IStaleSearchDeletingSvc myStaleSearchDeletingSvc;
 	@Autowired
 	@Qualifier("myStructureDefinitionDaoR4")
 	protected IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
+	@Autowired
+	@Qualifier("myConsentDaoR4")
+	protected IFhirResourceDao<Consent> myConsentDao;
 	@Autowired
 	@Qualifier("mySubscriptionDaoR4")
 	protected IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;
@@ -206,6 +261,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("mySystemDaoR4")
 	protected IFhirSystemDao<Bundle, Meta> mySystemDao;
+	@Autowired
+	protected IResourceReindexingSvc myResourceReindexingSvc;
 	@Autowired
 	@Qualifier("mySystemProviderR4")
 	protected JpaSystemProviderR4 mySystemProvider;
@@ -227,14 +284,45 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myValueSetDaoR4")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
 	@Autowired
+	protected ITermConceptMapDao myTermConceptMapDao;
+	@Autowired
+	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
+	@Autowired
+	protected ICacheWarmingSvc myCacheWarmingSvc;
+	@Autowired
 	private JpaValidationSupportChainR4 myJpaValidationSupportChainR4;
+	@Autowired
+	protected SubscriptionRegistry mySubscriptionRegistry;
+
+	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
+	private List<Object> mySystemInterceptors;
 
 	@After()
 	public void afterCleanupDao() {
 		myDaoConfig.setExpireSearchResults(new DaoConfig().isExpireSearchResults());
+		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
 		myDaoConfig.setExpireSearchResultsAfterMillis(new DaoConfig().getExpireSearchResultsAfterMillis());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
+		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
+
+		myPagingProvider.setDefaultPageSize(BasePagingProvider.DEFAULT_DEFAULT_PAGE_SIZE);
+		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
+	}
+
+	@After
+	public void afterResetInterceptors() {
+		myInterceptorRegistry.unregisterAllInterceptors();
+	}
+
+	@After
+	public void afterClearTerminologyCaches() {
+		BaseHapiTerminologySvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
+		baseHapiTerminologySvc.clearTranslationCache();
+		baseHapiTerminologySvc.clearTranslationWithReverseCache();
+		baseHapiTerminologySvc.clearDeferred();
+		BaseHapiTerminologySvcImpl.clearOurLastResultsFromTranslationCache();
+		BaseHapiTerminologySvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 	}
 
 	@After()
@@ -245,17 +333,22 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 
 	@Before
 	public void beforeCreateInterceptor() {
+		mySystemInterceptors = myInterceptorRegistry.getAllRegisteredInterceptors();
+
 		myInterceptor = mock(IServerInterceptor.class);
-		myDaoConfig.setInterceptors(myInterceptor);
+
+		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor();
+		myInterceptorRegistry.registerInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 
 	@Before
-	@Transactional
 	public void beforeFlushFT() {
-		FullTextEntityManager ftem = Search.getFullTextEntityManager(myEntityManager);
-		ftem.purgeAll(ResourceTable.class);
-		ftem.purgeAll(ResourceIndexedSearchParamString.class);
-		ftem.flushToIndexes();
+		runInTransaction(() -> {
+			FullTextEntityManager ftem = Search.getFullTextEntityManager(myEntityManager);
+			ftem.purgeAll(ResourceTable.class);
+			ftem.purgeAll(ResourceIndexedSearchParamString.class);
+			ftem.flushToIndexes();
+		});
 
 		myDaoConfig.setSchedulingDisabled(true);
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
@@ -264,8 +357,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Before
 	@Transactional()
 	public void beforePurgeDatabase() {
-		final EntityManager entityManager = this.myEntityManager;
-		purgeDatabase(entityManager, myTxManager, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegsitry);
+		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
 	}
 
 	@Before
@@ -281,6 +373,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		return myFhirCtx;
 	}
 
+	@Override
+	protected PlatformTransactionManager getTxManager() {
+		return myTxManager;
+	}
+
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
 		InputStream stream = FhirResourceDaoDstu2SearchNoFtTest.class.getResourceAsStream(resourceName);
 		if (stream == null) {
@@ -291,18 +388,108 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		return newJsonParser.parseResource(type, string);
 	}
 
-	public TransactionTemplate newTxTemplate() {
-		TransactionTemplate retVal = new TransactionTemplate(myTxManager);
-		retVal.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		retVal.afterPropertiesSet();
-		return retVal;
-	}
-
 	@AfterClass
 	public static void afterClassClearContextBaseJpaR4Test() throws Exception {
 		ourValueSetDao.purgeCaches();
 		ourJpaValidationSupportChainR4.flush();
 		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	/**
+	 * Creates a single {@link org.hl7.fhir.r4.model.ConceptMap} entity that includes:
+	 * <br>
+	 * <ul>
+	 * <li>
+	 * One group with two elements, each identifying one target apiece.
+	 * </li>
+	 * <li>
+	 * One group with one element, identifying two targets.
+	 * </li>
+	 * <li>
+	 * One group with one element, identifying a target that also appears
+	 * in the first element of the first group.
+	 * </li>
+	 * </ul>
+	 * </br>
+	 * The first two groups identify the same source code system and different target code systems.
+	 * </br>
+	 * The first two groups also include an element with the same source code.
+	 *
+	 * @return A {@link org.hl7.fhir.r4.model.ConceptMap} entity for testing.
+	 */
+	public static ConceptMap createConceptMap() {
+		ConceptMap conceptMap = new ConceptMap();
+		conceptMap.setUrl(CM_URL);
+
+		conceptMap.setSource(new UriType(VS_URL));
+		conceptMap.setTarget(new UriType(VS_URL_2));
+
+		ConceptMapGroupComponent group = conceptMap.addGroup();
+		group.setSource(CS_URL);
+		group.setSourceVersion("Version 1");
+		group.setTarget(CS_URL_2);
+		group.setTargetVersion("Version 2");
+
+		SourceElementComponent element = group.addElement();
+		element.setCode("12345");
+		element.setDisplay("Source Code 12345");
+
+		TargetElementComponent target = element.addTarget();
+		target.setCode("34567");
+		target.setDisplay("Target Code 34567");
+		target.setEquivalence(ConceptMapEquivalence.EQUAL);
+
+		element = group.addElement();
+		element.setCode("23456");
+		element.setDisplay("Source Code 23456");
+
+		target = element.addTarget();
+		target.setCode("45678");
+		target.setDisplay("Target Code 45678");
+		target.setEquivalence(ConceptMapEquivalence.WIDER);
+
+		// Add a duplicate
+		target = element.addTarget();
+		target.setCode("45678");
+		target.setDisplay("Target Code 45678");
+		target.setEquivalence(ConceptMapEquivalence.WIDER);
+
+		group = conceptMap.addGroup();
+		group.setSource(CS_URL);
+		group.setSourceVersion("Version 3");
+		group.setTarget(CS_URL_3);
+		group.setTargetVersion("Version 4");
+
+		element = group.addElement();
+		element.setCode("12345");
+		element.setDisplay("Source Code 12345");
+
+		target = element.addTarget();
+		target.setCode("56789");
+		target.setDisplay("Target Code 56789");
+		target.setEquivalence(ConceptMapEquivalence.EQUAL);
+
+		target = element.addTarget();
+		target.setCode("67890");
+		target.setDisplay("Target Code 67890");
+		target.setEquivalence(ConceptMapEquivalence.WIDER);
+
+		group = conceptMap.addGroup();
+		group.setSource(CS_URL_4);
+		group.setSourceVersion("Version 5");
+		group.setTarget(CS_URL_2);
+		group.setTargetVersion("Version 2");
+
+		element = group.addElement();
+		element.setCode("78901");
+		element.setDisplay("Source Code 78901");
+
+		target = element.addTarget();
+		target.setCode("34567");
+		target.setDisplay("Target Code 34567");
+		target.setEquivalence(ConceptMapEquivalence.NARROWER);
+
+		return conceptMap;
 	}
 
 	public static String toSearchUuidFromLinkNext(Bundle theBundle) {

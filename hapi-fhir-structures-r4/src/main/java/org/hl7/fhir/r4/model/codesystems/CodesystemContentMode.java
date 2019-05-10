@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,21 +37,25 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum CodesystemContentMode {
 
         /**
-         * None of the concepts defined by the code system are included in the code system resource
+         * None of the concepts defined by the code system are included in the code system resource.
          */
         NOTPRESENT, 
         /**
-         * A few representative concepts are included in the code system resource
+         * A few representative concepts are included in the code system resource. There is no useful intent in the subset choice and there's no process to make it workable: it's not intended to be workable.
          */
         EXAMPLE, 
         /**
-         * A subset of the code system concepts are included in the code system resource
+         * A subset of the code system concepts are included in the code system resource. This is a curated subset released for a specific purpose under the governance of the code system steward, and that the intent, bounds and consequences of the fragmentation are clearly defined in the fragment or the code system documentation. Fragments are also known as partitions.
          */
         FRAGMENT, 
         /**
-         * All the concepts defined by the code system are included in the code system resource
+         * All the concepts defined by the code system are included in the code system resource.
          */
         COMPLETE, 
+        /**
+         * The resource doesn't define any new concepts; it just provides additional designations and properties to another code system.
+         */
+        SUPPLEMENT, 
         /**
          * added to help the parsers
          */
@@ -67,6 +71,8 @@ public enum CodesystemContentMode {
           return FRAGMENT;
         if ("complete".equals(codeString))
           return COMPLETE;
+        if ("supplement".equals(codeString))
+          return SUPPLEMENT;
         throw new FHIRException("Unknown CodesystemContentMode code '"+codeString+"'");
         }
         public String toCode() {
@@ -75,6 +81,7 @@ public enum CodesystemContentMode {
             case EXAMPLE: return "example";
             case FRAGMENT: return "fragment";
             case COMPLETE: return "complete";
+            case SUPPLEMENT: return "supplement";
             default: return "?";
           }
         }
@@ -83,10 +90,11 @@ public enum CodesystemContentMode {
         }
         public String getDefinition() {
           switch (this) {
-            case NOTPRESENT: return "None of the concepts defined by the code system are included in the code system resource";
-            case EXAMPLE: return "A few representative concepts are included in the code system resource";
-            case FRAGMENT: return "A subset of the code system concepts are included in the code system resource";
-            case COMPLETE: return "All the concepts defined by the code system are included in the code system resource";
+            case NOTPRESENT: return "None of the concepts defined by the code system are included in the code system resource.";
+            case EXAMPLE: return "A few representative concepts are included in the code system resource. There is no useful intent in the subset choice and there's no process to make it workable: it's not intended to be workable.";
+            case FRAGMENT: return "A subset of the code system concepts are included in the code system resource. This is a curated subset released for a specific purpose under the governance of the code system steward, and that the intent, bounds and consequences of the fragmentation are clearly defined in the fragment or the code system documentation. Fragments are also known as partitions.";
+            case COMPLETE: return "All the concepts defined by the code system are included in the code system resource.";
+            case SUPPLEMENT: return "The resource doesn't define any new concepts; it just provides additional designations and properties to another code system.";
             default: return "?";
           }
         }
@@ -96,6 +104,7 @@ public enum CodesystemContentMode {
             case EXAMPLE: return "Example";
             case FRAGMENT: return "Fragment";
             case COMPLETE: return "Complete";
+            case SUPPLEMENT: return "Supplement";
             default: return "?";
           }
     }

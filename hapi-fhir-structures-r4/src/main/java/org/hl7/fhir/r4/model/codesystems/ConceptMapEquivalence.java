@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,7 +37,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ConceptMapEquivalence {
 
         /**
-         * The concepts are related to each other, and have at least some overlap in meaning, but the exact relationship is not known
+         * The concepts are related to each other, and have at least some overlap in meaning, but the exact relationship is not known.
          */
         RELATEDTO, 
         /**
@@ -65,11 +65,11 @@ public enum ConceptMapEquivalence {
          */
         SPECIALIZES, 
         /**
-         * The target mapping overlaps with the source concept, but both source and target cover additional meaning, or the definitions are imprecise and it is uncertain whether they have the same boundaries to their meaning. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.
+         * The target mapping overlaps with the source concept, but both source and target cover additional meaning, or the definitions are imprecise and it is uncertain whether they have the same boundaries to their meaning. The sense in which the mapping is inexact SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.
          */
         INEXACT, 
         /**
-         * There is no match for this concept in the destination concept system.
+         * There is no match for this concept in the target code system.
          */
         UNMATCHED, 
         /**
@@ -125,15 +125,15 @@ public enum ConceptMapEquivalence {
         }
         public String getDefinition() {
           switch (this) {
-            case RELATEDTO: return "The concepts are related to each other, and have at least some overlap in meaning, but the exact relationship is not known";
+            case RELATEDTO: return "The concepts are related to each other, and have at least some overlap in meaning, but the exact relationship is not known.";
             case EQUIVALENT: return "The definitions of the concepts mean the same thing (including when structural implications of meaning are considered) (i.e. extensionally identical).";
             case EQUAL: return "The definitions of the concepts are exactly the same (i.e. only grammatical differences) and structural implications of meaning are identical or irrelevant (i.e. intentionally identical).";
             case WIDER: return "The target mapping is wider in meaning than the source concept.";
             case SUBSUMES: return "The target mapping subsumes the meaning of the source concept (e.g. the source is-a target).";
             case NARROWER: return "The target mapping is narrower in meaning than the source concept. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.";
             case SPECIALIZES: return "The target mapping specializes the meaning of the source concept (e.g. the target is-a source).";
-            case INEXACT: return "The target mapping overlaps with the source concept, but both source and target cover additional meaning, or the definitions are imprecise and it is uncertain whether they have the same boundaries to their meaning. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.";
-            case UNMATCHED: return "There is no match for this concept in the destination concept system.";
+            case INEXACT: return "The target mapping overlaps with the source concept, but both source and target cover additional meaning, or the definitions are imprecise and it is uncertain whether they have the same boundaries to their meaning. The sense in which the mapping is inexact SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.";
+            case UNMATCHED: return "There is no match for this concept in the target code system.";
             case DISJOINT: return "This is an explicit assertion that there is no mapping between the source and target concept.";
             default: return "?";
           }

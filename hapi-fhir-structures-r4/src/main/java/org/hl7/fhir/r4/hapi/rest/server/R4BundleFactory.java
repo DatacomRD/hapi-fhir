@@ -9,9 +9,9 @@ package org.hl7.fhir.r4.hapi.rest.server;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,6 +27,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.Bundle;
@@ -42,6 +43,7 @@ import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@SuppressWarnings("Duplicates")
 public class R4BundleFactory implements IVersionSpecificBundleFactory {
   private String myBase;
   private Bundle myBundle;
@@ -74,7 +76,7 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
 
       List<IBaseReference> references = myContext.newTerser().getAllPopulatedChildElementsOfType(next, IBaseReference.class);
       do {
-        List<IAnyResource> addedResourcesThisPass = new ArrayList<IAnyResource>();
+        List<IAnyResource> addedResourcesThisPass = new ArrayList<>();
 
         for (IBaseReference nextRef : references) {
           IAnyResource nextRes = (IAnyResource) nextRef.getResource();
@@ -101,7 +103,7 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
         }
 
         // Linked resources may themselves have linked resources
-        references = new ArrayList<IBaseReference>();
+        references = new ArrayList<>();
         for (IAnyResource iResource : addedResourcesThisPass) {
           List<IBaseReference> newReferences = myContext.newTerser().getAllPopulatedChildElementsOfType(iResource, IBaseReference.class);
           references.addAll(newReferences);
@@ -121,11 +123,14 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
         entry.getRequest().getMethodElement().setValueAsString(httpVerb);
         entry.getRequest().getUrlElement().setValue(next.getId());
       }
+      if ("DELETE".equals(httpVerb)) {
+        entry.setResource(null);
+      }
     }
 
-		/*
-       * Actually add the resources to the bundle
-		 */
+    /*
+     * Actually add the resources to the bundle
+     */
     for (IBaseResource next : includedResources) {
       BundleEntryComponent entry = myBundle.addEntry();
       entry.setResource((Resource) next).getSearch().setMode(SearchEntryMode.INCLUDE);
@@ -195,7 +200,7 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
         includedResources.addAll(addedResourcesThisPass);
 
         // Linked resources may themselves have linked resources
-        references = new ArrayList<ResourceReferenceInfo>();
+        references = new ArrayList<>();
         for (IAnyResource iResource : addedResourcesThisPass) {
           List<ResourceReferenceInfo> newReferences = myContext.newTerser().getAllResourceReferences(iResource);
           references.addAll(newReferences);
@@ -205,12 +210,27 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
       BundleEntryComponent entry = myBundle.addEntry().setResource((Resource) next);
       Resource nextAsResource = (Resource) next;
       IIdType id = populateBundleEntryFullUrl(next, entry);
+
+      // Populate Request
       String httpVerb = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(nextAsResource);
       if (httpVerb != null) {
         entry.getRequest().getMethodElement().setValueAsString(httpVerb);
         if (id != null) {
           entry.getRequest().setUrl(id.getValue());
         }
+      }
+      if ("DELETE".equals(httpVerb)) {
+        entry.setResource(null);
+      }
+
+      // Populate Response
+      if ("1".equals(id.getVersionIdPart())) {
+        entry.getResponse().setStatus("201 Created");
+      } else if (isNotBlank(id.getVersionIdPart())) {
+        entry.getResponse().setStatus("200 OK");
+      }
+      if (isNotBlank(id.getVersionIdPart())) {
+        entry.getResponse().setEtag(RestfulServerUtils.createEtag(id.getVersionIdPart()));
       }
 
       String searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextAsResource);
@@ -219,9 +239,9 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
       }
     }
 
-		/*
-		 * Actually add the resources to the bundle
-		 */
+    /*
+     * Actually add the resources to the bundle
+     */
     for (IAnyResource next : includedResources) {
       BundleEntryComponent entry = myBundle.addEntry();
       entry.setResource((Resource) next).getSearch().setMode(SearchEntryMode.INCLUDE);

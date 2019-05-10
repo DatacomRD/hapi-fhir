@@ -19,8 +19,6 @@ import org.hl7.fhir.instance.model.Enumeration;
 import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
 import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.instance.model.api.*;
-import org.junit.*;
 import org.hl7.fhir.instance.model.Observation;
 import org.hl7.fhir.instance.model.Organization;
 import org.hl7.fhir.instance.model.Patient;
@@ -32,7 +30,6 @@ import org.hl7.fhir.instance.model.Specimen;
 import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.After;
 import org.junit.Assert;
@@ -49,7 +46,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.JsonParserHl7OrgDstu2Test.MyPatientWithOneDeclaredAddressExtension;
 import ca.uhn.fhir.parser.JsonParserHl7OrgDstu2Test.MyPatientWithOneDeclaredExtension;
 import ca.uhn.fhir.rest.api.Constants;
@@ -1050,7 +1046,7 @@ public class XmlParserHl7OrgDstu2Test {
     ourLog.info(encoded);
 
     assertThat(encoded, containsString("<Patient"));
-    assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM + "\"/>",
+    assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>",
         "<code value=\"" + Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
     assertThat(encoded, not(containsString("text")));
     assertThat(encoded, not(containsString("THE DIV")));
@@ -1169,7 +1165,7 @@ public class XmlParserHl7OrgDstu2Test {
     ourLog.info(encoded);
 
     assertThat(encoded, containsString("<Patient"));
-    assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM + "\"/>",
+    assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>",
         "<code value=\"" + Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
     assertThat(encoded, not(containsString("THE DIV")));
     assertThat(encoded, containsString("family"));
@@ -1191,7 +1187,7 @@ public class XmlParserHl7OrgDstu2Test {
 
     assertThat(encoded, containsString("<Patient"));
     assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"foo\"/>", "<code value=\"bar\"/>", "</tag>"));
-    assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM + "\"/>",
+    assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>",
         "<code value=\"" + Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
     assertThat(encoded, not(containsString("THE DIV")));
     assertThat(encoded, containsString("family"));
@@ -1502,37 +1498,6 @@ public class XmlParserHl7OrgDstu2Test {
         "<given value=\"Shmoe\"><extension url=\"http://examples.com#givenext_parent\"><extension url=\"http://examples.com#givenext_child\"><valueString value=\"CHILD\"/></extension></extension></given>"));
   }
 
-  // Narrative generation not currently supported for HL7org structures
-  public void testNarrativeGeneration() throws DataFormatException, IOException {
-
-    Patient patient = new Patient();
-    patient.addName().addFamily("Smith");
-    Organization org = new Organization();
-    patient.getManagingOrganization().setResource(org);
-
-    INarrativeGenerator gen = new INarrativeGenerator() {
-
-      @Override
-      public void generateNarrative(FhirContext theContext, IBaseResource theResource, INarrative theNarrative) {
-        try {
-          theNarrative.setDivAsString("<div>help</div>");
-        } catch (Exception e) {
-          throw new Error(e);
-        }
-        theNarrative.setStatusAsString("generated");
-      }
-
-    };
-
-    FhirContext context = ourCtx;
-    context.setNarrativeGenerator(gen);
-    IParser p = context.newXmlParser();
-    String str = p.encodeResourceToString(patient);
-
-    ourLog.info(str);
-
-    assertThat(str, StringContains.containsString(",\"text\":{\"status\":\"generated\",\"div\":\"<div>help</div>\"},"));
-  }
 
   @Test
   public void testNestedContainedResources() {
@@ -1745,9 +1710,7 @@ public class XmlParserHl7OrgDstu2Test {
     JSON expected = JSONSerializer.toJSON(jsonString);
     JSON actual = JSONSerializer.toJSON(encoded.trim());
 
-    // The encoded escapes quote marks using XML escaping instead of JSON
-    // escaping, which is probably nicer anyhow...
-    String exp = fixDivNodeTextJson(expected.toString().replace("\\\"Jim\\\"", "&quot;Jim&quot;"));
+    String exp = fixDivNodeTextJson(expected.toString());
     String act = fixDivNodeTextJson(actual.toString());
 
     ourLog.info("Expected: {}", exp);

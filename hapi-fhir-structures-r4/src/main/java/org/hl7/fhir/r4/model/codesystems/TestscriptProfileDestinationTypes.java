@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -79,7 +79,7 @@ public enum TestscriptProfileDestinationTypes {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/testscript-profile-destination-types";
+          return "http://terminology.hl7.org/CodeSystem/testscript-profile-destination-types";
         }
         public String getDefinition() {
           switch (this) {

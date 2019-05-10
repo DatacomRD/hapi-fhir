@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -73,22 +73,34 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return DataTypes.ELEMENT;
     if ("ElementDefinition".equals(codeString))
       return DataTypes.ELEMENTDEFINITION;
+    if ("Expression".equals(codeString))
+      return DataTypes.EXPRESSION;
     if ("Extension".equals(codeString))
       return DataTypes.EXTENSION;
     if ("HumanName".equals(codeString))
       return DataTypes.HUMANNAME;
     if ("Identifier".equals(codeString))
       return DataTypes.IDENTIFIER;
+    if ("MarketingStatus".equals(codeString))
+      return DataTypes.MARKETINGSTATUS;
     if ("Meta".equals(codeString))
       return DataTypes.META;
     if ("Money".equals(codeString))
       return DataTypes.MONEY;
+    if ("MoneyQuantity".equals(codeString))
+      return DataTypes.MONEYQUANTITY;
     if ("Narrative".equals(codeString))
       return DataTypes.NARRATIVE;
     if ("ParameterDefinition".equals(codeString))
       return DataTypes.PARAMETERDEFINITION;
     if ("Period".equals(codeString))
       return DataTypes.PERIOD;
+    if ("Population".equals(codeString))
+      return DataTypes.POPULATION;
+    if ("ProdCharacteristic".equals(codeString))
+      return DataTypes.PRODCHARACTERISTIC;
+    if ("ProductShelfLife".equals(codeString))
+      return DataTypes.PRODUCTSHELFLIFE;
     if ("Quantity".equals(codeString))
       return DataTypes.QUANTITY;
     if ("Range".equals(codeString))
@@ -105,6 +117,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return DataTypes.SIGNATURE;
     if ("SimpleQuantity".equals(codeString))
       return DataTypes.SIMPLEQUANTITY;
+    if ("SubstanceAmount".equals(codeString))
+      return DataTypes.SUBSTANCEAMOUNT;
     if ("Timing".equals(codeString))
       return DataTypes.TIMING;
     if ("TriggerDefinition".equals(codeString))
@@ -115,6 +129,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return DataTypes.BASE64BINARY;
     if ("boolean".equals(codeString))
       return DataTypes.BOOLEAN;
+    if ("canonical".equals(codeString))
+      return DataTypes.CANONICAL;
     if ("code".equals(codeString))
       return DataTypes.CODE;
     if ("date".equals(codeString))
@@ -143,6 +159,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return DataTypes.UNSIGNEDINT;
     if ("uri".equals(codeString))
       return DataTypes.URI;
+    if ("url".equals(codeString))
+      return DataTypes.URL;
     if ("uuid".equals(codeString))
       return DataTypes.UUID;
     if ("xhtml".equals(codeString))
@@ -185,22 +203,34 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return "Element";
     if (code == DataTypes.ELEMENTDEFINITION)
       return "ElementDefinition";
+    if (code == DataTypes.EXPRESSION)
+      return "Expression";
     if (code == DataTypes.EXTENSION)
       return "Extension";
     if (code == DataTypes.HUMANNAME)
       return "HumanName";
     if (code == DataTypes.IDENTIFIER)
       return "Identifier";
+    if (code == DataTypes.MARKETINGSTATUS)
+      return "MarketingStatus";
     if (code == DataTypes.META)
       return "Meta";
     if (code == DataTypes.MONEY)
       return "Money";
+    if (code == DataTypes.MONEYQUANTITY)
+      return "MoneyQuantity";
     if (code == DataTypes.NARRATIVE)
       return "Narrative";
     if (code == DataTypes.PARAMETERDEFINITION)
       return "ParameterDefinition";
     if (code == DataTypes.PERIOD)
       return "Period";
+    if (code == DataTypes.POPULATION)
+      return "Population";
+    if (code == DataTypes.PRODCHARACTERISTIC)
+      return "ProdCharacteristic";
+    if (code == DataTypes.PRODUCTSHELFLIFE)
+      return "ProductShelfLife";
     if (code == DataTypes.QUANTITY)
       return "Quantity";
     if (code == DataTypes.RANGE)
@@ -217,6 +247,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return "Signature";
     if (code == DataTypes.SIMPLEQUANTITY)
       return "SimpleQuantity";
+    if (code == DataTypes.SUBSTANCEAMOUNT)
+      return "SubstanceAmount";
     if (code == DataTypes.TIMING)
       return "Timing";
     if (code == DataTypes.TRIGGERDEFINITION)
@@ -227,6 +259,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return "base64Binary";
     if (code == DataTypes.BOOLEAN)
       return "boolean";
+    if (code == DataTypes.CANONICAL)
+      return "canonical";
     if (code == DataTypes.CODE)
       return "code";
     if (code == DataTypes.DATE)
@@ -255,6 +289,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return "unsignedInt";
     if (code == DataTypes.URI)
       return "uri";
+    if (code == DataTypes.URL)
+      return "url";
     if (code == DataTypes.UUID)
       return "uuid";
     if (code == DataTypes.XHTML)

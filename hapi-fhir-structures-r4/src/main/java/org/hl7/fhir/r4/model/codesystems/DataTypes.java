@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -105,6 +105,10 @@ public enum DataTypes {
          */
         ELEMENTDEFINITION, 
         /**
+         * A expression that is evaluated in a specified context and returns a value. The context of use of the expression must specify the context in which the expression is evaluated, and how the result of the expression is used.
+         */
+        EXPRESSION, 
+        /**
          * Optional Extension Element - found in all resources.
          */
         EXTENSION, 
@@ -113,11 +117,15 @@ public enum DataTypes {
          */
         HUMANNAME, 
         /**
-         * A technical identifier - identifies some entity uniquely and unambiguously.
+         * An identifier - identifies some entity uniquely and unambiguously. Typically this is used for business identifiers.
          */
         IDENTIFIER, 
         /**
-         * The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.
+         * The marketing status describes the date when a medicinal product is actually put on the market or the date as of which it is no longer available.
+         */
+        MARKETINGSTATUS, 
+        /**
+         * The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content might not always be associated with version changes to the resource.
          */
         META, 
         /**
@@ -125,7 +133,11 @@ public enum DataTypes {
          */
         MONEY, 
         /**
-         * A human-readable formatted text, including images.
+         * null
+         */
+        MONEYQUANTITY, 
+        /**
+         * A human-readable summary of the resource conveying the essential clinical and business information for the resource.
          */
         NARRATIVE, 
         /**
@@ -136,6 +148,18 @@ public enum DataTypes {
          * A time period defined by a start and end date and optionally time.
          */
         PERIOD, 
+        /**
+         * A populatioof people with some set of grouping criteria.
+         */
+        POPULATION, 
+        /**
+         * The marketing status describes the date when a medicinal product is actually put on the market or the date as of which it is no longer available.
+         */
+        PRODCHARACTERISTIC, 
+        /**
+         * The shelf-life and storage information for a medicinal product item or container can be described using this class.
+         */
+        PRODUCTSHELFLIFE, 
         /**
          * A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.
          */
@@ -161,13 +185,17 @@ public enum DataTypes {
          */
         SAMPLEDDATA, 
         /**
-         * A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities.
+         * A signature along with supporting context. The signature may be a digital signature that is cryptographic in nature, or some other signature acceptable to the domain. This other signature may be as simple as a graphical image representing a hand-written signature, or a signature ceremony Different signature approaches have different utilities.
          */
         SIGNATURE, 
         /**
          * null
          */
         SIMPLEQUANTITY, 
+        /**
+         * Chemical substances are a single substance type whose primary defining element is the molecular structure. Chemical substances shall be defined on the basis of their complete covalent molecular structure; the presence of a salt (counter-ion) and/or solvates (water, alcohols) is also captured. Purity, grade, physical form or particle size are not taken into account in the definition of a chemical substance or in the assignment of a Substance ID.
+         */
+        SUBSTANCEAMOUNT, 
         /**
          * Specifies an event that may occur multiple times. Timing schedules are used to record when things are planned, expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds, and may be used for reporting the schedule to which past regular activities were carried out.
          */
@@ -177,7 +205,7 @@ public enum DataTypes {
          */
         TRIGGERDEFINITION, 
         /**
-         * Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).
+         * Specifies clinical/business/etc. metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).
          */
         USAGECONTEXT, 
         /**
@@ -188,6 +216,10 @@ public enum DataTypes {
          * Value of "true" or "false"
          */
         BOOLEAN, 
+        /**
+         * A URI that is a reference to a canonical URL on a FHIR resource
+         */
+        CANONICAL, 
         /**
          * A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents
          */
@@ -217,7 +249,7 @@ public enum DataTypes {
          */
         INTEGER, 
         /**
-         * A string that may contain markdown syntax for optional processing by a mark down presentation engine
+         * A string that may contain Github Flavored Markdown syntax for optional processing by a mark down presentation engine
          */
         MARKDOWN, 
         /**
@@ -244,6 +276,10 @@ public enum DataTypes {
          * String of characters used to identify a name or a resource
          */
         URI, 
+        /**
+         * A URI that is a literal reference
+         */
+        URL, 
         /**
          * A UUID, represented as a URI
          */
@@ -293,22 +329,34 @@ public enum DataTypes {
           return ELEMENT;
         if ("ElementDefinition".equals(codeString))
           return ELEMENTDEFINITION;
+        if ("Expression".equals(codeString))
+          return EXPRESSION;
         if ("Extension".equals(codeString))
           return EXTENSION;
         if ("HumanName".equals(codeString))
           return HUMANNAME;
         if ("Identifier".equals(codeString))
           return IDENTIFIER;
+        if ("MarketingStatus".equals(codeString))
+          return MARKETINGSTATUS;
         if ("Meta".equals(codeString))
           return META;
         if ("Money".equals(codeString))
           return MONEY;
+        if ("MoneyQuantity".equals(codeString))
+          return MONEYQUANTITY;
         if ("Narrative".equals(codeString))
           return NARRATIVE;
         if ("ParameterDefinition".equals(codeString))
           return PARAMETERDEFINITION;
         if ("Period".equals(codeString))
           return PERIOD;
+        if ("Population".equals(codeString))
+          return POPULATION;
+        if ("ProdCharacteristic".equals(codeString))
+          return PRODCHARACTERISTIC;
+        if ("ProductShelfLife".equals(codeString))
+          return PRODUCTSHELFLIFE;
         if ("Quantity".equals(codeString))
           return QUANTITY;
         if ("Range".equals(codeString))
@@ -325,6 +373,8 @@ public enum DataTypes {
           return SIGNATURE;
         if ("SimpleQuantity".equals(codeString))
           return SIMPLEQUANTITY;
+        if ("SubstanceAmount".equals(codeString))
+          return SUBSTANCEAMOUNT;
         if ("Timing".equals(codeString))
           return TIMING;
         if ("TriggerDefinition".equals(codeString))
@@ -335,6 +385,8 @@ public enum DataTypes {
           return BASE64BINARY;
         if ("boolean".equals(codeString))
           return BOOLEAN;
+        if ("canonical".equals(codeString))
+          return CANONICAL;
         if ("code".equals(codeString))
           return CODE;
         if ("date".equals(codeString))
@@ -363,6 +415,8 @@ public enum DataTypes {
           return UNSIGNEDINT;
         if ("uri".equals(codeString))
           return URI;
+        if ("url".equals(codeString))
+          return URL;
         if ("uuid".equals(codeString))
           return UUID;
         if ("xhtml".equals(codeString))
@@ -388,14 +442,20 @@ public enum DataTypes {
             case DURATION: return "Duration";
             case ELEMENT: return "Element";
             case ELEMENTDEFINITION: return "ElementDefinition";
+            case EXPRESSION: return "Expression";
             case EXTENSION: return "Extension";
             case HUMANNAME: return "HumanName";
             case IDENTIFIER: return "Identifier";
+            case MARKETINGSTATUS: return "MarketingStatus";
             case META: return "Meta";
             case MONEY: return "Money";
+            case MONEYQUANTITY: return "MoneyQuantity";
             case NARRATIVE: return "Narrative";
             case PARAMETERDEFINITION: return "ParameterDefinition";
             case PERIOD: return "Period";
+            case POPULATION: return "Population";
+            case PRODCHARACTERISTIC: return "ProdCharacteristic";
+            case PRODUCTSHELFLIFE: return "ProductShelfLife";
             case QUANTITY: return "Quantity";
             case RANGE: return "Range";
             case RATIO: return "Ratio";
@@ -404,11 +464,13 @@ public enum DataTypes {
             case SAMPLEDDATA: return "SampledData";
             case SIGNATURE: return "Signature";
             case SIMPLEQUANTITY: return "SimpleQuantity";
+            case SUBSTANCEAMOUNT: return "SubstanceAmount";
             case TIMING: return "Timing";
             case TRIGGERDEFINITION: return "TriggerDefinition";
             case USAGECONTEXT: return "UsageContext";
             case BASE64BINARY: return "base64Binary";
             case BOOLEAN: return "boolean";
+            case CANONICAL: return "canonical";
             case CODE: return "code";
             case DATE: return "date";
             case DATETIME: return "dateTime";
@@ -423,6 +485,7 @@ public enum DataTypes {
             case TIME: return "time";
             case UNSIGNEDINT: return "unsignedInt";
             case URI: return "uri";
+            case URL: return "url";
             case UUID: return "uuid";
             case XHTML: return "xhtml";
             default: return "?";
@@ -450,27 +513,35 @@ public enum DataTypes {
             case DURATION: return "A length of time.";
             case ELEMENT: return "Base definition for all elements in a resource.";
             case ELEMENTDEFINITION: return "Captures constraints on each element within the resource, profile, or extension.";
+            case EXPRESSION: return "A expression that is evaluated in a specified context and returns a value. The context of use of the expression must specify the context in which the expression is evaluated, and how the result of the expression is used.";
             case EXTENSION: return "Optional Extension Element - found in all resources.";
             case HUMANNAME: return "A human's name with the ability to identify parts and usage.";
-            case IDENTIFIER: return "A technical identifier - identifies some entity uniquely and unambiguously.";
-            case META: return "The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.";
+            case IDENTIFIER: return "An identifier - identifies some entity uniquely and unambiguously. Typically this is used for business identifiers.";
+            case MARKETINGSTATUS: return "The marketing status describes the date when a medicinal product is actually put on the market or the date as of which it is no longer available.";
+            case META: return "The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content might not always be associated with version changes to the resource.";
             case MONEY: return "An amount of economic utility in some recognized currency.";
-            case NARRATIVE: return "A human-readable formatted text, including images.";
+            case MONEYQUANTITY: return "";
+            case NARRATIVE: return "A human-readable summary of the resource conveying the essential clinical and business information for the resource.";
             case PARAMETERDEFINITION: return "The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.";
             case PERIOD: return "A time period defined by a start and end date and optionally time.";
+            case POPULATION: return "A populatioof people with some set of grouping criteria.";
+            case PRODCHARACTERISTIC: return "The marketing status describes the date when a medicinal product is actually put on the market or the date as of which it is no longer available.";
+            case PRODUCTSHELFLIFE: return "The shelf-life and storage information for a medicinal product item or container can be described using this class.";
             case QUANTITY: return "A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.";
             case RANGE: return "A set of ordered Quantities defined by a low and high limit.";
             case RATIO: return "A relationship of two Quantity values - expressed as a numerator and a denominator.";
             case REFERENCE: return "A reference from one resource to another.";
             case RELATEDARTIFACT: return "Related artifacts such as additional documentation, justification, or bibliographic references.";
             case SAMPLEDDATA: return "A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.";
-            case SIGNATURE: return "A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different signature approaches have different utilities.";
+            case SIGNATURE: return "A signature along with supporting context. The signature may be a digital signature that is cryptographic in nature, or some other signature acceptable to the domain. This other signature may be as simple as a graphical image representing a hand-written signature, or a signature ceremony Different signature approaches have different utilities.";
             case SIMPLEQUANTITY: return "";
+            case SUBSTANCEAMOUNT: return "Chemical substances are a single substance type whose primary defining element is the molecular structure. Chemical substances shall be defined on the basis of their complete covalent molecular structure; the presence of a salt (counter-ion) and/or solvates (water, alcohols) is also captured. Purity, grade, physical form or particle size are not taken into account in the definition of a chemical substance or in the assignment of a Substance ID.";
             case TIMING: return "Specifies an event that may occur multiple times. Timing schedules are used to record when things are planned, expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds, and may be used for reporting the schedule to which past regular activities were carried out.";
             case TRIGGERDEFINITION: return "A description of a triggering event. Triggering events can be named events, data events, or periodic, as determined by the type element.";
-            case USAGECONTEXT: return "Specifies clinical/business/etc metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).";
+            case USAGECONTEXT: return "Specifies clinical/business/etc. metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).";
             case BASE64BINARY: return "A stream of bytes";
             case BOOLEAN: return "Value of \"true\" or \"false\"";
+            case CANONICAL: return "A URI that is a reference to a canonical URL on a FHIR resource";
             case CODE: return "A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents";
             case DATE: return "A date or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.  Dates SHALL be valid dates.";
             case DATETIME: return "A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.                 Dates SHALL be valid dates.";
@@ -478,13 +549,14 @@ public enum DataTypes {
             case ID: return "Any combination of letters, numerals, \"-\" and \".\", with a length limit of 64 characters.  (This might be an integer, an unprefixed OID, UUID or any other identifier pattern that meets these constraints.)  Ids are case-insensitive.";
             case INSTANT: return "An instant in time - known at least to the second";
             case INTEGER: return "A whole number";
-            case MARKDOWN: return "A string that may contain markdown syntax for optional processing by a mark down presentation engine";
+            case MARKDOWN: return "A string that may contain Github Flavored Markdown syntax for optional processing by a mark down presentation engine";
             case OID: return "An OID represented as a URI";
             case POSITIVEINT: return "An integer with a value that is positive (e.g. >0)";
             case STRING: return "A sequence of Unicode characters";
             case TIME: return "A time during the day, with no date specified";
             case UNSIGNEDINT: return "An integer with a value that is not negative (e.g. >= 0)";
             case URI: return "String of characters used to identify a name or a resource";
+            case URL: return "A URI that is a literal reference";
             case UUID: return "A UUID, represented as a URI";
             case XHTML: return "XHTML format, as defined by W3C, but restricted usage (mainly, no active content)";
             default: return "?";
@@ -509,14 +581,20 @@ public enum DataTypes {
             case DURATION: return "Duration";
             case ELEMENT: return "Element";
             case ELEMENTDEFINITION: return "ElementDefinition";
+            case EXPRESSION: return "Expression";
             case EXTENSION: return "Extension";
             case HUMANNAME: return "HumanName";
             case IDENTIFIER: return "Identifier";
+            case MARKETINGSTATUS: return "MarketingStatus";
             case META: return "Meta";
             case MONEY: return "Money";
+            case MONEYQUANTITY: return "MoneyQuantity";
             case NARRATIVE: return "Narrative";
             case PARAMETERDEFINITION: return "ParameterDefinition";
             case PERIOD: return "Period";
+            case POPULATION: return "Population";
+            case PRODCHARACTERISTIC: return "ProdCharacteristic";
+            case PRODUCTSHELFLIFE: return "ProductShelfLife";
             case QUANTITY: return "Quantity";
             case RANGE: return "Range";
             case RATIO: return "Ratio";
@@ -525,11 +603,13 @@ public enum DataTypes {
             case SAMPLEDDATA: return "SampledData";
             case SIGNATURE: return "Signature";
             case SIMPLEQUANTITY: return "SimpleQuantity";
+            case SUBSTANCEAMOUNT: return "SubstanceAmount";
             case TIMING: return "Timing";
             case TRIGGERDEFINITION: return "TriggerDefinition";
             case USAGECONTEXT: return "UsageContext";
             case BASE64BINARY: return "base64Binary";
             case BOOLEAN: return "boolean";
+            case CANONICAL: return "canonical";
             case CODE: return "code";
             case DATE: return "date";
             case DATETIME: return "dateTime";
@@ -544,6 +624,7 @@ public enum DataTypes {
             case TIME: return "time";
             case UNSIGNEDINT: return "unsignedInt";
             case URI: return "uri";
+            case URL: return "url";
             case UUID: return "uuid";
             case XHTML: return "XHTML";
             default: return "?";

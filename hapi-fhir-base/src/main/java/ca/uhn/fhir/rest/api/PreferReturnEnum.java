@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import java.util.HashMap;
  */
 public enum PreferReturnEnum {
 
-	REPRESENTATION("representation"), MINIMAL("minimal");
+	REPRESENTATION("representation"), MINIMAL("minimal"), OPERATION_OUTCOME("OperationOutcome");
 
 	private String myHeaderValue;
 	private static HashMap<String, PreferReturnEnum> ourValues;

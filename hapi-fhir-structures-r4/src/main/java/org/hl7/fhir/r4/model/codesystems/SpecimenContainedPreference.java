@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum SpecimenContainedPreference {
 
         /**
-         * This type of contained specimen is preferred to collect this kind of specimen
+         * This type of contained specimen is preferred to collect this kind of specimen.
          */
         PREFERRED, 
         /**
-         * This type of conditioned specimen is an alternate
+         * This type of conditioned specimen is an alternate.
          */
         ALTERNATE, 
         /**
@@ -69,8 +69,8 @@ public enum SpecimenContainedPreference {
         }
         public String getDefinition() {
           switch (this) {
-            case PREFERRED: return "This type of contained specimen is preferred to collect this kind of specimen";
-            case ALTERNATE: return "This type of conditioned specimen is an alternate";
+            case PREFERRED: return "This type of contained specimen is preferred to collect this kind of specimen.";
+            case ALTERNATE: return "This type of conditioned specimen is an alternate.";
             default: return "?";
           }
         }

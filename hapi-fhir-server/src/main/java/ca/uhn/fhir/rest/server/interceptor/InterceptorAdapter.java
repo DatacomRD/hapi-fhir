@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.api.TagList;
@@ -82,6 +83,11 @@ public class InterceptorAdapter implements IServerInterceptor {
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
 			throws AuthenticationException {
+		return true;
+	}
+
+	@Override
+	public boolean outgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
 		return true;
 	}
 

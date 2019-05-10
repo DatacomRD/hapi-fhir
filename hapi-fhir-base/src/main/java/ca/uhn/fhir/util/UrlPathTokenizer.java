@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,27 +22,29 @@ package ca.uhn.fhir.util;
 
 import java.util.StringTokenizer;
 
-public class UrlPathTokenizer extends StringTokenizer {
+public class UrlPathTokenizer {
+
+	private final StringTokenizer myTok;
 
 	public UrlPathTokenizer(String theRequestPath) {
-		super(theRequestPath, "/");
+		myTok = new StringTokenizer(theRequestPath, "/");
 	}
 
-	@Override
-	public String nextToken() {
-		return UrlUtil.unescape(super.nextToken());
+	public boolean hasMoreTokens() {
+		return myTok.hasMoreTokens();
 	}
 
-	@CoverageIgnore
-	@Override
-	public String nextToken(String theDelim) {
-		throw new UnsupportedOperationException();
-	}
-
-	@CoverageIgnore
-	@Override
-	public Object nextElement() {
-		return super.nextElement();
+	/**
+	 * Returns the next portion. Any URL-encoding is undone, but we will
+	 * HTML encode the &lt; and &quot; marks since they are both
+	 * not useful un URL paths in FHIR and potentially represent injection
+	 * attacks.
+	 *
+	 * @see UrlUtil#sanitizeUrlPart(String)
+	 * @see UrlUtil#unescape(String)
+	 */
+	public String nextTokenUnescapedAndSanitized() {
+		return UrlUtil.sanitizeUrlPart(UrlUtil.unescape(myTok.nextToken()));
 	}
 
 }

@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>3.1.0-SNAPSHOT</version>
+		<version>3.8.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-base</artifactId>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 
 	<url>http://jamesagnew.github.io/hapi-fhir/</url>
 
@@ -45,19 +45,19 @@
 
 		<!-- Only required for Schematron Validator Support -->
 		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-schematron</artifactId>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-schematron</artifactId>
 			<optional>true</optional>
-			<exclusions><!--
+			<exclusions>
 				<exclusion>
-					<artifactId>Saxon-HE</artifactId>
-					<groupId>net.sf.saxon</groupId>
-				</exclusion>-->
+					<groupId>org.glassfish.jaxb</groupId>
+					<artifactId>jaxb-core</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.phloc</groupId>
-			<artifactId>phloc-commons</artifactId>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-commons</artifactId>
 			<optional>true</optional>
 		</dependency>
 
@@ -70,12 +70,20 @@
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
 		</dependency>
 
 		<!-- Logging -->
@@ -122,7 +130,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<argLine>${argLine} -Dfile.encoding=UTF-8 -Xmx712m</argLine>
+					<argLine>@{argLine} -Dfile.encoding=UTF-8 -Xmx712m</argLine>
 				</configuration>
 			</plugin>
 			<!--
@@ -139,11 +147,59 @@
 				</executions>
 			</plugin>
 			-->
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Import-Package>
+							<!--required when using servers-->
+							ca.uhn.fhir.rest.api.server;resolution:=optional,
+							ca.uhn.fhir.model.api;resolution:=optional,
+							*
+						</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<inherited>true</inherited>
+				<executions>
+					<execution>
+						<id>standard</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>downstream</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>create-metadata</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/generated-sources/properties</outputDirectory>
+							<outputName>ca/uhn/fhir/hapi-fhir-base-build.properties</outputName>
+							<revisionPropertyName>hapifhir.buildnumber</revisionPropertyName>
+							<timestampPropertyName>hapifhir.timestamp</timestampPropertyName>
+							<timestampFormat>yyyy-MM-dd'T'HH:mm:ss.SXXX</timestampFormat>
+							<versionPropertyName>hapifhir.version</versionPropertyName>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
+			</resource>
+			<resource>
+				<directory>${project.build.directory}/generated-sources/properties</directory>
+				<filtering>false</filtering>
 			</resource>
 		</resources>
 	</build>
@@ -166,7 +222,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-jxr-plugin</artifactId>
-						<version>${maven_jxr_plugin_version}</version>
 						<reportSets>
 							<reportSet>
 								<id>normal</id>

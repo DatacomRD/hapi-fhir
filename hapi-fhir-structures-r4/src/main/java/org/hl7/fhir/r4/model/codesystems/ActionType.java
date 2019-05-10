@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ActionType {
 
         /**
-         * The action is to create a new resource
+         * The action is to create a new resource.
          */
         CREATE, 
         /**
-         * The action is to update an existing resource
+         * The action is to update an existing resource.
          */
         UPDATE, 
         /**
-         * The action is to remove an existing resource
+         * The action is to remove an existing resource.
          */
         REMOVE, 
         /**
-         * The action is to fire a specific event
+         * The action is to fire a specific event.
          */
         FIREEVENT, 
         /**
@@ -79,14 +79,14 @@ public enum ActionType {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/action-type";
+          return "http://terminology.hl7.org/CodeSystem/action-type";
         }
         public String getDefinition() {
           switch (this) {
-            case CREATE: return "The action is to create a new resource";
-            case UPDATE: return "The action is to update an existing resource";
-            case REMOVE: return "The action is to remove an existing resource";
-            case FIREEVENT: return "The action is to fire a specific event";
+            case CREATE: return "The action is to create a new resource.";
+            case UPDATE: return "The action is to update an existing resource.";
+            case REMOVE: return "The action is to remove an existing resource.";
+            case FIREEVENT: return "The action is to fire a specific event.";
             default: return "?";
           }
         }

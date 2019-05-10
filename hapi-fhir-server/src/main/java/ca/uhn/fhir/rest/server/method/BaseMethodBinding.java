@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,32 +19,43 @@ package ca.uhn.fhir.rest.server.method;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
-
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.IRestfulServer;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
+import ca.uhn.fhir.rest.server.BundleProviders;
+import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.*;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.util.ReflectionUtil;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.*;
-import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
-import ca.uhn.fhir.rest.server.*;
-import ca.uhn.fhir.rest.server.exceptions.*;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.ReflectionUtil;
+import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.io.Reader;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class BaseMethodBinding<T> {
 
@@ -75,6 +86,8 @@ public abstract class BaseMethodBinding<T> {
 			}
 		}
 
+		// This allows us to invoke methods on private classes
+		myMethod.setAccessible(true);
 	}
 
 	protected IParser createAppropriateParserForParsingResponse(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, List<Class<? extends IBaseResource>> thePreferTypes) {
@@ -215,6 +228,7 @@ public abstract class BaseMethodBinding<T> {
 	 */
 	public abstract String getResourceName();
 
+	@Nonnull
 	public abstract RestOperationTypeEnum getRestOperationType();
 
 	/**
@@ -235,10 +249,15 @@ public abstract class BaseMethodBinding<T> {
 		// Handle server action interceptors
 		RestOperationTypeEnum operationType = getRestOperationType(theRequest);
 		if (operationType != null) {
-			for (IServerInterceptor next : theServer.getInterceptors()) {
-				ActionRequestDetails details = new ActionRequestDetails(theRequest);
-				populateActionRequestDetailsForInterceptor(theRequest, details, theMethodParams);
-				next.incomingRequestPreHandled(operationType, details);
+			ActionRequestDetails details = new ActionRequestDetails(theRequest);
+			populateActionRequestDetailsForInterceptor(theRequest, details, theMethodParams);
+			HookParams preHandledParams = new HookParams();
+			preHandledParams.add(RestOperationTypeEnum.class, operationType);
+			preHandledParams.add(ActionRequestDetails.class, details);
+			if (theRequest.getInterceptorBroadcaster() != null) {
+				theRequest
+					.getInterceptorBroadcaster()
+					.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
 			}
 		}
 
@@ -250,9 +269,9 @@ public abstract class BaseMethodBinding<T> {
 			if (e.getCause() instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException) e.getCause();
 			}
-			throw new InternalErrorException("Failed to call access method", e);
+			throw new InternalErrorException("Failed to call access method: " + e.getCause(), e);
 		} catch (Exception e) {
-			throw new InternalErrorException("Failed to call access method", e);
+			throw new InternalErrorException("Failed to call access method: " + e.getCause(), e);
 		}
 	}
 
@@ -438,8 +457,7 @@ public abstract class BaseMethodBinding<T> {
 
 		if (returnTypeFromRp != null) {
 			if (returnTypeFromAnnotation != null && !isResourceInterface(returnTypeFromAnnotation)) {
-				if (!returnTypeFromRp.isAssignableFrom(returnTypeFromAnnotation)) {
-					//FIXME potential null access on retunrTypeFromMethod
+				if (returnTypeFromMethod != null && !returnTypeFromRp.isAssignableFrom(returnTypeFromMethod)) {
 					throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " returns type "
 							+ returnTypeFromMethod.getCanonicalName() + " - Must return " + returnTypeFromRp.getCanonicalName() + " (or a subclass of it) per IResourceProvider contract");
 				}
@@ -460,25 +478,14 @@ public abstract class BaseMethodBinding<T> {
 				}
 				returnType = returnTypeFromAnnotation;
 			} else {
-				// if (IRestfulClient.class.isAssignableFrom(theMethod.getDeclaringClass())) {
-				// Clients don't define their methods in resource specific types, so they can
-				// infer their resource type from the method return type.
 				returnType = (Class<? extends IBaseResource>) returnTypeFromMethod;
-				// } else {
-				// This is a plain provider method returning a resource, so it should be
-				// an operation or global search presumably
-				// returnType = null;
 			}
 		}
 
 		if (read != null) {
 			return new ReadMethodBinding(returnType, theMethod, theContext, theProvider);
 		} else if (search != null) {
-			if (search.dynamic()) {
-				IDynamicSearchResourceProvider provider = (IDynamicSearchResourceProvider) theProvider;
-				return new DynamicSearchMethodBinding(returnType, theMethod, theContext, provider);
-			}
-			return new SearchMethodBinding(returnType, theMethod, theContext, theProvider);
+			return new SearchMethodBinding(returnType, returnTypeFromRp, theMethod, theContext, theProvider);
 		} else if (conformance != null) {
 			return new ConformanceMethodBinding(theMethod, theContext, theProvider);
 		} else if (create != null) {
@@ -493,10 +500,6 @@ public abstract class BaseMethodBinding<T> {
 			return new HistoryMethodBinding(theMethod, theContext, theProvider);
 		} else if (validate != null) {
 			return new ValidateMethodBindingDstu2Plus(returnType, returnTypeFromRp, theMethod, theContext, theProvider, validate);
-		} else if (addTags != null) {
-			return new AddTagsMethodBinding(theMethod, theContext, theProvider, addTags);
-		} else if (deleteTags != null) {
-			return new DeleteTagsMethodBinding(theMethod, theContext, theProvider, deleteTags);
 		} else if (transaction != null) {
 			return new TransactionMethodBinding(theMethod, theContext, theProvider);
 		} else if (operation != null) {
@@ -505,26 +508,6 @@ public abstract class BaseMethodBinding<T> {
 			throw new ConfigurationException("Did not detect any FHIR annotations on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
 
-		// // each operation name must have a request type annotation and be
-		// unique
-		// if (null != read) {
-		// return rm;
-		// }
-		//
-		// SearchMethodBinding sm = new SearchMethodBinding();
-		// if (null != search) {
-		// sm.setRequestType(SearchMethodBinding.RequestType.GET);
-		// } else if (null != theMethod.getAnnotation(PUT.class)) {
-		// sm.setRequestType(SearchMethodBinding.RequestType.PUT);
-		// } else if (null != theMethod.getAnnotation(POST.class)) {
-		// sm.setRequestType(SearchMethodBinding.RequestType.POST);
-		// } else if (null != theMethod.getAnnotation(DELETE.class)) {
-		// sm.setRequestType(SearchMethodBinding.RequestType.DELETE);
-		// } else {
-		// return null;
-		// }
-		//
-		// return sm;
 	}
 
 	private static boolean isResourceInterface(Class<?> theReturnTypeFromMethod) {
@@ -555,8 +538,6 @@ public abstract class BaseMethodBinding<T> {
 			return false;
 		}
 		return true;
-		// boolean retVal = Modifier.isAbstract(theReturnType.getModifiers()) == false;
-		// return retVal;
 	}
 
 	public static boolean verifyMethodHasZeroOrOneOperationAnnotation(Method theNextMethod, Object... theAnnotations) {
@@ -574,39 +555,8 @@ public abstract class BaseMethodBinding<T> {
 		}
 		if (obj1 == null) {
 			return false;
-			// throw new ConfigurationException("Method '" +
-			// theNextMethod.getName() + "' on type '" +
-			// theNextMethod.getDeclaringClass().getSimpleName() +
-			// " has no FHIR method annotations.");
 		}
 		return true;
-	}
-
-	/**
-	 * @see ServletRequestDetails#getByteStreamRequestContents()
-	 */
-	public static class ActiveRequestReader implements IRequestReader {
-		@Override
-		public InputStream getInputStream(RequestDetails theRequestDetails) throws IOException {
-			return theRequestDetails.getInputStream();
-		}
-	}
-
-	/**
-	 * @see ServletRequestDetails#getByteStreamRequestContents()
-	 */
-	public static class InactiveRequestReader implements IRequestReader {
-		@Override
-		public InputStream getInputStream(RequestDetails theRequestDetails) {
-			throw new IllegalStateException("The servlet-api JAR is not found on the classpath. Please check that this library is available.");
-		}
-	}
-
-	/**
-	 * @see ServletRequestDetails#getByteStreamRequestContents()
-	 */
-	public static interface IRequestReader {
-		InputStream getInputStream(RequestDetails theRequestDetails) throws IOException;
 	}
 
 }

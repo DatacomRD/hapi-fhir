@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -61,7 +61,7 @@ public enum TaskPerformerType {
          */
         MANAGER, 
         /**
-         * A workflow participant that acquires resources (specimens, images, etc) necessary to perform the task.
+         * A workflow participant that acquires resources (specimens, images, etc.) necessary to perform the task.
          */
         ACQUIRER, 
         /**
@@ -107,7 +107,7 @@ public enum TaskPerformerType {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/task-performer-type";
+          return "http://terminology.hl7.org/CodeSystem/task-performer-type";
         }
         public String getDefinition() {
           switch (this) {
@@ -117,7 +117,7 @@ public enum TaskPerformerType {
             case PERFORMER: return "A workflow participant that performs services.";
             case MONITOR: return "A workflow participant that monitors task activity.";
             case MANAGER: return "A workflow participant that manages task activity.";
-            case ACQUIRER: return "A workflow participant that acquires resources (specimens, images, etc) necessary to perform the task.";
+            case ACQUIRER: return "A workflow participant that acquires resources (specimens, images, etc.) necessary to perform the task.";
             case REVIEWER: return "A workflow participant that reviews task inputs or outputs.";
             default: return "?";
           }

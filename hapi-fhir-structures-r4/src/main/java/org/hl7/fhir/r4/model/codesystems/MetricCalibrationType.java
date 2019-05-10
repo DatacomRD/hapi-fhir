@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,15 +41,15 @@ public enum MetricCalibrationType {
          */
         UNSPECIFIED, 
         /**
-         * Offset metric calibration method
+         * Offset metric calibration method.
          */
         OFFSET, 
         /**
-         * Gain metric calibration method
+         * Gain metric calibration method.
          */
         GAIN, 
         /**
-         * Two-point metric calibration method
+         * Two-point metric calibration method.
          */
         TWOPOINT, 
         /**
@@ -84,9 +84,9 @@ public enum MetricCalibrationType {
         public String getDefinition() {
           switch (this) {
             case UNSPECIFIED: return "Metric calibration method has not been identified.";
-            case OFFSET: return "Offset metric calibration method";
-            case GAIN: return "Gain metric calibration method";
-            case TWOPOINT: return "Two-point metric calibration method";
+            case OFFSET: return "Offset metric calibration method.";
+            case GAIN: return "Gain metric calibration method.";
+            case TWOPOINT: return "Two-point metric calibration method.";
             default: return "?";
           }
         }

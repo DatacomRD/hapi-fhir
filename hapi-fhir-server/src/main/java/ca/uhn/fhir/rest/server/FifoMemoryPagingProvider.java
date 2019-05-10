@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class FifoMemoryPagingProvider extends BasePagingProvider implements IPag
 		Validate.isTrue(theSize > 0, "theSize must be greater than 0");
 
 		mySize = theSize;
-		myBundleProviders = new LinkedHashMap<String, IBundleProvider>(mySize);
+		myBundleProviders = new LinkedHashMap<>(mySize);
 	}
 
 	@Override

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,30 +20,21 @@ package ca.uhn.fhir.jpa.search;
  * #L%
  */
 
-import javax.persistence.EntityManager;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.PlatformTransactionManager;
-
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.IPagingProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+// Note: this class is not annotated with @Service because we want to
+// explicitly define it in BaseConfig.java. This is done so that
+// implementors can override if they want to.
 public class DatabaseBackedPagingProvider extends BasePagingProvider implements IPagingProvider {
 
 	@Autowired
-	private FhirContext myContext;
-	@Autowired
-	private IFhirSystemDao<?, ?> myDao;
-	@Autowired
-	private EntityManager myEntityManager;
-	@Autowired
-	private PlatformTransactionManager myPlatformTransactionManager;
-	@Autowired
-	private ISearchResultDao mySearchResultDao;
+	private DaoRegistry myDaoRegistry;
 
 	/**
 	 * Constructor
@@ -63,7 +54,8 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider implements 
 
 	@Override
 	public synchronized IBundleProvider retrieveResultList(String theId) {
-		PersistedJpaBundleProvider provider = new PersistedJpaBundleProvider(theId, myDao);
+		IFhirSystemDao<?, ?> systemDao = myDaoRegistry.getSystemDao();
+		PersistedJpaBundleProvider provider = new PersistedJpaBundleProvider(theId, systemDao);
 		if (!provider.ensureSearchEntityLoaded()) {
 			return null;
 		}

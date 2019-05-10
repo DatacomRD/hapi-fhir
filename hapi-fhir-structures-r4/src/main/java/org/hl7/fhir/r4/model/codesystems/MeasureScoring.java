@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MeasureScoring {
 
         /**
-         * The measure score is defined using a proportion
+         * The measure score is defined using a proportion.
          */
         PROPORTION, 
         /**
-         * The measure score is defined using a ratio
+         * The measure score is defined using a ratio.
          */
         RATIO, 
         /**
-         * The score is defined by a calculation of some quantity
+         * The score is defined by a calculation of some quantity.
          */
         CONTINUOUSVARIABLE, 
         /**
-         * The measure is a cohort definition
+         * The measure is a cohort definition.
          */
         COHORT, 
         /**
@@ -79,14 +79,14 @@ public enum MeasureScoring {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/measure-scoring";
+          return "http://terminology.hl7.org/CodeSystem/measure-scoring";
         }
         public String getDefinition() {
           switch (this) {
-            case PROPORTION: return "The measure score is defined using a proportion";
-            case RATIO: return "The measure score is defined using a ratio";
-            case CONTINUOUSVARIABLE: return "The score is defined by a calculation of some quantity";
-            case COHORT: return "The measure is a cohort definition";
+            case PROPORTION: return "The measure score is defined using a proportion.";
+            case RATIO: return "The measure score is defined using a ratio.";
+            case CONTINUOUSVARIABLE: return "The score is defined by a calculation of some quantity.";
+            case COHORT: return "The measure is a cohort definition.";
             default: return "?";
           }
         }

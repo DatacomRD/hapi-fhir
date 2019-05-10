@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ public abstract class BaseQueryParameter implements IParameter {
 	@Override
 	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 
-		List<QualifiedParamList> paramList = new ArrayList<QualifiedParamList>();
+		List<QualifiedParamList> paramList = new ArrayList<>();
 		String name = getName();
 		parseParams(theRequest, paramList, name, null);
 

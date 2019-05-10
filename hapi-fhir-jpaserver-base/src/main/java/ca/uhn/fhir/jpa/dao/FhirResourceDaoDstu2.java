@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
@@ -30,7 +30,7 @@ import ca.uhn.fhir.validation.*;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,9 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 			// Validate that there are no resources pointing to the candidate that
 			// would prevent deletion
 			List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
-			validateOkToDelete(deleteConflicts, entity);
+			if (myDaoConfig.isEnforceReferentialIntegrityOnDelete()) {
+				validateOkToDelete(deleteConflicts, entity, true);
+			}
 			validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
 			OperationOutcome oo = new OperationOutcome();

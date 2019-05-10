@@ -1,6 +1,7 @@
 package ca.uhn.fhir.parser;
 
 import static org.hamcrest.Matchers.*;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -21,6 +22,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.internal.stubbing.answers.ThrowsException;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.builder.Input;
@@ -187,6 +189,29 @@ public class XmlParserDstu2Test {
 		parser.setParserErrorHandler(new StrictErrorHandler());
 		parser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, string);
 	}
+
+	@Test
+	public void testSetDontEncodeResourcesWithMetaSubPath() {
+		Patient p = new Patient();
+		ResourceMetadataKeyEnum.VERSION.put(p, "BBB");
+		p.setId("AAA");
+		p.getMeta().setVersionId("BBB");
+		p.getMeta().setLastUpdated(new InstantDt("2011-01-01T00:00:00.000Z").getValue());
+		p.getMeta().addTag().setSystem("SYS").setCode("CODE");
+		p.addName().addFamily("FAMILY");
+
+		IParser parser = ourCtx.newXmlParser();
+		parser.setDontEncodeElements(Sets.newHashSet("id", "*.meta.versionId", "*.meta.lastUpdated"));
+		String output = parser.encodeResourceToString(p);
+
+		assertThat(output, containsString("FAMILY"));
+		assertThat(output, containsString("SYS"));
+		assertThat(output, containsString("CODE"));
+		assertThat(output, not(containsString("AAA")));
+		assertThat(output, not(containsString("BBB")));
+		assertThat(output, not(containsString("2011")));
+	}
+
 
 	@Test()
 	public void testContainedResourceWithNoIdLenient() throws IOException {
@@ -1542,7 +1567,7 @@ public class XmlParserDstu2Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded, containsString("<Patient"));
-		assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM + "\"/>", "<code value=\"" + Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
+		assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>", "<code value=\"" + Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
 		assertThat(encoded, not(containsString("text")));
 		assertThat(encoded, not(containsString("THE DIV")));
 		assertThat(encoded, containsString("family"));
@@ -1656,7 +1681,7 @@ public class XmlParserDstu2Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded, containsString("<Patient"));
-		assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM + "\"/>", "<code value=\"" + Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
+		assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>", "<code value=\"" + Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
 		assertThat(encoded, not(containsString("THE DIV")));
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
@@ -1679,7 +1704,7 @@ public class XmlParserDstu2Test {
 
 		assertThat(encoded, containsString("<Patient"));
 		assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"foo\"/>", "<code value=\"bar\"/>", "</tag>"));
-		assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM + "\"/>", "<code value=\"" + Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
+		assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>", "<code value=\"" + Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
 		assertThat(encoded, not(containsString("THE DIV")));
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
@@ -1768,7 +1793,7 @@ public class XmlParserDstu2Test {
 
 		{
 			IParser p = ourCtx.newXmlParser();
-			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient.name", "Bundle.entry")));
+			p.setEncodeElements(new HashSet<>(Arrays.asList("Patient.name", "Bundle.entry")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);
@@ -1779,8 +1804,7 @@ public class XmlParserDstu2Test {
 		}
 		{
 			IParser p = ourCtx.newXmlParser();
-			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient.name")));
-			p.setEncodeElementsAppliesToResourceTypes(new HashSet<String>(Arrays.asList("Patient")));
+			p.setEncodeElements(new HashSet<>(Arrays.asList("Patient.name")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);
@@ -1791,8 +1815,7 @@ public class XmlParserDstu2Test {
 		}
 		{
 			IParser p = ourCtx.newXmlParser();
-			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient")));
-			p.setEncodeElementsAppliesToResourceTypes(new HashSet<String>(Arrays.asList("Patient")));
+			p.setEncodeElements(new HashSet<>(Arrays.asList("Patient")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);
@@ -1817,7 +1840,7 @@ public class XmlParserDstu2Test {
 
 		{
 			IParser p = ourCtx.newXmlParser();
-			p.setEncodeElements(new HashSet<String>(Arrays.asList("Bundle.entry", "*.text", "*.(mandatory)")));
+			p.setEncodeElements(new HashSet<>(Arrays.asList("Bundle.entry", "*.text", "*.(mandatory)")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);
@@ -2551,7 +2574,7 @@ public class XmlParserDstu2Test {
 		assertThat(patient.getIdentifier().get(0).getType().getValueAsEnum(), IsEmptyCollection.empty());
 
 		ArgumentCaptor<String> capt = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).unknownAttribute(any(IParseLocation.class), capt.capture());
+		verify(errorHandler, times(1)).unknownAttribute(ArgumentMatchers.nullable(IParseLocation.class), capt.capture());
 
 		assertEquals("value", capt.getValue());
 	}

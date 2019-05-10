@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -47,7 +47,7 @@ public class ObservationStatisticsEnumFactory implements EnumFactory<Observation
       return ObservationStatistics.MINIMUM;
     if ("count".equals(codeString))
       return ObservationStatistics.COUNT;
-    if ("totalcount".equals(codeString))
+    if ("total-count".equals(codeString))
       return ObservationStatistics.TOTALCOUNT;
     if ("median".equals(codeString))
       return ObservationStatistics.MEDIAN;
@@ -94,7 +94,7 @@ public class ObservationStatisticsEnumFactory implements EnumFactory<Observation
     if (code == ObservationStatistics.COUNT)
       return "count";
     if (code == ObservationStatistics.TOTALCOUNT)
-      return "totalcount";
+      return "total-count";
     if (code == ObservationStatistics.MEDIAN)
       return "median";
     if (code == ObservationStatistics.STDDEV)

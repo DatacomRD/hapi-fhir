@@ -8,7 +8,7 @@ import java.util.List;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.List;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -40,10 +41,8 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 
 	/**
 	 * Patient/123/$everything
-	 * @param theRequestDetails 
 	 */
-	//@formatter:off
-	@Operation(name = "everything", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
+	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
 	public IBundleProvider patientInstanceEverything(
 
 			javax.servlet.http.HttpServletRequest theServletRequest,
@@ -72,7 +71,6 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 			
 			RequestDetails theRequestDetails
 			) {
-		//@formatter:on
 
 		startRequest(theServletRequest);
 		try {
@@ -84,10 +82,8 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 
 	/**
 	 * /Patient/$everything
-	 * @param theRequestDetails 
 	 */
-	//@formatter:off
-		@Operation(name = "everything", idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
+		@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType=BundleTypeEnum.SEARCHSET)
 		public IBundleProvider patientTypeEverything(
 
 				javax.servlet.http.HttpServletRequest theServletRequest,
@@ -113,7 +109,6 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 				
 				RequestDetails theRequestDetails
 				) {
-			//@formatter:on
 
 		startRequest(theServletRequest);
 		try {

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -39,22 +39,22 @@ public class AdverseEventSeverityEnumFactory implements EnumFactory<AdverseEvent
   public AdverseEventSeverity fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("Mild".equals(codeString))
+    if ("mild".equals(codeString))
       return AdverseEventSeverity.MILD;
-    if ("Moderate".equals(codeString))
+    if ("moderate".equals(codeString))
       return AdverseEventSeverity.MODERATE;
-    if ("Severe".equals(codeString))
+    if ("severe".equals(codeString))
       return AdverseEventSeverity.SEVERE;
     throw new IllegalArgumentException("Unknown AdverseEventSeverity code '"+codeString+"'");
   }
 
   public String toCode(AdverseEventSeverity code) {
     if (code == AdverseEventSeverity.MILD)
-      return "Mild";
+      return "mild";
     if (code == AdverseEventSeverity.MODERATE)
-      return "Moderate";
+      return "moderate";
     if (code == AdverseEventSeverity.SEVERE)
-      return "Severe";
+      return "severe";
     return "?";
   }
 

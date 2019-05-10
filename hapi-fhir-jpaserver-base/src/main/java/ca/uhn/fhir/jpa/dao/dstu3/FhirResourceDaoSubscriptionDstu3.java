@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,13 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.dao.data.ISubscriptionTableDao;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
@@ -81,9 +83,9 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 
 
 	@Override
-	protected ResourceTable updateEntity(IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
+	protected ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
 													 Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
-		ResourceTable retVal = super.updateEntity(theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
+		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
 		if (theDeletedTimestampOrNull != null) {
 			mySubscriptionTableDao.deleteAllForSubscription(theEntity);
@@ -98,16 +100,22 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 	}
 
 	protected void validateChannelPayload(Subscription theResource) {
-		if (isBlank(theResource.getChannel().getPayload())) {
-			throw new UnprocessableEntityException("Subscription.channel.payload must be populated for rest-hook subscriptions");
-		}
-
-		if (EncodingEnum.forContentType(theResource.getChannel().getPayload()) == null) {
+		if (!isBlank(theResource.getChannel().getPayload()) && EncodingEnum.forContentType(theResource.getChannel().getPayload()) == null) {
 			throw new UnprocessableEntityException("Invalid value for Subscription.channel.payload: " + theResource.getChannel().getPayload());
 		}
 	}
 
 	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
+		switch (ObjectUtils.defaultIfNull(theResource.getStatus(), SubscriptionStatus.OFF)) {
+			case REQUESTED:
+			case ACTIVE:
+				break;
+			case ERROR:
+			case OFF:
+			case NULL:
+				return null;
+		}
+
 		String query = theResource.getCriteria();
 		if (isBlank(query)) {
 			throw new UnprocessableEntityException("Subscription.criteria must be populated");
@@ -144,6 +152,9 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 		super.validateResourceForStorage(theResource, theEntityToSave);
 
 		RuntimeResourceDefinition resDef = validateCriteriaAndReturnResourceDefinition(theResource);
+		if (resDef == null) {
+			return;
+		}
 
 		IFhirResourceDao<? extends IBaseResource> dao = getDao(resDef.getImplementingClass());
 		if (dao == null) {

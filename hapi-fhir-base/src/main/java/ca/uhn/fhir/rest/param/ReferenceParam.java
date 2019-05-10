@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,24 +104,33 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
 		String q = theQualifier;
 		String resourceType = null;
+		boolean skipSetValue = false;
 		if (isNotBlank(q)) {
 			if (q.startsWith(":")) {
 				int nextIdx = q.indexOf('.');
 				if (nextIdx != -1) {
 					resourceType = q.substring(1, nextIdx);
 					myChain = q.substring(nextIdx + 1);
+					// type is explicitly defined so use it
+					myId.setParts(null, resourceType, theValue, null);
+					skipSetValue = true;
 				} else {
 					resourceType = q.substring(1);
 				}
 			} else if (q.startsWith(".")) {
 				myChain = q.substring(1);
+				// type not defined but this is a chain, so treat value as opaque
+				myId.setParts(null, null, theValue, null);
+				skipSetValue = true;
 			}
 		}
 
-		setValue(theValue);
+		if (!skipSetValue) {
+			setValue(theValue);
 
-		if (isNotBlank(resourceType) && isBlank(getResourceType())) {
-			setValue(resourceType + '/' + theValue);
+			if (isNotBlank(resourceType) && isBlank(getResourceType())) {
+				setValue(resourceType + '/' + theValue);
+			}
 		}
 	}
 

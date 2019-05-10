@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
+import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -19,7 +20,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,14 +48,14 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Server
 
 	@Override
 	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
-		if (myDao.getContext().getResourceDefinition(theResource).getName().equals("Subscription")) {
+		if (myDao.getContext().getResourceDefinition(theResource).getName().equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
 			verifyStatusOk(RestOperationTypeEnum.CREATE, null, theResource);
 		}
 	}
 
 	@Override
 	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
-		if (myDao.getContext().getResourceDefinition(theNewResource).getName().equals("Subscription")) {
+		if (myDao.getContext().getResourceDefinition(theNewResource).getName().equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
 			verifyStatusOk(RestOperationTypeEnum.UPDATE, theOldResource, theNewResource);
 		}
 	}
@@ -74,7 +75,7 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Server
 
 		if (newStatus == null) {
 			String actualCode = subscription.getStatusElement().getValueAsString();
-			throw new UnprocessableEntityException("Can not " + theOperation.getCode() + " resource: Subscription.status must be populated" + ((isNotBlank(actualCode)) ? " (invalid value " + actualCode + ")" : ""));
+			throw new UnprocessableEntityException("Can not " + theOperation.getCode() + " resource: Subscription.status must be populated on this server" + ((isNotBlank(actualCode)) ? " (invalid value " + actualCode + ")" : ""));
 		}
 
 		if (theOldResourceOrNull != null) {
@@ -108,7 +109,7 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Server
 		}
 
 		if (theSubscription.getStatus() == null) {
-			throw new UnprocessableEntityException("Can not " + theOperation.getCode().toLowerCase() + " resource: Subscription.status must be populated");
+			throw new UnprocessableEntityException("Can not " + theOperation.getCode().toLowerCase() + " resource: Subscription.status must be populated on this server");
 		}
 
 		throw new UnprocessableEntityException("Subscription.status must be '" + SubscriptionStatusEnum.OFF.getCode() + "' or '" + SubscriptionStatusEnum.REQUESTED.getCode() + "' on a newly created subscription");

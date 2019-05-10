@@ -728,6 +728,7 @@ public class JsonParserDstu3Test {
 		Observation obs = new Observation();
 		obs.setId("1");
 		obs.getMeta().addProfile("http://profile");
+		obs.setStatus(ObservationStatus.FINAL);
 		Extension ext = obs.addExtension();
 		ext.setUrl("http://exturl").setValue(new StringType("ext_url_value"));
 
@@ -758,6 +759,9 @@ public class JsonParserDstu3Test {
 		assertEquals(1, obs.getExtension().size());
 		assertEquals("http://exturl", obs.getExtension().get(0).getUrl());
 		assertEquals("ext_url_value", ((StringType) obs.getExtension().get(0).getValue()).getValue());
+		assertEquals("final", obs.getStatusElement().getValueAsString());
+		assertEquals(ObservationStatus.FINAL, obs.getStatusElement().getValue());
+
 	}
 
 	@Test
@@ -1019,7 +1023,7 @@ public class JsonParserDstu3Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded, containsString("Patient"));
-		assertThat(encoded, stringContainsInOrder(ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM, ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE));
+		assertThat(encoded, stringContainsInOrder(ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3, ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE));
 		assertThat(encoded, not(containsString("text")));
 		assertThat(encoded, not(containsString("THE DIV")));
 		assertThat(encoded, containsString("family"));
@@ -1053,7 +1057,7 @@ public class JsonParserDstu3Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded, containsString("Patient"));
-		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM + "\",", "\"code\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\""));
+		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\""));
 		assertThat(encoded, not(containsString("THE DIV")));
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
@@ -1073,7 +1077,7 @@ public class JsonParserDstu3Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded, containsString("Patient"));
-		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\": \"foo\",", "\"code\": \"bar\"", "\"system\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM + "\"",
+		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\": \"foo\",", "\"code\": \"bar\"", "\"system\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"",
 			"\"code\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\""));
 		assertThat(encoded, not(containsString("THE DIV")));
 		assertThat(encoded, containsString("family"));
@@ -1228,6 +1232,7 @@ public class JsonParserDstu3Test {
 			assertThat(out, containsString("id"));
 			assertThat(out, not(containsString("address")));
 			assertThat(out, not(containsString("meta")));
+			assertThat(out, not(containsString("SUBSETTED")));
 		}
 	}
 
@@ -1357,7 +1362,7 @@ public class JsonParserDstu3Test {
 		ArgumentCaptor<ValueType> expected = ArgumentCaptor.forClass(ValueType.class);
 		ArgumentCaptor<ScalarType> expectedScalarType = ArgumentCaptor.forClass(ScalarType.class);
 		ArgumentCaptor<ScalarType> foundScalarType = ArgumentCaptor.forClass(ScalarType.class);
-		verify(errorHandler, times(2)).incorrectJsonType(any(IParseLocation.class), elementName.capture(), expected.capture(), expectedScalarType.capture(), found.capture(), foundScalarType.capture());
+		verify(errorHandler, times(2)).incorrectJsonType(nullable(IParseLocation.class), elementName.capture(), expected.capture(), expectedScalarType.capture(), found.capture(), foundScalarType.capture());
 
 		assertEquals(ValueType.SCALAR, found.getAllValues().get(0));
 		assertEquals(ValueType.SCALAR, expected.getAllValues().get(0));
@@ -1405,7 +1410,7 @@ public class JsonParserDstu3Test {
 	}
 
 	@Test
-	public void testInvalidDateTimeValueInvalid() throws Exception {
+	public void testInvalidDateTimeValueInvalid() {
 		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
 
 		String res = "{ \"resourceType\": \"Observation\", \"valueDateTime\": \"foo\" }";
@@ -1417,7 +1422,7 @@ public class JsonParserDstu3Test {
 		assertEquals("foo", parsed.getValueDateTimeType().getValueAsString());
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq("foo"), msgCaptor.capture());
+		verify(errorHandler, times(1)).invalidValue(isNull(), eq("foo"), msgCaptor.capture());
 		assertEquals("Invalid date/time format: \"foo\"", msgCaptor.getValue());
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
@@ -1449,7 +1454,7 @@ public class JsonParserDstu3Test {
 		assertEquals(null, parsed.getGenderElement().getValueAsString());
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq(""), msgCaptor.capture());
+		verify(errorHandler, times(1)).invalidValue(isNull(), eq(""), msgCaptor.capture());
 		assertEquals("Attribute values must not be empty (\"\")", msgCaptor.getValue());
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
@@ -1469,7 +1474,7 @@ public class JsonParserDstu3Test {
 		assertEquals("foo", parsed.getGenderElement().getValueAsString());
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq("foo"), msgCaptor.capture());
+		verify(errorHandler, times(1)).invalidValue(isNull(), eq("foo"), msgCaptor.capture());
 		assertEquals("Unknown AdministrativeGender code 'foo'", msgCaptor.getValue());
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
@@ -1504,7 +1509,7 @@ public class JsonParserDstu3Test {
 	// FIXME: this should pass
 	@Test
 	@Ignore
-	public void testNamespacePreservationEncode() throws Exception {
+	public void testNamespacePreservationEncode() {
 		//@formatter:off
 		String input = "<Patient xmlns=\"http://hl7.org/fhir\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">" +
 			"<text>" +
@@ -1528,7 +1533,7 @@ public class JsonParserDstu3Test {
 	// TODO: this should pass
 	@Test
 	@Ignore
-	public void testNamespacePreservationParse() throws Exception {
+	public void testNamespacePreservationParse() {
 		String input = "{\"resourceType\":\"Patient\",\"text\":{\"div\":\"<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\"><xhtml:img src=\\\"foo\\\"/>@fhirabend</xhtml:div>\"}}";
 		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, input);
 		XhtmlNode div = parsed.getText().getDiv();
@@ -2060,7 +2065,7 @@ public class JsonParserDstu3Test {
 	}
 
 	@Test
-	public void testParseMetadata() throws Exception {
+	public void testParseMetadata() {
 		//@formatter:off
 		String bundle = "{\n" +
 			"  \"resourceType\" : \"Bundle\",\n" +
@@ -2214,7 +2219,7 @@ public class JsonParserDstu3Test {
 	}
 
 	@Test(expected = DataFormatException.class)
-	public void testParseWithTrailingContent() throws Exception {
+	public void testParseWithTrailingContent() {
 		//@formatter:off
 		String bundle = "{\n" +
 			"  \"resourceType\" : \"Bundle\",\n" +
@@ -2340,13 +2345,13 @@ public class JsonParserDstu3Test {
 		ArgumentCaptor<ValueType> actual = ArgumentCaptor.forClass(ValueType.class);
 		ArgumentCaptor<ScalarType> expectedScalar = ArgumentCaptor.forClass(ScalarType.class);
 		ArgumentCaptor<ScalarType> actualScalar = ArgumentCaptor.forClass(ScalarType.class);
-		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), elementName.capture(), expected.capture(), expectedScalar.capture(), actual.capture(),
+		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.nullable(IParseLocation.class), elementName.capture(), expected.capture(), expectedScalar.capture(), actual.capture(),
 			actualScalar.capture());
-		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), Mockito.eq("_id"), Mockito.eq(ValueType.OBJECT), expectedScalar.capture(), Mockito.eq(ValueType.SCALAR),
+		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.nullable(IParseLocation.class), Mockito.eq("_id"), Mockito.eq(ValueType.OBJECT), expectedScalar.capture(), Mockito.eq(ValueType.SCALAR),
 			actualScalar.capture());
-		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), Mockito.eq("__v"), Mockito.eq(ValueType.OBJECT), expectedScalar.capture(), Mockito.eq(ValueType.SCALAR),
+		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.nullable(IParseLocation.class), Mockito.eq("__v"), Mockito.eq(ValueType.OBJECT), expectedScalar.capture(), Mockito.eq(ValueType.SCALAR),
 			actualScalar.capture());
-		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.any(IParseLocation.class), Mockito.eq("_status"), Mockito.eq(ValueType.OBJECT), expectedScalar.capture(),
+		verify(errorHandler, atLeastOnce()).incorrectJsonType(Mockito.nullable(IParseLocation.class), Mockito.eq("_status"), Mockito.eq(ValueType.OBJECT), expectedScalar.capture(),
 			Mockito.eq(ValueType.SCALAR), actualScalar.capture());
 
 		assertEquals("_id", elementName.getAllValues().get(0));

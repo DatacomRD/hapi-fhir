@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ActionConditionKind {
 
         /**
-         * The condition describes whether or not a given action is applicable
+         * The condition describes whether or not a given action is applicable.
          */
         APPLICABILITY, 
         /**
-         * The condition is a starting condition for the action
+         * The condition is a starting condition for the action.
          */
         START, 
         /**
-         * The condition is a stop, or exit condition for the action
+         * The condition is a stop, or exit condition for the action.
          */
         STOP, 
         /**
@@ -76,9 +76,9 @@ public enum ActionConditionKind {
         }
         public String getDefinition() {
           switch (this) {
-            case APPLICABILITY: return "The condition describes whether or not a given action is applicable";
-            case START: return "The condition is a starting condition for the action";
-            case STOP: return "The condition is a stop, or exit condition for the action";
+            case APPLICABILITY: return "The condition describes whether or not a given action is applicable.";
+            case START: return "The condition is a starting condition for the action.";
+            case STOP: return "The condition is a stop, or exit condition for the action.";
             default: return "?";
           }
         }

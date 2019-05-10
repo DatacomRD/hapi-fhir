@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum GraphCompartmentRule {
 
         /**
-         * The compartment must be identical (the same literal reference)
+         * The compartment must be identical (the same literal reference).
          */
         IDENTICAL, 
         /**
-         * The compartment must be the same - the record must be about the same patient, but the reference may be different
+         * The compartment must be the same - the record must be about the same patient, but the reference may be different.
          */
         MATCHING, 
         /**
-         * The compartment must be different
+         * The compartment must be different.
          */
         DIFFERENT, 
         /**
-         * The compartment rule is defined in the accompanying FHIRPath expression
+         * The compartment rule is defined in the accompanying FHIRPath expression.
          */
         CUSTOM, 
         /**
@@ -83,10 +83,10 @@ public enum GraphCompartmentRule {
         }
         public String getDefinition() {
           switch (this) {
-            case IDENTICAL: return "The compartment must be identical (the same literal reference)";
-            case MATCHING: return "The compartment must be the same - the record must be about the same patient, but the reference may be different";
-            case DIFFERENT: return "The compartment must be different";
-            case CUSTOM: return "The compartment rule is defined in the accompanying FHIRPath expression";
+            case IDENTICAL: return "The compartment must be identical (the same literal reference).";
+            case MATCHING: return "The compartment must be the same - the record must be about the same patient, but the reference may be different.";
+            case DIFFERENT: return "The compartment must be different.";
+            case CUSTOM: return "The compartment rule is defined in the accompanying FHIRPath expression.";
             default: return "?";
           }
         }

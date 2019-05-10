@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -43,10 +43,10 @@ public class RequestStatusEnumFactory implements EnumFactory<RequestStatus> {
       return RequestStatus.DRAFT;
     if ("active".equals(codeString))
       return RequestStatus.ACTIVE;
-    if ("suspended".equals(codeString))
-      return RequestStatus.SUSPENDED;
-    if ("cancelled".equals(codeString))
-      return RequestStatus.CANCELLED;
+    if ("on-hold".equals(codeString))
+      return RequestStatus.ONHOLD;
+    if ("revoked".equals(codeString))
+      return RequestStatus.REVOKED;
     if ("completed".equals(codeString))
       return RequestStatus.COMPLETED;
     if ("entered-in-error".equals(codeString))
@@ -61,10 +61,10 @@ public class RequestStatusEnumFactory implements EnumFactory<RequestStatus> {
       return "draft";
     if (code == RequestStatus.ACTIVE)
       return "active";
-    if (code == RequestStatus.SUSPENDED)
-      return "suspended";
-    if (code == RequestStatus.CANCELLED)
-      return "cancelled";
+    if (code == RequestStatus.ONHOLD)
+      return "on-hold";
+    if (code == RequestStatus.REVOKED)
+      return "revoked";
     if (code == RequestStatus.COMPLETED)
       return "completed";
     if (code == RequestStatus.ENTEREDINERROR)

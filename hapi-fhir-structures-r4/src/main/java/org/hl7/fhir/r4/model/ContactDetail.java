@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -277,22 +277,22 @@ public class ContactDetail extends Type implements ICompositeType {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof ContactDetail))
+        if (!(other_ instanceof ContactDetail))
           return false;
-        ContactDetail o = (ContactDetail) other;
+        ContactDetail o = (ContactDetail) other_;
         return compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof ContactDetail))
+        if (!(other_ instanceof ContactDetail))
           return false;
-        ContactDetail o = (ContactDetail) other;
+        ContactDetail o = (ContactDetail) other_;
         return compareValues(name, o.name, true);
       }
 

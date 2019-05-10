@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,29 +37,33 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum HttpOperations {
 
         /**
-         * HTTP DELETE operation
+         * HTTP DELETE operation.
          */
         DELETE, 
         /**
-         * HTTP GET operation
+         * HTTP GET operation.
          */
         GET, 
         /**
-         * HTTP OPTIONS operation
+         * HTTP OPTIONS operation.
          */
         OPTIONS, 
         /**
-         * HTTP PATCH operation
+         * HTTP PATCH operation.
          */
         PATCH, 
         /**
-         * HTTP POST operation
+         * HTTP POST operation.
          */
         POST, 
         /**
-         * HTTP PUT operation
+         * HTTP PUT operation.
          */
         PUT, 
+        /**
+         * HTTP HEAD operation.
+         */
+        HEAD, 
         /**
          * added to help the parsers
          */
@@ -79,6 +83,8 @@ public enum HttpOperations {
           return POST;
         if ("put".equals(codeString))
           return PUT;
+        if ("head".equals(codeString))
+          return HEAD;
         throw new FHIRException("Unknown HttpOperations code '"+codeString+"'");
         }
         public String toCode() {
@@ -89,6 +95,7 @@ public enum HttpOperations {
             case PATCH: return "patch";
             case POST: return "post";
             case PUT: return "put";
+            case HEAD: return "head";
             default: return "?";
           }
         }
@@ -97,12 +104,13 @@ public enum HttpOperations {
         }
         public String getDefinition() {
           switch (this) {
-            case DELETE: return "HTTP DELETE operation";
-            case GET: return "HTTP GET operation";
-            case OPTIONS: return "HTTP OPTIONS operation";
-            case PATCH: return "HTTP PATCH operation";
-            case POST: return "HTTP POST operation";
-            case PUT: return "HTTP PUT operation";
+            case DELETE: return "HTTP DELETE operation.";
+            case GET: return "HTTP GET operation.";
+            case OPTIONS: return "HTTP OPTIONS operation.";
+            case PATCH: return "HTTP PATCH operation.";
+            case POST: return "HTTP POST operation.";
+            case PUT: return "HTTP PUT operation.";
+            case HEAD: return "HTTP HEAD operation.";
             default: return "?";
           }
         }
@@ -114,6 +122,7 @@ public enum HttpOperations {
             case PATCH: return "PATCH";
             case POST: return "POST";
             case PUT: return "PUT";
+            case HEAD: return "HEAD";
             default: return "?";
           }
     }

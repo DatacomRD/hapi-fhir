@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ActivityDefinitionCategory {
 
         /**
-         * The activity is intended to provide or is related to treatment of the patient
+         * The activity is intended to provide or is related to treatment of the patient.
          */
         TREATMENT, 
         /**
-         * The activity is intended to provide or is related to education of the patient
+         * The activity is intended to provide or is related to education of the patient.
          */
         EDUCATION, 
         /**
-         * The activity is intended to perform or is related to assessment of the patient
+         * The activity is intended to perform or is related to assessment of the patient.
          */
         ASSESSMENT, 
         /**
@@ -72,13 +72,13 @@ public enum ActivityDefinitionCategory {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/activity-definition-category";
+          return "http://terminology.hl7.org/CodeSystem/activity-definition-category";
         }
         public String getDefinition() {
           switch (this) {
-            case TREATMENT: return "The activity is intended to provide or is related to treatment of the patient";
-            case EDUCATION: return "The activity is intended to provide or is related to education of the patient";
-            case ASSESSMENT: return "The activity is intended to perform or is related to assessment of the patient";
+            case TREATMENT: return "The activity is intended to provide or is related to treatment of the patient.";
+            case EDUCATION: return "The activity is intended to provide or is related to education of the patient.";
+            case ASSESSMENT: return "The activity is intended to perform or is related to assessment of the patient.";
             default: return "?";
           }
         }

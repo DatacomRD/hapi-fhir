@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,35 +20,38 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.*;
-
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.IRequestOperationCallback;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.binder.CollectionBinder;
 import ca.uhn.fhir.rest.server.method.OperationParameter.IOperationParamConverter;
 import ca.uhn.fhir.rest.server.method.ResourceParameter.Mode;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class MethodUtil {
-	
+
 	public static void extractDescription(SearchParameter theParameter, Annotation[] theAnnotations) {
 		for (Annotation annotation : theAnnotations) {
 			if (annotation instanceof Description) {
@@ -62,7 +65,7 @@ public class MethodUtil {
 		}
 	}
 
-	
+
 	@SuppressWarnings("unchecked")
 	public static List<IParameter> getResourceParameters(final FhirContext theContext, Method theMethod, Object theProvider, RestOperationTypeEnum theRestfulOperationTypeEnum) {
 		List<IParameter> parameters = new ArrayList<IParameter>();
@@ -90,7 +93,26 @@ public class MethodUtil {
 				}
 				if (Collection.class.isAssignableFrom(parameterType)) {
 					throw new ConfigurationException("Argument #" + paramIndex + " of Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName()
-							+ "' is of an invalid generic type (can not be a collection of a collection of a collection)");
+						+ "' is of an invalid generic type (can not be a collection of a collection of a collection)");
+				}
+
+				/*
+				 * If the user is trying to bind IPrimitiveType they are probably
+				 * trying to write code that is compatible across versions of FHIR.
+				 * We'll try and come up with an appropriate subtype to give
+				 * them.
+				 *
+				 * This gets tested in HistoryR4Test
+				 */
+				if (IPrimitiveType.class.equals(parameterType)) {
+					Class<?> genericType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
+					if (Date.class.equals(genericType)) {
+						BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("dateTime");
+						parameterType = dateTimeDef.getImplementingClass();
+					} else if (String.class.equals(genericType) || genericType == null) {
+						BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("string");
+						parameterType = dateTimeDef.getImplementingClass();
+					}
 				}
 			}
 
@@ -100,12 +122,14 @@ public class MethodUtil {
 				param = new ServletResponseParameter();
 			} else if (parameterType.equals(RequestDetails.class) || parameterType.equals(ServletRequestDetails.class)) {
 				param = new RequestDetailsParameter();
-			} else if (parameterType.equals(IRequestOperationCallback.class)) {
-				param = new RequestOperationCallbackParameter();
+			} else if (parameterType.equals(IInterceptorBroadcaster.class)) {
+				param = new InterceptorBroadcasterParameter();
 			} else if (parameterType.equals(SummaryEnum.class)) {
 				param = new SummaryEnumParameter();
 			} else if (parameterType.equals(PatchTypeEnum.class)) {
 				param = new PatchTypeParameter();
+			} else if (parameterType.equals(SearchTotalModeEnum.class)) {
+				param = new SearchTotalModeParameter();
 			} else {
 				for (int i = 0; i < annotations.length && param == null; i++) {
 					Annotation nextAnnotation = annotations[i];
@@ -141,7 +165,7 @@ public class MethodUtil {
 							specType = String.class;
 						} else if ((parameterType != Include.class) || innerCollectionType == null || outerCollectionType != null) {
 							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + IncludeParam.class.getSimpleName() + " but has a type other than Collection<"
-									+ Include.class.getSimpleName() + ">");
+								+ Include.class.getSimpleName() + ">");
 						} else {
 							instantiableCollectionType = (Class<? extends Collection<Include>>) CollectionBinder.getInstantiableCollectionType(innerCollectionType, "Method '" + theMethod.getName() + "'");
 							specType = parameterType;
@@ -169,7 +193,8 @@ public class MethodUtil {
 							b.append(" or String or byte[]");
 							throw new ConfigurationException(b.toString());
 						}
-						param = new ResourceParameter((Class<? extends IBaseResource>) parameterType, theProvider, mode);
+						boolean methodIsOperation = theMethod.getAnnotation(Operation.class) != null;
+						param = new ResourceParameter((Class<? extends IBaseResource>) parameterType, theProvider, mode, methodIsOperation);
 					} else if (nextAnnotation instanceof IdParam) {
 						param = new NullParameter();
 					} else if (nextAnnotation instanceof ServerBase) {
@@ -198,7 +223,7 @@ public class MethodUtil {
 					} else if (nextAnnotation instanceof Validate.Mode) {
 						if (parameterType.equals(ValidationModeEnum.class) == false) {
 							throw new ConfigurationException(
-									"Parameter annotated with @" + Validate.class.getSimpleName() + "." + Validate.Mode.class.getSimpleName() + " must be of type " + ValidationModeEnum.class.getName());
+								"Parameter annotated with @" + Validate.class.getSimpleName() + "." + Validate.Mode.class.getSimpleName() + " must be of type " + ValidationModeEnum.class.getName());
 						}
 						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_MODE, 0, 1).setConverter(new IOperationParamConverter() {
 							@Override
@@ -221,7 +246,7 @@ public class MethodUtil {
 					} else if (nextAnnotation instanceof Validate.Profile) {
 						if (parameterType.equals(String.class) == false) {
 							throw new ConfigurationException(
-									"Parameter annotated with @" + Validate.class.getSimpleName() + "." + Validate.Profile.class.getSimpleName() + " must be of type " + String.class.getName());
+								"Parameter annotated with @" + Validate.class.getSimpleName() + "." + Validate.Profile.class.getSimpleName() + " must be of type " + String.class.getName());
 						}
 						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_PROFILE, 0, 1).setConverter(new IOperationParamConverter() {
 							@Override
@@ -244,8 +269,8 @@ public class MethodUtil {
 
 			if (param == null) {
 				throw new ConfigurationException(
-						"Parameter #" + ((paramIndex + 1)) + "/" + (parameterTypes.length) + " of method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName()
-								+ "' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter");
+					"Parameter #" + ((paramIndex + 1)) + "/" + (parameterTypes.length) + " of method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName()
+						+ "' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter");
 			}
 
 			param.initializeTypes(theMethod, outerCollectionType, innerCollectionType, parameterType);
@@ -256,5 +281,5 @@ public class MethodUtil {
 		return parameters;
 	}
 
-	
+
 }

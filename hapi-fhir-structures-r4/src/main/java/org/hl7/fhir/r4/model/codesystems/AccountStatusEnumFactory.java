@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -45,6 +45,10 @@ public class AccountStatusEnumFactory implements EnumFactory<AccountStatus> {
       return AccountStatus.INACTIVE;
     if ("entered-in-error".equals(codeString))
       return AccountStatus.ENTEREDINERROR;
+    if ("on-hold".equals(codeString))
+      return AccountStatus.ONHOLD;
+    if ("unknown".equals(codeString))
+      return AccountStatus.UNKNOWN;
     throw new IllegalArgumentException("Unknown AccountStatus code '"+codeString+"'");
   }
 
@@ -55,6 +59,10 @@ public class AccountStatusEnumFactory implements EnumFactory<AccountStatus> {
       return "inactive";
     if (code == AccountStatus.ENTEREDINERROR)
       return "entered-in-error";
+    if (code == AccountStatus.ONHOLD)
+      return "on-hold";
+    if (code == AccountStatus.UNKNOWN)
+      return "unknown";
     return "?";
   }
 

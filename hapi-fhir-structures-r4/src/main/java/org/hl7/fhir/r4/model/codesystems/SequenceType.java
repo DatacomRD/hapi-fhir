@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum SequenceType {
 
         /**
-         * Amino acid sequence
+         * Amino acid sequence.
          */
         AA, 
         /**
-         * DNA Sequence
+         * DNA Sequence.
          */
         DNA, 
         /**
-         * RNA Sequence
+         * RNA Sequence.
          */
         RNA, 
         /**
@@ -76,9 +76,9 @@ public enum SequenceType {
         }
         public String getDefinition() {
           switch (this) {
-            case AA: return "Amino acid sequence";
-            case DNA: return "DNA Sequence";
-            case RNA: return "RNA Sequence";
+            case AA: return "Amino acid sequence.";
+            case DNA: return "DNA Sequence.";
+            case RNA: return "RNA Sequence.";
             default: return "?";
           }
         }

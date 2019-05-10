@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,29 +20,40 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import javax.persistence.EntityManager;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-
 public interface ISearchBuilder {
 
-	Iterator<Long> createQuery(SearchParameterMap theParams, String theSearchUuid);
+	IResultIterator createQuery(SearchParameterMap theParams, SearchRuntimeDetails theSearchRuntime);
+
+	void setMaxResultsToFetch(Integer theMaxResultsToFetch);
+
+	Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid);
+
+	void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation, EntityManager theEntityManager,
+									FhirContext theContext, IDao theDao);
+
+	Set<Long> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode,
+								  DateRangeParam theLastUpdated, String theSearchIdOrDescription);
+
+	/**
+	 * How many results may be fetched at once
+	 */
+	void setFetchSize(int theFetchSize);
 
 	void setType(Class<? extends IBaseResource> theResourceType, String theResourceName);
 
-	void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation, EntityManager theEntityManager,
-			FhirContext theContext, IDao theDao);
-
-	Set<Long> loadReverseIncludes(IDao theCallingDao, FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode,
-			DateRangeParam theLastUpdated);
+	void setPreviouslyAddedResourcePids(List<Long> thePreviouslyAddedResourcePids);
 
 }

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -55,6 +55,10 @@ public class AppointmentstatusEnumFactory implements EnumFactory<Appointmentstat
       return Appointmentstatus.NOSHOW;
     if ("entered-in-error".equals(codeString))
       return Appointmentstatus.ENTEREDINERROR;
+    if ("checked-in".equals(codeString))
+      return Appointmentstatus.CHECKEDIN;
+    if ("waitlist".equals(codeString))
+      return Appointmentstatus.WAITLIST;
     throw new IllegalArgumentException("Unknown Appointmentstatus code '"+codeString+"'");
   }
 
@@ -75,6 +79,10 @@ public class AppointmentstatusEnumFactory implements EnumFactory<Appointmentstat
       return "noshow";
     if (code == Appointmentstatus.ENTEREDINERROR)
       return "entered-in-error";
+    if (code == Appointmentstatus.CHECKEDIN)
+      return "checked-in";
+    if (code == Appointmentstatus.WAITLIST)
+      return "waitlist";
     return "?";
   }
 

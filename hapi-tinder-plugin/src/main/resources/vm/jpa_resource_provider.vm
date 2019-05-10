@@ -5,12 +5,8 @@ import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 
-#if ( $version != 'dstu' && (${className} == 'Encounter' || ${className} == 'Patient' || ${className} == 'ValueSet' || ${className} == 'QuestionnaireAnswers' || ${className} == 'CodeSystem'))
-import ca.uhn.fhir.jpa.provider${package_suffix}.BaseJpaResourceProvider${className}${versionCapitalized};
-#else
-import ca.uhn.fhir.jpa.provider${package_suffix}.JpaResourceProvider${versionCapitalized};
-#end 
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.provider${package_suffix}.*;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.*;
 #if ( $isRi )
@@ -22,11 +18,13 @@ import ca.uhn.fhir.model.${version}.resource.*; //
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 
 public class ${className}ResourceProvider extends 
 ## We have specialized base classes for RPs that handle certain resource types. These
 ## RPs implement type specific operations 
-#if ( $version != 'dstu' && (${className} == 'Encounter' || ${className} == 'Patient' || ${className} == 'ValueSet' || ${className} == 'QuestionnaireAnswers' || ${className} == 'CodeSystem'))
+#if ( $version != 'dstu' && (${className} == 'Encounter' || ${className} == 'Patient' || ${className} == 'ValueSet' || ${className} == 'QuestionnaireAnswers' || ${className} == 'CodeSystem' || ($version != 'dstu2' && ${className} == 'ConceptMap') || ${className} == 'MessageHeader' || ${className} == 'Composition'))
 	BaseJpaResourceProvider${className}${versionCapitalized}
 #else
 	JpaResourceProvider${versionCapitalized}<${className}>
@@ -77,7 +75,10 @@ public class ${className}ResourceProvider extends
 			StringAndListParam the${param.nameCapitalized}, 
 #elseif (${param.type} == 'token' )
 			@OptionalParam(name="${param.name}")
-			TokenAndListParam the${param.nameCapitalized}, 
+			TokenAndListParam the${param.nameCapitalized},
+#elseif (${param.type} == 'special' )
+			@OptionalParam(name="${param.name}")
+			SpecialAndListParam the${param.nameCapitalized},
 #elseif (${param.type} == 'date' )
 			@OptionalParam(name="${param.name}")
 			DateRangeParam the${param.nameCapitalized}, 
@@ -131,8 +132,13 @@ public class ${className}ResourceProvider extends
 			SortSpec theSort,
 			
 			@ca.uhn.fhir.rest.annotation.Count
-			Integer theCount
-	) {
+			Integer theCount,
+
+			SummaryEnum theSummaryMode,
+
+			SearchTotalModeEnum theSearchTotalMode
+
+			) {
 		startRequest(theServletRequest);
 		try {
 			SearchParameterMap paramMap = new SearchParameterMap();
@@ -152,6 +158,8 @@ public class ${className}ResourceProvider extends
 			paramMap.setIncludes(theIncludes);
 			paramMap.setSort(theSort);
 			paramMap.setCount(theCount);
+			paramMap.setSummaryMode(theSummaryMode);
+			paramMap.setSearchTotalMode(theSearchTotalMode);
 
 			getDao().translateRawParameters(theAdditionalRawParams, paramMap);
 

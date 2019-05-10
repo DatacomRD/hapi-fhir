@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.method;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -179,7 +180,7 @@ public class OperationParameter implements IParameter {
 			sourceClientArgument = myConverter.outgoingClient(sourceClientArgument);
 		}
 
-		ParametersUtil.addParameterToParameters(theContext, theTargetResource, sourceClientArgument, myName);
+		ParametersUtil.addParameterToParameters(theContext, (IBaseParameters) theTargetResource, myName, sourceClientArgument);
 	}
 
 

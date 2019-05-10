@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MedicationStatus {
 
         /**
-         * The medication is available for use
+         * The medication is available for use.
          */
         ACTIVE, 
         /**
-         * The medication is not available for use
+         * The medication is not available for use.
          */
         INACTIVE, 
         /**
-         * The medication was entered in error
+         * The medication was entered in error.
          */
         ENTEREDINERROR, 
         /**
@@ -72,13 +72,13 @@ public enum MedicationStatus {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/medication-status";
+          return "http://hl7.org/fhir/CodeSystem/medication-status";
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIVE: return "The medication is available for use";
-            case INACTIVE: return "The medication is not available for use";
-            case ENTEREDINERROR: return "The medication was entered in error";
+            case ACTIVE: return "The medication is available for use.";
+            case INACTIVE: return "The medication is not available for use.";
+            case ENTEREDINERROR: return "The medication was entered in error.";
             default: return "?";
           }
         }

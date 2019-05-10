@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,23 +37,23 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum DiscriminatorType {
 
         /**
-         * The slices have different values in the nominated element
+         * The slices have different values in the nominated element.
          */
         VALUE, 
         /**
-         * The slices are differentiated by the presence or absence of the nominated element
+         * The slices are differentiated by the presence or absence of the nominated element.
          */
         EXISTS, 
         /**
-         * The slices have different values in the nominated element, as determined by testing them against the applicable ElementDefinition.pattern[x]
+         * The slices have different values in the nominated element, as determined by testing them against the applicable ElementDefinition.pattern[x].
          */
         PATTERN, 
         /**
-         * The slices are differentiated by type of the nominated element to a specifed profile
+         * The slices are differentiated by type of the nominated element.
          */
         TYPE, 
         /**
-         * The slices are differentiated by conformance of the nominated element to a specifed profile
+         * The slices are differentiated by conformance of the nominated element to a specified profile. Note that if the path specifies .resolve() then the profile is the target profile on the reference. In this case, validation by the possible profiles is required to differentiate the slices.
          */
         PROFILE, 
         /**
@@ -90,11 +90,11 @@ public enum DiscriminatorType {
         }
         public String getDefinition() {
           switch (this) {
-            case VALUE: return "The slices have different values in the nominated element";
-            case EXISTS: return "The slices are differentiated by the presence or absence of the nominated element";
-            case PATTERN: return "The slices have different values in the nominated element, as determined by testing them against the applicable ElementDefinition.pattern[x]";
-            case TYPE: return "The slices are differentiated by type of the nominated element to a specifed profile";
-            case PROFILE: return "The slices are differentiated by conformance of the nominated element to a specifed profile";
+            case VALUE: return "The slices have different values in the nominated element.";
+            case EXISTS: return "The slices are differentiated by the presence or absence of the nominated element.";
+            case PATTERN: return "The slices have different values in the nominated element, as determined by testing them against the applicable ElementDefinition.pattern[x].";
+            case TYPE: return "The slices are differentiated by type of the nominated element.";
+            case PROFILE: return "The slices are differentiated by conformance of the nominated element to a specified profile. Note that if the path specifies .resolve() then the profile is the target profile on the reference. In this case, validation by the possible profiles is required to differentiate the slices.";
             default: return "?";
           }
         }

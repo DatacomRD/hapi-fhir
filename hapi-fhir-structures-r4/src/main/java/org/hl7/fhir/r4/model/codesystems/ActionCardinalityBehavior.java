@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ActionCardinalityBehavior {
 
         /**
-         * The action may only be selected one time
+         * The action may only be selected one time.
          */
         SINGLE, 
         /**
-         * The action may be selected multiple times
+         * The action may be selected multiple times.
          */
         MULTIPLE, 
         /**
@@ -69,8 +69,8 @@ public enum ActionCardinalityBehavior {
         }
         public String getDefinition() {
           switch (this) {
-            case SINGLE: return "The action may only be selected one time";
-            case MULTIPLE: return "The action may be selected multiple times";
+            case SINGLE: return "The action may only be selected one time.";
+            case MULTIPLE: return "The action may be selected multiple times.";
             default: return "?";
           }
         }

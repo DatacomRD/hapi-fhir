@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MapModelMode {
 
         /**
-         * This structure describes an instance passed to the mapping engine that is used a source of data
+         * This structure describes an instance passed to the mapping engine that is used a source of data.
          */
         SOURCE, 
         /**
-         * This structure describes an instance that the mapping engine may ask for that is used a source of data
+         * This structure describes an instance that the mapping engine may ask for that is used a source of data.
          */
         QUERIED, 
         /**
-         * This structure describes an instance passed to the mapping engine that is used a target of data
+         * This structure describes an instance passed to the mapping engine that is used a target of data.
          */
         TARGET, 
         /**
-         * This structure describes an instance that the mapping engine may ask to create that is used a target of data
+         * This structure describes an instance that the mapping engine may ask to create that is used a target of data.
          */
         PRODUCED, 
         /**
@@ -83,10 +83,10 @@ public enum MapModelMode {
         }
         public String getDefinition() {
           switch (this) {
-            case SOURCE: return "This structure describes an instance passed to the mapping engine that is used a source of data";
-            case QUERIED: return "This structure describes an instance that the mapping engine may ask for that is used a source of data";
-            case TARGET: return "This structure describes an instance passed to the mapping engine that is used a target of data";
-            case PRODUCED: return "This structure describes an instance that the mapping engine may ask to create that is used a target of data";
+            case SOURCE: return "This structure describes an instance passed to the mapping engine that is used a source of data.";
+            case QUERIED: return "This structure describes an instance that the mapping engine may ask for that is used a source of data.";
+            case TARGET: return "This structure describes an instance passed to the mapping engine that is used a target of data.";
+            case PRODUCED: return "This structure describes an instance that the mapping engine may ask to create that is used a target of data.";
             default: return "?";
           }
         }

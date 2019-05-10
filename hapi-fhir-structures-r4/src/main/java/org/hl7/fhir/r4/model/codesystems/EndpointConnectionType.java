@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -73,7 +73,7 @@ public enum EndpointConnectionType {
          */
         DICOMWADOURI, 
         /**
-         * Interact with the server interface using FHIR's RESTful interface. For details on its version/capabilities you should connect the the value in Endpoint.address and retrieve the FHIR CapabilityStatement.
+         * Interact with the server interface using FHIR's RESTful interface. For details on its version/capabilities you should connect the value in Endpoint.address and retrieve the FHIR CapabilityStatement.
          */
         HL7FHIRREST, 
         /**
@@ -149,7 +149,7 @@ public enum EndpointConnectionType {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/endpoint-connection-type";
+          return "http://terminology.hl7.org/CodeSystem/endpoint-connection-type";
         }
         public String getDefinition() {
           switch (this) {
@@ -162,7 +162,7 @@ public enum EndpointConnectionType {
             case DICOMQIDORS: return "DICOMweb RESTful Image query - http://dicom.nema.org/medical/dicom/current/output/chtml/part18/sect_6.7.html";
             case DICOMSTOWRS: return "DICOMweb RESTful image sending and storage - http://dicom.nema.org/medical/dicom/current/output/chtml/part18/sect_6.6.html";
             case DICOMWADOURI: return "DICOMweb Image Retrieve - http://dicom.nema.org/dicom/2013/output/chtml/part18/sect_6.3.html";
-            case HL7FHIRREST: return "Interact with the server interface using FHIR's RESTful interface. For details on its version/capabilities you should connect the the value in Endpoint.address and retrieve the FHIR CapabilityStatement.";
+            case HL7FHIRREST: return "Interact with the server interface using FHIR's RESTful interface. For details on its version/capabilities you should connect the value in Endpoint.address and retrieve the FHIR CapabilityStatement.";
             case HL7FHIRMSG: return "Use the servers FHIR Messaging interface. Details can be found on the messaging.html page in the FHIR Specification. The FHIR server's base address is specified in the Endpoint.address property.";
             case HL7V2MLLP: return "HL7v2 messages over an LLP TCP connection";
             case SECUREEMAIL: return "Email delivery using a digital certificate to encrypt the content using the public key, receiver must have the private key to decrypt the content";

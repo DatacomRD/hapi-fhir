@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,7 +41,7 @@ public enum ReferencerangeMeaning {
          */
         TYPE, 
         /**
-         * Based on 95th percentile for the relevant control population.
+         * Values expected for a normal member of the relevant control population being measured. Typically each results producer such as a laboratory has specific normal ranges and they are usually defined as within two standard deviations from the mean and account for 95.45% of this population.
          */
         NORMAL, 
         /**
@@ -77,7 +77,7 @@ public enum ReferencerangeMeaning {
          */
         FOLLICULAR, 
         /**
-         * An expected range in an individual during the follicular stage of the cycle.
+         * An expected range in an individual during the midcycle stage of the cycle.
          */
         MIDCYCLE, 
         /**
@@ -87,7 +87,7 @@ public enum ReferencerangeMeaning {
         /**
          * An expected range in an individual post-menopause.
          */
-        POSTMEOPAUSAL, 
+        POSTMENOPAUSAL, 
         /**
          * added to help the parsers
          */
@@ -119,8 +119,8 @@ public enum ReferencerangeMeaning {
           return MIDCYCLE;
         if ("luteal".equals(codeString))
           return LUTEAL;
-        if ("postmeopausal".equals(codeString))
-          return POSTMEOPAUSAL;
+        if ("postmenopausal".equals(codeString))
+          return POSTMENOPAUSAL;
         throw new FHIRException("Unknown ReferencerangeMeaning code '"+codeString+"'");
         }
         public String toCode() {
@@ -137,17 +137,17 @@ public enum ReferencerangeMeaning {
             case FOLLICULAR: return "follicular";
             case MIDCYCLE: return "midcycle";
             case LUTEAL: return "luteal";
-            case POSTMEOPAUSAL: return "postmeopausal";
+            case POSTMENOPAUSAL: return "postmenopausal";
             default: return "?";
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/referencerange-meaning";
+          return "http://terminology.hl7.org/CodeSystem/referencerange-meaning";
         }
         public String getDefinition() {
           switch (this) {
             case TYPE: return "General types of reference range.";
-            case NORMAL: return "Based on 95th percentile for the relevant control population.";
+            case NORMAL: return "Values expected for a normal member of the relevant control population being measured. Typically each results producer such as a laboratory has specific normal ranges and they are usually defined as within two standard deviations from the mean and account for 95.45% of this population.";
             case RECOMMENDED: return "The range that is recommended by a relevant professional body.";
             case TREATMENT: return "The range at which treatment would/should be considered.";
             case THERAPEUTIC: return "The optimal range for best therapeutic outcomes.";
@@ -156,9 +156,9 @@ public enum ReferencerangeMeaning {
             case ENDOCRINE: return "Endocrine related states that change the expected value.";
             case PREPUBERTY: return "An expected range in an individual prior to puberty.";
             case FOLLICULAR: return "An expected range in an individual during the follicular stage of the cycle.";
-            case MIDCYCLE: return "An expected range in an individual during the follicular stage of the cycle.";
+            case MIDCYCLE: return "An expected range in an individual during the midcycle stage of the cycle.";
             case LUTEAL: return "An expected range in an individual during the luteal stage of the cycle.";
-            case POSTMEOPAUSAL: return "An expected range in an individual post-menopause.";
+            case POSTMENOPAUSAL: return "An expected range in an individual post-menopause.";
             default: return "?";
           }
         }
@@ -176,7 +176,7 @@ public enum ReferencerangeMeaning {
             case FOLLICULAR: return "Follicular Stage";
             case MIDCYCLE: return "MidCycle";
             case LUTEAL: return "Luteal";
-            case POSTMEOPAUSAL: return "Post-Menopause";
+            case POSTMENOPAUSAL: return "Post-Menopause";
             default: return "?";
           }
     }

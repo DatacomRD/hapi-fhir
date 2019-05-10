@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,23 +37,23 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum RejectionCriteria {
 
         /**
-         * blood specimen hemolized
+         * blood specimen hemolized.
          */
         HEMOLIZED, 
         /**
-         * insufficient quantity of specimen
+         * insufficient quantity of specimen.
          */
         INSUFFICIENT, 
         /**
-         * specimen container broken
+         * specimen container broken.
          */
         BROKEN, 
         /**
-         * specimen clotted
+         * specimen clotted.
          */
         CLOTTED, 
         /**
-         * specimen temperature inappropriate
+         * specimen temperature inappropriate.
          */
         WRONGTEMPERATURE, 
         /**
@@ -86,22 +86,22 @@ public enum RejectionCriteria {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/rejection-criteria";
+          return "http://terminology.hl7.org/CodeSystem/rejection-criteria";
         }
         public String getDefinition() {
           switch (this) {
-            case HEMOLIZED: return "blood specimen hemolized";
-            case INSUFFICIENT: return "insufficient quantity of specimen";
-            case BROKEN: return "specimen container broken";
-            case CLOTTED: return "specimen clotted";
-            case WRONGTEMPERATURE: return "specimen temperature inappropriate";
+            case HEMOLIZED: return "blood specimen hemolized.";
+            case INSUFFICIENT: return "insufficient quantity of specimen.";
+            case BROKEN: return "specimen container broken.";
+            case CLOTTED: return "specimen clotted.";
+            case WRONGTEMPERATURE: return "specimen temperature inappropriate.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case HEMOLIZED: return "specimen hemolized";
-            case INSUFFICIENT: return "specimen volume insufficient";
+            case HEMOLIZED: return "hemolized specimen";
+            case INSUFFICIENT: return "insufficient specimen volume";
             case BROKEN: return "broken specimen container";
             case CLOTTED: return "specimen clotted";
             case WRONGTEMPERATURE: return "specimen temperature inappropriate";

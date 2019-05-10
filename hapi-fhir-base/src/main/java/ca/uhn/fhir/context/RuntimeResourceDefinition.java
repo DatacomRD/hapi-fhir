@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,14 +185,31 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		});
 		mySearchParams = Collections.unmodifiableList(searchParams);
 
-		Map<String, List<RuntimeSearchParam>> compartmentNameToSearchParams = new HashMap<String, List<RuntimeSearchParam>>();
+		Map<String, List<RuntimeSearchParam>> compartmentNameToSearchParams = new HashMap<>();
 		for (RuntimeSearchParam next : searchParams) {
 			if (next.getProvidesMembershipInCompartments() != null) {
 				for (String nextCompartment : next.getProvidesMembershipInCompartments()) {
 					if (!compartmentNameToSearchParams.containsKey(nextCompartment)) {
-						compartmentNameToSearchParams.put(nextCompartment, new ArrayList<RuntimeSearchParam>());
+						compartmentNameToSearchParams.put(nextCompartment, new ArrayList<>());
 					}
-					compartmentNameToSearchParams.get(nextCompartment).add(next);
+					List<RuntimeSearchParam> searchParamsForCompartment = compartmentNameToSearchParams.get(nextCompartment);
+					searchParamsForCompartment.add(next);
+
+					/*
+					 * If one search parameter marks an SP as making a resource
+					 * a part of a compartment, let's also denote all other
+					 * SPs with the same path the same way. This behaviour is
+					 * used by AuthorizationInterceptor
+					 */
+					String nextPath = massagePathForCompartmentSimilarity(next.getPath());
+					for (RuntimeSearchParam nextAlternate : searchParams) {
+						String nextAlternatePath = massagePathForCompartmentSimilarity(nextAlternate.getPath());
+						if (nextAlternatePath.equals(nextPath)) {
+							if (!nextAlternate.getName().equals(next.getName())) {
+								searchParamsForCompartment.add(nextAlternate);
+							}
+						}
+					}
 				}
 			}
 		}
@@ -219,6 +236,14 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 			}
 		}
 
+	}
+
+	private String massagePathForCompartmentSimilarity(String thePath) {
+		String path = thePath;
+		if (path.matches(".*\\.where\\(resolve\\(\\) is [a-zA-Z]+\\)")) {
+			path = path.substring(0, path.indexOf(".where"));
+		}
+		return path;
 	}
 
 	@Deprecated

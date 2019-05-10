@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ContributorType {
 
         /**
-         * An author of the content of the module
+         * An author of the content of the module.
          */
         AUTHOR, 
         /**
-         * An editor of the content of the module
+         * An editor of the content of the module.
          */
         EDITOR, 
         /**
-         * A reviewer of the content of the module
+         * A reviewer of the content of the module.
          */
         REVIEWER, 
         /**
-         * An endorser of the content of the module
+         * An endorser of the content of the module.
          */
         ENDORSER, 
         /**
@@ -83,10 +83,10 @@ public enum ContributorType {
         }
         public String getDefinition() {
           switch (this) {
-            case AUTHOR: return "An author of the content of the module";
-            case EDITOR: return "An editor of the content of the module";
-            case REVIEWER: return "A reviewer of the content of the module";
-            case ENDORSER: return "An endorser of the content of the module";
+            case AUTHOR: return "An author of the content of the module.";
+            case EDITOR: return "An editor of the content of the module.";
+            case REVIEWER: return "A reviewer of the content of the module.";
+            case ENDORSER: return "An endorser of the content of the module.";
             default: return "?";
           }
         }

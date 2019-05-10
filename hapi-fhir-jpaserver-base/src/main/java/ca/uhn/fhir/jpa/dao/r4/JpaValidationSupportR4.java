@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
@@ -10,10 +10,13 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.r4.terminologies.ValueSetExpander;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import java.util.Collections;
@@ -23,7 +26,7 @@ import java.util.List;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,29 +43,22 @@ import java.util.List;
  */
 
 @Transactional(value = TxType.REQUIRED)
-public class JpaValidationSupportR4 implements IJpaValidationSupportR4 {
+public class JpaValidationSupportR4 implements IJpaValidationSupportR4, ApplicationContextAware {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaValidationSupportR4.class);
 
-	@Autowired
-	@Qualifier("myStructureDefinitionDaoR4")
 	private IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
-
-	@Autowired
-	@Qualifier("myValueSetDaoR4")
 	private IFhirResourceDao<ValueSet> myValueSetDao;
-
-	@Autowired
-	@Qualifier("myQuestionnaireDaoR4")
 	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
-
-	@Autowired
-	@Qualifier("myCodeSystemDaoR4")
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
 
 	@Autowired
 	private FhirContext myR4Ctx;
+	private ApplicationContext myApplicationContext;
 
+	/**
+	 * Constructor
+	 */
 	public JpaValidationSupportR4() {
 		super();
 	}
@@ -70,7 +66,7 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4 {
 
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
-	public ValueSetExpansionComponent expandValueSet(FhirContext theCtx, ConceptSetComponent theInclude) {
+	public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theCtx, ConceptSetComponent theInclude) {
 		return null;
 	}
 
@@ -88,6 +84,11 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4 {
 	@Override
 	public CodeSystem fetchCodeSystem(FhirContext theCtx, String theSystem) {
 		return fetchResource(theCtx, CodeSystem.class, theSystem);
+	}
+
+	@Override
+	public ValueSet fetchValueSet(FhirContext theCtx, String theSystem) {
+		return fetchResource(theCtx, ValueSet.class, theSystem);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -161,6 +162,19 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4 {
 	@Transactional(value = TxType.SUPPORTS)
 	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
 		return false;
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
+		myApplicationContext = theApplicationContext;
+	}
+
+	@PostConstruct
+	public void start() {
+		myStructureDefinitionDao = myApplicationContext.getBean("myStructureDefinitionDaoR4", IFhirResourceDao.class);
+		myValueSetDao = myApplicationContext.getBean("myValueSetDaoR4", IFhirResourceDao.class);
+		myQuestionnaireDao = myApplicationContext.getBean("myQuestionnaireDaoR4", IFhirResourceDao.class);
+		myCodeSystemDao = myApplicationContext.getBean("myCodeSystemDaoR4", IFhirResourceDao.class);
 	}
 
 	@Override

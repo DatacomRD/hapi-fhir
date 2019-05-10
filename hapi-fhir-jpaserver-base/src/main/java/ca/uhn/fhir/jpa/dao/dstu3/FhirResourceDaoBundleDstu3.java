@@ -7,7 +7,7 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleType;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,18 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
+import java.util.Set;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 public class FhirResourceDaoBundleDstu3 extends FhirResourceDaoDstu3<Bundle> {
 
 	@Override
 	protected void preProcessResourceForStorage(Bundle theResource) {
 		super.preProcessResourceForStorage(theResource);
 
-		if (theResource.getType() != BundleType.DOCUMENT && theResource.getType() != BundleType.COLLECTION) {
+		Set<String> allowedBundleTypes = getConfig().getBundleTypesAllowedForStorage();
+		if (theResource.getType() == null || !allowedBundleTypes.contains(defaultString(theResource.getType().toCode()))) {
 			String message = "Unable to store a Bundle resource on this server with a Bundle.type value of: " + (theResource.getType() != null ? theResource.getType().toCode() : "(missing)");
 			throw new UnprocessableEntityException(message);
 		}

@@ -10,12 +10,19 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.*;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.Validate;
 import org.hamcrest.core.StringContains;
+import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
+import org.hl7.fhir.dstu3.context.IWorkerContext;
+import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
+import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Condition.ConditionClinicalStatus;
 import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
 import org.hl7.fhir.dstu3.model.EligibilityResponse.BenefitComponent;
 import org.hl7.fhir.dstu3.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -168,6 +175,43 @@ public class ResourceValidatorDstu3Test {
 
 	@Test
 	@Ignore
+	public void testValidateProfileWithExtension() throws IOException, FHIRException {
+		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport();
+		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport();
+		ValidationSupportChain support = new ValidationSupportChain(valSupport, defaultSupport);
+
+		// Prepopulate SDs
+		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/dstu3/myconsent-profile.xml"));
+		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/dstu3/myconsent-ext.xml"));
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(support));
+
+		Consent input = ourCtx.newJsonParser().parseResource(Consent.class, IOUtils.toString(ResourceValidatorDstu3Test.class.getResourceAsStream("/dstu3/myconsent-resource.json")));
+
+		ValidationResult output = val.validateWithResult(input);
+		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
+		assertEquals(0, all.size());
+		assertEquals(0, output.getMessages().size());
+
+	}
+
+	private StructureDefinition loadStructureDefinition(DefaultProfileValidationSupport theDefaultValSupport, String theResName) throws IOException, FHIRException {
+		StructureDefinition derived = ourCtx.newXmlParser().parseResource(StructureDefinition.class, IOUtils.toString(ResourceValidatorDstu3Test.class.getResourceAsStream(theResName)));
+		StructureDefinition base = theDefaultValSupport.fetchStructureDefinition(ourCtx, derived.getBaseDefinition());
+		Validate.notNull(base);
+
+		IWorkerContext worker = new HapiWorkerContext(ourCtx, theDefaultValSupport);
+		List<ValidationMessage> issues = new ArrayList<>();
+		ProfileUtilities profileUtilities = new ProfileUtilities(worker, issues, null);
+		profileUtilities.generateSnapshot(base, derived, "", "");
+
+		return derived;
+	}
+
+
+	@Test
+	@Ignore
 	public void testValidateDifferentPropertyButSameStartsWithPath() throws Exception {
 
 		EligibilityResponse fhirObj = new EligibilityResponse();
@@ -244,12 +288,11 @@ public class ResourceValidatorDstu3Test {
 	 * TODO: re-enable this
 	 */
 	@Test
-	@Ignore
 	public void testValidateQuestionnaireWithCanonicalUrl() {
 		String input = "{\n" +
 			"  \"resourceType\": \"Questionnaire\",\n" +
 			"  \"url\": \"http://some.example.url\",\n" +
-			"  \"status\": \"published\",\n" +
+			"  \"status\": \"active\",\n" +
 			"  \"subjectType\": [\n" +
 			"    \"Patient\"\n" +
 			"  ],\n" +
@@ -334,16 +377,15 @@ public class ResourceValidatorDstu3Test {
 		PatientProfileDstu3 myPatient = new PatientProfileDstu3();
 		myPatient.setId("1");
 		myPatient.setColorPrimary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setCode("furry-grey")));
-		myPatient.setColorSecondary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setSystem("furry-white")));
+		myPatient.setColorSecondary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setCode("furry-white")));
 		myPatient.setOwningOrganization(new Reference("Organization/2.25.79433498044103547197447759549862032393"));
 		myPatient.addName().setFamily("FamilyName");
 		myPatient.addExtension().setUrl("http://foo.com/example").setValue(new StringType("String Extension"));
 
 		IParser p = ourCtx.newJsonParser().setPrettyPrint(true);
 		String messageString = p.encodeResourceToString(myPatient);
-		ourLog.info(messageString);
+//		ourLog.info(messageString);
 
-		//@formatter:off
 		assertThat(messageString, stringContainsInOrder(
 			"meta",
 			"String Extension",
@@ -356,7 +398,6 @@ public class ResourceValidatorDstu3Test {
 			"extension",
 			"meta"
 		)));
-		//@formatter:on
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
@@ -383,7 +424,7 @@ public class ResourceValidatorDstu3Test {
 		PatientProfileDstu3 myPatient = new PatientProfileDstu3();
 		myPatient.setId("1");
 		myPatient.setColorPrimary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setCode("furry-grey")));
-		myPatient.setColorSecondary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setSystem("furry-white")));
+		myPatient.setColorSecondary(new CodeableConcept().addCoding(new Coding().setSystem("http://example.com#animalColor").setCode("furry-white")));
 		myPatient.setOwningOrganization(new Reference("Organization/2.25.79433498044103547197447759549862032393"));
 		myPatient.addName().setFamily("FamilyName");
 		myPatient.addExtension().setUrl("http://foo.com/example").setValue(new StringType("String Extension"));

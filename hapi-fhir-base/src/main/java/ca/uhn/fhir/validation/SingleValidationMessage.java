@@ -4,7 +4,7 @@ package ca.uhn.fhir.validation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,15 +109,15 @@ public class SingleValidationMessage {
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		if (myLocationCol != null || myLocationLine != null) {
-			b.append("myLocationCol", myLocationCol);
-			b.append("myLocationRow", myLocationLine);
+			b.append("col", myLocationCol);
+			b.append("row", myLocationLine);
 		}
 		if (myLocationString != null) {
-			b.append("myLocationString", myLocationString);
+			b.append("locationString", myLocationString);
 		}
-		b.append("myMessage", myMessage);
+		b.append("message", myMessage);
 		if (mySeverity != null) {
-			b.append("mySeverity", mySeverity.getCode());
+			b.append("severity", mySeverity.getCode());
 		}
 		return b.toString();
 	}

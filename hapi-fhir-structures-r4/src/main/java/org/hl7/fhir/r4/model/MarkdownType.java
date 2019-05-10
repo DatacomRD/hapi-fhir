@@ -67,10 +67,13 @@ public class MarkdownType extends StringType implements Comparable<MarkdownType>
 
 	@Override
 	public MarkdownType copy() {
-		return new MarkdownType(getValue());
+		MarkdownType ret = new MarkdownType(getValue());
+    copyValues(ret);
+    return ret;
 	}
 
 	public String fhirType() {
 		return "markdown";		
 	}
+
 }

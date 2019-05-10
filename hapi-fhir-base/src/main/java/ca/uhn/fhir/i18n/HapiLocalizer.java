@@ -1,12 +1,19 @@
 package ca.uhn.fhir.i18n;
 
+import ca.uhn.fhir.context.ConfigurationException;
+
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,30 +29,18 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import ca.uhn.fhir.context.ConfigurationException;
-
 /**
  * This feature is not yet in its final state and should be considered an internal part of HAPI for now - use with caution
  */
 public class HapiLocalizer {
 
-	private static boolean ourFailOnMissingMessage;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiLocalizer.class);
+	@SuppressWarnings("WeakerAccess")
 	public static final String UNKNOWN_I18N_KEY_MESSAGE = "!MESSAGE!";
-
-	private List<ResourceBundle> myBundle = new ArrayList<ResourceBundle>();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiLocalizer.class);
+	private static boolean ourFailOnMissingMessage;
+	private final Map<String, MessageFormat> myKeyToMessageFormat = new ConcurrentHashMap<>();
+	private List<ResourceBundle> myBundle = new ArrayList<>();
 	private String[] myBundleNames;
-	private final Map<String, MessageFormat> myKeyToMessageFormat = new ConcurrentHashMap<String, MessageFormat>();
 
 	public HapiLocalizer() {
 		this(HapiLocalizer.class.getPackage().getName() + ".hapi-messages");
@@ -56,11 +51,27 @@ public class HapiLocalizer {
 		init();
 	}
 
-	private String findFormatString(String theQualifiedKey) {
+	public Set<String> getAllKeys() {
+		HashSet<String> retVal = new HashSet<>();
+		for (ResourceBundle nextBundle : myBundle) {
+			Enumeration<String> keysEnum = nextBundle.getKeys();
+			while (keysEnum.hasMoreElements()) {
+				retVal.add(keysEnum.nextElement());
+			}
+		}
+		return retVal;
+	}
+
+	/**
+	 * @return Returns the raw message format string for the given key, or returns {@link #UNKNOWN_I18N_KEY_MESSAGE} if not found
+	 */
+	@SuppressWarnings("WeakerAccess")
+	public String getFormatString(String theQualifiedKey) {
 		String formatString = null;
 		for (ResourceBundle nextBundle : myBundle) {
 			if (nextBundle.containsKey(theQualifiedKey)) {
 				formatString = nextBundle.getString(theQualifiedKey);
+				formatString = trim(formatString);
 			}
 			if (isNotBlank(formatString)) {
 				break;
@@ -77,36 +88,47 @@ public class HapiLocalizer {
 		return formatString;
 	}
 
-	public Set<String> getAllKeys(){
-		HashSet<String> retVal = new HashSet<String>();
-		for (ResourceBundle nextBundle : myBundle) {
-			Enumeration<String> keysEnum = nextBundle.getKeys();
-			while (keysEnum.hasMoreElements()) {
-				retVal.add(keysEnum.nextElement());
-			}
-		}
-		return retVal;
-	}
-
 	public String getMessage(Class<?> theType, String theKey, Object... theParameters) {
-		return getMessage(theType.getName() + '.' + theKey, theParameters);
+		return getMessage(toKey(theType, theKey), theParameters);
 	}
 
 	public String getMessage(String theQualifiedKey, Object... theParameters) {
 		if (theParameters != null && theParameters.length > 0) {
 			MessageFormat format = myKeyToMessageFormat.get(theQualifiedKey);
 			if (format != null) {
-				return format.format(theParameters).toString();
+				return format.format(theParameters);
 			}
 
-			String formatString = findFormatString(theQualifiedKey);
+			String formatString = getFormatString(theQualifiedKey);
 
-			format = new MessageFormat(formatString.trim());
+			format = newMessageFormat(formatString);
 			myKeyToMessageFormat.put(theQualifiedKey, format);
-			return format.format(theParameters).toString();
+			return format.format(theParameters);
 		}
-		String retVal = findFormatString(theQualifiedKey);
-		return retVal;
+		return getFormatString(theQualifiedKey);
+	}
+
+	MessageFormat newMessageFormat(String theFormatString) {
+		StringBuilder pattern = new StringBuilder(theFormatString.trim());
+
+
+		for (int i = 0; i < (pattern.length()-1); i++) {
+			if (pattern.charAt(i) == '{') {
+				char nextChar = pattern.charAt(i+1);
+				if (nextChar >= '0' && nextChar <= '9') {
+					continue;
+				}
+
+				pattern.replace(i, i+1, "'{'");
+				int closeBraceIndex = pattern.indexOf("}", i);
+				if (closeBraceIndex > 0) {
+					i = closeBraceIndex;
+					pattern.replace(i, i+1, "'}'");
+				}
+			}
+		}
+
+		return new MessageFormat(pattern.toString());
 	}
 
 	protected void init() {
@@ -114,7 +136,7 @@ public class HapiLocalizer {
 			myBundle.add(ResourceBundle.getBundle(nextName));
 		}
 	}
-	
+
 	/**
 	 * This <b>global setting</b> causes the localizer to fail if any attempts
 	 * are made to retrieve a key that does not exist. This method is primarily for
@@ -123,5 +145,9 @@ public class HapiLocalizer {
 	public static void setOurFailOnMissingMessage(boolean ourFailOnMissingMessage) {
 		HapiLocalizer.ourFailOnMissingMessage = ourFailOnMissingMessage;
 	}
-	
+
+	public static String toKey(Class<?> theType, String theKey) {
+		return theType.getName() + '.' + theKey;
+	}
+
 }

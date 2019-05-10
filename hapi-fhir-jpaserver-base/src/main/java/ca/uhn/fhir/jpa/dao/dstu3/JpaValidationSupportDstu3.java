@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
@@ -11,19 +11,24 @@ import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import java.util.Collections;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,33 +45,24 @@ import java.util.List;
  */
 
 @Transactional(value = TxType.REQUIRED)
-public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
+public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3, ApplicationContextAware {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaValidationSupportDstu3.class);
 
-	@Autowired
-	@Qualifier("myStructureDefinitionDaoDstu3")
 	private IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
-
-	@Autowired
-	@Qualifier("myValueSetDaoDstu3")
 	private IFhirResourceDao<ValueSet> myValueSetDao;
-
-	@Autowired
-	@Qualifier("myQuestionnaireDaoDstu3")
 	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
-
-	@Autowired
-	@Qualifier("myCodeSystemDaoDstu3")
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
-
 	@Autowired
 	private FhirContext myDstu3Ctx;
+	private ApplicationContext myApplicationContext;
 
+	/**
+	 * Constructor
+	 */
 	public JpaValidationSupportDstu3() {
 		super();
 	}
-
 
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
@@ -87,7 +83,18 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 
 	@Override
 	public CodeSystem fetchCodeSystem(FhirContext theCtx, String theSystem) {
+		if (isBlank(theSystem)) {
+			return null;
+		}
 		return fetchResource(theCtx, CodeSystem.class, theSystem);
+	}
+
+	@Override
+	public ValueSet fetchValueSet(FhirContext theCtx, String theSystem) {
+		if (isBlank(theSystem)) {
+			return null;
+		}
+		return fetchResource(theCtx, ValueSet.class, theSystem);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -161,6 +168,19 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3 {
 	@Transactional(value = TxType.SUPPORTS)
 	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
 		return false;
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
+		myApplicationContext = theApplicationContext;
+	}
+
+	@PostConstruct
+	public void start() {
+		myStructureDefinitionDao = myApplicationContext.getBean("myStructureDefinitionDaoDstu3", IFhirResourceDao.class);
+		myValueSetDao = myApplicationContext.getBean("myValueSetDaoDstu3", IFhirResourceDao.class);
+		myQuestionnaireDao = myApplicationContext.getBean("myQuestionnaireDaoDstu3", IFhirResourceDao.class);
+		myCodeSystemDao = myApplicationContext.getBean("myCodeSystemDaoDstu3", IFhirResourceDao.class);
 	}
 
 	@Override

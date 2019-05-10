@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -59,6 +59,10 @@ public class SearchModifierCodeEnumFactory implements EnumFactory<SearchModifier
       return SearchModifierCode.ABOVE;
     if ("type".equals(codeString))
       return SearchModifierCode.TYPE;
+    if ("identifier".equals(codeString))
+      return SearchModifierCode.IDENTIFIER;
+    if ("ofType".equals(codeString))
+      return SearchModifierCode.OFTYPE;
     throw new IllegalArgumentException("Unknown SearchModifierCode code '"+codeString+"'");
   }
 
@@ -83,6 +87,10 @@ public class SearchModifierCodeEnumFactory implements EnumFactory<SearchModifier
       return "above";
     if (code == SearchModifierCode.TYPE)
       return "type";
+    if (code == SearchModifierCode.IDENTIFIER)
+      return "identifier";
+    if (code == SearchModifierCode.OFTYPE)
+      return "ofType";
     return "?";
   }
 

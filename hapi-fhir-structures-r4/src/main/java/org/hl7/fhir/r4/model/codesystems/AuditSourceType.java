@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -69,7 +69,7 @@ public enum AuditSourceType {
          */
         _8, 
         /**
-         * other kind of device (defined by DICOM, but some other code/system can be used).
+         * Other kind of device (defined by DICOM, but some other code/system can be used).
          */
         _9, 
         /**
@@ -114,7 +114,7 @@ public enum AuditSourceType {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/security-source-type";
+          return "http://terminology.hl7.org/CodeSystem/security-source-type";
         }
         public String getDefinition() {
           switch (this) {
@@ -126,7 +126,7 @@ public enum AuditSourceType {
             case _6: return "Security server, e.g. a domain controller.";
             case _7: return "ISO level 1-3 network component.";
             case _8: return "ISO level 4-6 operating software.";
-            case _9: return "other kind of device (defined by DICOM, but some other code/system can be used).";
+            case _9: return "Other kind of device (defined by DICOM, but some other code/system can be used).";
             default: return "?";
           }
         }

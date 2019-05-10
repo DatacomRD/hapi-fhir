@@ -1,17 +1,36 @@
 package ca.uhn.fhir.rest.api.server;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nonnull;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,101 +45,11 @@ import java.nio.charset.Charset;
  * limitations under the License.
  * #L%
  */
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 
 public abstract class RequestDetails {
 
-	private class RequestOperationCallback implements IRequestOperationCallback {
-
-		private List<IServerInterceptor> getInterceptors() {
-			if (getServer() == null) {
-				return Collections.emptyList();
-			}
-			return getServer().getInterceptors();
-		}
-
-		@Override
-		public void resourceCreated(IBaseResource theResource) {
-			for (IServerInterceptor next : getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceCreated(RequestDetails.this, theResource);
-				}
-			}
-		}
-
-		@Override
-		public void resourceDeleted(IBaseResource theResource) {
-			for (IServerInterceptor next : getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceDeleted(RequestDetails.this, theResource);
-				}
-			}
-		}
-
-		@Override
-		public void resourcesCreated(Collection<? extends IBaseResource> theResource) {
-			for (IBaseResource next : theResource) {
-				resourceCreated(next);
-			}
-		}
-
-		@Override
-		public void resourcesDeleted(Collection<? extends IBaseResource> theResource) {
-			for (IBaseResource next : theResource) {
-				resourceDeleted(next);
-			}
-		}
-
-		/**
-		 * @deprecated Deprecated in HAPI FHIR 2.6 - Use {@link IRequestOperationCallback#resourceUpdated(IBaseResource, IBaseResource)} instead
-		 */
-		@Deprecated
-		public void resourcesUpdated(Collection<? extends IBaseResource> theResource) {
-			for (IBaseResource next : theResource) {
-				resourceUpdated(next);
-			}
-		}
-
-		
-		/**
-		 * @deprecated Deprecated in HAPI FHIR 2.6 - Use {@link IRequestOperationCallback#resourceUpdated(IBaseResource, IBaseResource)} instead
-		 */
-		@Deprecated
-		@Override
-		public void resourceUpdated(IBaseResource theResource) {
-			for (IServerInterceptor next : getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceUpdated(RequestDetails.this, theResource);
-				}
-			}
-		}
-
-		@Override
-		public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
-			for (IServerInterceptor next : getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceUpdated(RequestDetails.this, theOldResource, theNewResource);
-				}
-			}
-		}
-
-	}
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	private String myTenantId;
 	private String myCompartmentName;
 	private String myCompleteUrl;
 	private String myFhirServerBase;
@@ -128,7 +57,7 @@ public abstract class RequestDetails {
 	private String myOperation;
 	private Map<String, String[]> myParameters;
 	private byte[] myRequestContents;
-	private IRequestOperationCallback myRequestOperationCallback = new RequestOperationCallback();
+	private DeferredOperationCallback myDeferredInterceptorBroadcaster;
 	private String myRequestPath;
 	private RequestTypeEnum myRequestType;
 	private String myResourceName;
@@ -139,7 +68,19 @@ public abstract class RequestDetails {
 	private boolean mySubRequest;
 	private Map<String, List<String>> myUnqualifiedToQualifiedNames;
 	private Map<Object, Object> myUserData;
-	
+
+	/**
+	 * Constructor
+	 */
+	public RequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
+
+	public void addParameter(String theName, String[] theValues) {
+		getParameters();
+		myParameters.put(theName, theValues);
+	}
+
 	protected abstract byte[] getByteStreamRequestContents();
 
 	/**
@@ -150,15 +91,24 @@ public abstract class RequestDetails {
 	public String getCompartmentName() {
 		return myCompartmentName;
 	}
+
+	public void setCompartmentName(String theCompartmentName) {
+		myCompartmentName = theCompartmentName;
+	}
+
 	public String getCompleteUrl() {
 		return myCompleteUrl;
+	}
+
+	public void setCompleteUrl(String theCompleteUrl) {
+		myCompleteUrl = theCompleteUrl;
 	}
 
 	/**
 	 * Returns the <b>conditional URL</b> if this request has one, or <code>null</code> otherwise. For an
 	 * update or delete method, this is the part of the URL after the <code>?</code>. For a create, this
 	 * is the value of the <code>If-None-Exist</code> header.
-	 * 
+	 *
 	 * @param theOperationType The operation type to find the conditional URL for
 	 * @return Returns the <b>conditional URL</b> if this request has one, or <code>null</code> otherwise
 	 */
@@ -179,27 +129,31 @@ public abstract class RequestDetails {
 		if (this.getId() != null && this.getId().hasIdPart()) {
 			return null;
 		}
-		
+
 		int questionMarkIndex = this.getCompleteUrl().indexOf('?');
 		if (questionMarkIndex == -1) {
 			return null;
 		}
-		
+
 		return this.getResourceName() + this.getCompleteUrl().substring(questionMarkIndex);
 	}
 
 	/**
-	 * Returns the HAPI FHIR Context associated with this request 
+	 * Returns the HAPI FHIR Context associated with this request
 	 */
 	public abstract FhirContext getFhirContext();
 
 	/**
 	 * The fhir server base url, independant of the query being executed
-	 * 
+	 *
 	 * @return the fhir server base url
 	 */
 	public String getFhirServerBase() {
 		return myFhirServerBase;
+	}
+
+	public void setFhirServerBase(String theFhirServerBase) {
+		myFhirServerBase = theFhirServerBase;
 	}
 
 	public abstract String getHeader(String name);
@@ -210,17 +164,31 @@ public abstract class RequestDetails {
 		return myId;
 	}
 
+	public void setId(IIdType theId) {
+		myId = theId;
+	}
+
+	/**
+	 * Returns the attribute map for this request. Attributes are a place for user-supplied
+	 * objects of any type to be attached to an individual request. They can be used to pass information
+	 * between interceptor methods.
+	 */
+	public abstract Object getAttribute(String theAttributeName);
+
+	/**
+	 * Returns the attribute map for this request. Attributes are a place for user-supplied
+	 * objects of any type to be attached to an individual request. They can be used to pass information
+	 * between interceptor methods.
+	 */
+	public abstract void setAttribute(String theAttributeName, Object theAttributeValue);
+
 	/**
 	 * Retrieves the body of the request as binary data. Either this method or {@link #getReader} may be called to read
 	 * the body, not both.
 	 *
 	 * @return a {@link InputStream} object containing the body of the request
-	 *
-	 * @exception IllegalStateException
-	 *               if the {@link #getReader} method has already been called for this request
-	 *
-	 * @exception IOException
-	 *               if an input or output exception occurred
+	 * @throws IllegalStateException if the {@link #getReader} method has already been called for this request
+	 * @throws IOException           if an input or output exception occurred
 	 */
 	public abstract InputStream getInputStream() throws IOException;
 
@@ -228,29 +196,46 @@ public abstract class RequestDetails {
 		return myOperation;
 	}
 
+	public void setOperation(String theOperation) {
+		myOperation = theOperation;
+	}
+
 	public Map<String, String[]> getParameters() {
 		if (myParameters == null) {
-			return Collections.emptyMap();
+			myParameters = new HashMap<>();
 		}
-		return myParameters;
+		return Collections.unmodifiableMap(myParameters);
+	}
+
+	public void setParameters(Map<String, String[]> theParams) {
+		myParameters = theParams;
+		myUnqualifiedToQualifiedNames = null;
+
+		// Sanitize keys if necessary to prevent injection attacks
+		boolean needsSanitization = false;
+		for (String nextKey : theParams.keySet()) {
+			if (UrlUtil.isNeedsSanitization(nextKey)) {
+				needsSanitization = true;
+				break;
+			}
+		}
+		if (needsSanitization) {
+			myParameters = myParameters
+				.entrySet()
+				.stream()
+				.collect(Collectors.toMap(t -> UrlUtil.sanitizeUrlPart((String) ((Map.Entry) t).getKey()), t -> (String[]) ((Map.Entry) t).getValue()));
+		}
 	}
 
 	/**
 	 * Retrieves the body of the request as character data using a <code>BufferedReader</code>. The reader translates the
 	 * character data according to the character encoding used on the body. Either this method or {@link #getInputStream}
 	 * may be called to read the body, not both.
-	 * 
+	 *
 	 * @return a <code>Reader</code> containing the body of the request
-	 *
-	 * @exception UnsupportedEncodingException
-	 *               if the character set encoding used is not supported and the text cannot be decoded
-	 *
-	 * @exception IllegalStateException
-	 *               if {@link #getInputStream} method has been called on this request
-	 *
-	 * @exception IOException
-	 *               if an input or output exception occurred
-	 *
+	 * @throws UnsupportedEncodingException if the character set encoding used is not supported and the text cannot be decoded
+	 * @throws IllegalStateException        if {@link #getInputStream} method has been called on this request
+	 * @throws IOException                  if an input or output exception occurred
 	 * @see javax.servlet.http.HttpServletRequest#getInputStream
 	 */
 	public abstract Reader getReader() throws IOException;
@@ -258,10 +243,13 @@ public abstract class RequestDetails {
 	/**
 	 * Returns an invoker that can be called from user code to advise the server interceptors
 	 * of any nested operations being invoked within operations. This invoker acts as a proxy for
-	 * all interceptors  
+	 * all interceptors
 	 */
-	public IRequestOperationCallback getRequestOperationCallback() {
-		return myRequestOperationCallback;
+	public IInterceptorBroadcaster getInterceptorBroadcaster() {
+		if (myDeferredInterceptorBroadcaster != null) {
+			return myDeferredInterceptorBroadcaster;
+		}
+		return myInterceptorBroadcaster;
 	}
 
 	/**
@@ -274,24 +262,49 @@ public abstract class RequestDetails {
 		return myRequestPath;
 	}
 
+	public void setRequestPath(String theRequestPath) {
+		assert theRequestPath.length() == 0 || theRequestPath.charAt(0) != '/';
+		myRequestPath = theRequestPath;
+	}
+
 	public RequestTypeEnum getRequestType() {
 		return myRequestType;
+	}
+
+	public void setRequestType(RequestTypeEnum theRequestType) {
+		myRequestType = theRequestType;
 	}
 
 	public String getResourceName() {
 		return myResourceName;
 	}
 
+	public void setResourceName(String theResourceName) {
+		myResourceName = theResourceName;
+	}
+
 	public IRestfulResponse getResponse() {
 		return myResponse;
+	}
+
+	public void setResponse(IRestfulResponse theResponse) {
+		this.myResponse = theResponse;
 	}
 
 	public RestOperationTypeEnum getRestOperationType() {
 		return myRestOperationType;
 	}
 
+	public void setRestOperationType(RestOperationTypeEnum theRestOperationType) {
+		myRestOperationType = theRestOperationType;
+	}
+
 	public String getSecondaryOperation() {
 		return mySecondaryOperation;
+	}
+
+	public void setSecondaryOperation(String theSecondaryOperation) {
+		mySecondaryOperation = theSecondaryOperation;
 	}
 
 	public abstract IRestfulServerDefaults getServer();
@@ -301,7 +314,40 @@ public abstract class RequestDetails {
 	 */
 	public abstract String getServerBaseForRequest();
 
+	public String getTenantId() {
+		return myTenantId;
+	}
+
+	public void setTenantId(String theTenantId) {
+		myTenantId = theTenantId;
+	}
+
 	public Map<String, List<String>> getUnqualifiedToQualifiedNames() {
+		if (myUnqualifiedToQualifiedNames == null) {
+			for (String next : myParameters.keySet()) {
+				for (int i = 0; i < next.length(); i++) {
+					char nextChar = next.charAt(i);
+					if (nextChar == ':' || nextChar == '.') {
+						if (myUnqualifiedToQualifiedNames == null) {
+							myUnqualifiedToQualifiedNames = new HashMap<>();
+						}
+						String unqualified = next.substring(0, i);
+						List<String> list = myUnqualifiedToQualifiedNames.get(unqualified);
+						if (list == null) {
+							list = new ArrayList<>(4);
+							myUnqualifiedToQualifiedNames.put(unqualified, list);
+						}
+						list.add(next);
+						break;
+					}
+				}
+			}
+		}
+
+		if (myUnqualifiedToQualifiedNames == null) {
+			myUnqualifiedToQualifiedNames = Collections.emptyMap();
+		}
+
 		return myUnqualifiedToQualifiedNames;
 	}
 
@@ -312,14 +358,14 @@ public abstract class RequestDetails {
 	 * <p>
 	 * A new map is created for each individual request that is handled by the server,
 	 * so this map can be used (for example) to pass authorization details from an interceptor
-	 * to the resource providers, or from an interceptor's {@link IServerInterceptor#incomingRequestPreHandled(RestOperationTypeEnum, ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails)} 
+	 * to the resource providers, or from an interceptor's {@link IServerInterceptor#incomingRequestPreHandled(RestOperationTypeEnum, ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails)}
 	 * method to the {@link IServerInterceptor#outgoingResponse(RequestDetails, org.hl7.fhir.instance.model.api.IBaseResource, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)}
-	 * method.  
+	 * method.
 	 * </p>
 	 */
 	public Map<Object, Object> getUserData() {
 		if (myUserData == null) {
-			myUserData = new HashMap<Object, Object>();
+			myUserData = new HashMap<>();
 		}
 		return myUserData;
 	}
@@ -328,8 +374,12 @@ public abstract class RequestDetails {
 		return myRespondGzip;
 	}
 
+	public void setRespondGzip(boolean theRespondGzip) {
+		myRespondGzip = theRespondGzip;
+	}
+
 	/**
-	 * Is this request a sub-request (i.e. a request within a batch or transaction)? This 
+	 * Is this request a sub-request (i.e. a request within a batch or transaction)? This
 	 * flag is used internally by hapi-fhir-jpaserver-base, but not used in the plain server
 	 * library. You may use it in your client code as a hint when implementing transaction logic in the plain
 	 * server.
@@ -341,92 +391,8 @@ public abstract class RequestDetails {
 		return mySubRequest;
 	}
 
-	public final byte[] loadRequestContents() {
-		if (myRequestContents == null) {
-			myRequestContents = getByteStreamRequestContents();
-		}
-		return myRequestContents;
-	}
-
-	public void setCompartmentName(String theCompartmentName) {
-		myCompartmentName = theCompartmentName;
-	}
-
-	public void setCompleteUrl(String theCompleteUrl) {
-		myCompleteUrl = theCompleteUrl;
-	}
-
-	public void setFhirServerBase(String theFhirServerBase) {
-		myFhirServerBase = theFhirServerBase;
-	}
-
-	public void setId(IIdType theId) {
-		myId = theId;
-	}
-
-	public void setOperation(String theOperation) {
-		myOperation = theOperation;
-	}
-
-	public void setParameters(Map<String, String[]> theParams) {
-		myParameters = theParams;
-
-		for (String next : theParams.keySet()) {
-			for (int i = 0; i < next.length(); i++) {
-				char nextChar = next.charAt(i);
-				if (nextChar == ':' || nextChar == '.') {
-					if (myUnqualifiedToQualifiedNames == null) {
-						myUnqualifiedToQualifiedNames = new HashMap<String, List<String>>();
-					}
-					String unqualified = next.substring(0, i);
-					List<String> list = myUnqualifiedToQualifiedNames.get(unqualified);
-					if (list == null) {
-						list = new ArrayList<String>(4);
-						myUnqualifiedToQualifiedNames.put(unqualified, list);
-					}
-					list.add(next);
-					break;
-				}
-			}
-		}
-
-		if (myUnqualifiedToQualifiedNames == null) {
-			myUnqualifiedToQualifiedNames = Collections.emptyMap();
-		}
-
-	}
-
-	public void setRequestPath(String theRequestPath) {
-		assert theRequestPath.length() == 0 || theRequestPath.charAt(0) != '/';
-		myRequestPath = theRequestPath;
-	}
-
-	public void setRequestType(RequestTypeEnum theRequestType) {
-		myRequestType = theRequestType;
-	}
-
-	public void setResourceName(String theResourceName) {
-		myResourceName = theResourceName;
-	}
-
-	public void setRespondGzip(boolean theRespondGzip) {
-		myRespondGzip = theRespondGzip;
-	}
-
-	public void setResponse(IRestfulResponse theResponse) {
-		this.myResponse = theResponse;
-	}
-	
-	public void setRestOperationType(RestOperationTypeEnum theRestOperationType) {
-		myRestOperationType = theRestOperationType;
-	}
-
-	public void setSecondaryOperation(String theSecondaryOperation) {
-		mySecondaryOperation = theSecondaryOperation;
-	}
-
 	/**
-	 * Is this request a sub-request (i.e. a request within a batch or transaction)? This 
+	 * Is this request a sub-request (i.e. a request within a batch or transaction)? This
 	 * flag is used internally by hapi-fhir-jpaserver-base, but not used in the plain server
 	 * library. You may use it in your client code as a hint when implementing transaction logic in the plain
 	 * server.
@@ -437,5 +403,87 @@ public abstract class RequestDetails {
 	public void setSubRequest(boolean theSubRequest) {
 		mySubRequest = theSubRequest;
 	}
+
+	public final byte[] loadRequestContents() {
+		if (myRequestContents == null) {
+			myRequestContents = getByteStreamRequestContents();
+		}
+		return myRequestContents;
+	}
+
+	public void removeParameter(String theName) {
+		Validate.notNull(theName, "theName must not be null");
+		getParameters();
+		myParameters.remove(theName);
+	}
+
+	/**
+	 * This method may be used to modify the contents of the incoming
+	 * request by hardcoding a value which will be used instead of the
+	 * value received by the client.
+	 * <p>
+	 * This method is useful for modifying the request body prior
+	 * to parsing within interceptors. It generally only has an
+	 * impact when called in the {@link IServerInterceptor#incomingRequestPostProcessed(RequestDetails, HttpServletRequest, HttpServletResponse)}
+	 * method
+	 * </p>
+	 */
+	public void setRequestContents(byte[] theRequestContents) {
+		myRequestContents = theRequestContents;
+	}
+
+	/**
+	 * Sets the {@link #getInterceptorBroadcaster()} () interceptor broadcaster} handler in
+	 * deferred mode, meaning that any notifications will be queued up for delivery, but
+	 * won't be delivered until {@link #stopDeferredRequestOperationCallbackAndRunDeferredItems()}
+	 * is called.
+	 */
+	public void startDeferredOperationCallback() {
+		myDeferredInterceptorBroadcaster = new DeferredOperationCallback(myInterceptorBroadcaster);
+	}
+
+	/**
+	 * @see #startDeferredOperationCallback()
+	 */
+	public void stopDeferredRequestOperationCallbackAndRunDeferredItems() {
+		DeferredOperationCallback deferredCallback = myDeferredInterceptorBroadcaster;
+		deferredCallback.playDeferredActions();
+		myInterceptorBroadcaster = deferredCallback.getWrap();
+	}
+
+
+	private class DeferredOperationCallback implements IInterceptorBroadcaster {
+
+		private final IInterceptorBroadcaster myWrap;
+		private final List<Runnable> myDeferredTasks = new ArrayList<>();
+
+		private DeferredOperationCallback(@Nonnull IInterceptorBroadcaster theWrap) {
+			Validate.notNull(theWrap);
+			myWrap = theWrap;
+		}
+
+
+		void playDeferredActions() {
+			myDeferredTasks.forEach(Runnable::run);
+		}
+
+		IInterceptorBroadcaster getWrap() {
+			return myWrap;
+		}
+
+		@Override
+		public boolean callHooks(Pointcut thePointcut, HookParams theParams) {
+			myDeferredTasks.add(() -> myWrap.callHooks(thePointcut, theParams));
+			return true;
+		}
+
+		@Override
+		public Object callHooksAndReturnObject(Pointcut thePointcut, HookParams theParams) {
+			myDeferredTasks.add(() -> myWrap.callHooksAndReturnObject(thePointcut, theParams));
+			return null;
+		}
+
+	}
+
 
 }

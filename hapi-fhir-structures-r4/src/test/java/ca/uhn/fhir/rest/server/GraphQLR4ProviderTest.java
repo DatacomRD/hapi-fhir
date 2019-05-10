@@ -22,9 +22,8 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
 import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.utils.GraphQLEngine;
 import org.hl7.fhir.utilities.graphql.Argument;
-import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
-import org.hl7.fhir.utilities.graphql.ReferenceResolution;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -54,7 +53,7 @@ public class GraphQLR4ProviderTest {
 	@Test
 	public void testGraphInstance() throws Exception {
 		String query = "{name{family,given}}";
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$graphql?query=" + UrlUtil.escape(query));
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -80,7 +79,7 @@ public class GraphQLR4ProviderTest {
 	@Test
 	public void testGraphInstanceWithFhirpath() throws Exception {
 		String query = "{name(fhirpath:\"family.exists()\"){text,given,family}}";
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$graphql?query=" + UrlUtil.escape(query));
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -104,7 +103,7 @@ public class GraphQLR4ProviderTest {
 	@Test
 	public void testGraphSystemInstance() throws Exception {
 		String query = "{Patient(id:123){id,name{given,family}}}";
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$graphql?query=" + UrlUtil.escape(query));
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -132,7 +131,7 @@ public class GraphQLR4ProviderTest {
 	@Test
 	public void testGraphSystemList() throws Exception {
 		String query = "{PatientList(name:\"pet\"){name{family,given}}}";
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$graphql?query=" + UrlUtil.escape(query));
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -216,7 +215,7 @@ public class GraphQLR4ProviderTest {
 
 	}
 
-	private static class MyStorageServices implements IGraphQLStorageServices<Resource, Reference, Bundle> {
+	private static class MyStorageServices implements GraphQLEngine.IGraphQLStorageServices {
 		@Override
 		public void listResources(Object theAppInfo, String theType, List<Argument> theSearchParams, List<Resource> theMatches) throws FHIRException {
 			ourLog.info("listResources of {} - {}", theType, theSearchParams);
@@ -264,7 +263,7 @@ public class GraphQLR4ProviderTest {
 		}
 
 		@Override
-		public ReferenceResolution<Resource> lookup(Object theAppInfo, Resource theContext, Reference theReference) throws FHIRException {
+		public ReferenceResolution lookup(Object theAppInfo, Resource theContext, Reference theReference) throws FHIRException {
 			ourLog.info("lookup from {} to {}", theContext.getIdElement().getValue(), theReference.getReference());
 			return null;
 		}

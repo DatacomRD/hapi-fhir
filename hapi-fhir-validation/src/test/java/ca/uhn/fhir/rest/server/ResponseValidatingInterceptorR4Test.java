@@ -20,11 +20,14 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.*;
 import org.mockito.Mockito;
 
@@ -55,9 +58,7 @@ public class ResponseValidatingInterceptorR4Test {
 	@Before
 	public void before() {
 		myReturnResource = null;
-		while (ourServlet.getInterceptors().size() > 0) {
-			ourServlet.unregisterInterceptor(ourServlet.getInterceptors().get(0));
-		}
+		ourServlet.getInterceptorService().unregisterAllInterceptors();
 
 		myInterceptor = new ResponseValidatingInterceptor();
 		// myInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
@@ -83,7 +84,7 @@ public class ResponseValidatingInterceptorR4Test {
 		myInterceptor.addValidatorModule(module);
 		myInterceptor.setIgnoreValidatorExceptions(false);
 
-		Mockito.doThrow(NullPointerException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
+		Mockito.doThrow(new NullPointerException("SOME MESSAGE")).when(module).validateResource(Mockito.any(IValidationContext.class));
 		
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient?foo=bar");
 		HttpResponse status = ourClient.execute(httpPost);
@@ -95,7 +96,7 @@ public class ResponseValidatingInterceptorR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(500, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<diagnostics value=\"java.lang.NullPointerException\"/>"));
+		assertThat(responseContent, containsString("<diagnostics value=\"SOME MESSAGE\"/>"));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -260,6 +261,7 @@ public class ResponseValidatingInterceptorR4Test {
 	public void testOperationOutcome() throws Exception {
 		myInterceptor.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 		Patient patient = new Patient();
+		patient.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		patient.addIdentifier().setValue("002");
 		patient.setGender(AdministrativeGender.MALE);
 		myReturnResource = patient;
@@ -283,7 +285,6 @@ public class ResponseValidatingInterceptorR4Test {
 	 * Ignored until #264 is fixed
 	 */
 	@Test
-	@Ignore
 	public void testSearchJsonInvalidNoValidatorsSpecified() throws Exception {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
@@ -302,13 +303,13 @@ public class ResponseValidatingInterceptorR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), containsString("X-FHIR-Response-Validation"));
 		assertThat(responseContent, containsString("<severity value=\"error\"/>"));
 	}
 
 	@Test
 	public void testSearchJsonValidNoValidatorsSpecified() throws Exception {
 		Patient patient = new Patient();
+		patient.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		patient.addIdentifier().setValue("002");
 		patient.setGender(AdministrativeGender.MALE);
 		myReturnResource = patient;
@@ -333,6 +334,7 @@ public class ResponseValidatingInterceptorR4Test {
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 
 		Patient patient = new Patient();
+		patient.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		patient.addIdentifier().setValue("002");
 		patient.setGender(AdministrativeGender.MALE);
 		myReturnResource = patient;
@@ -381,7 +383,6 @@ public class ResponseValidatingInterceptorR4Test {
 	 * Ignored until #264 is fixed
 	 */
 	@Test
-	@Ignore
 	public void testSearchXmlInvalidNoValidatorsSpecified() throws Exception {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
@@ -400,12 +401,13 @@ public class ResponseValidatingInterceptorR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
-		assertThat(status.toString(), containsString("X-FHIR-Response-Validation"));
+		Assert.assertThat(responseContent, Matchers.containsString("<severity value=\"error\"/>"));
 	}
 
 	@Test
 	public void testSearchXmlValidNoValidatorsSpecified() throws Exception {
 		Patient patient = new Patient();
+		patient.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		patient.addIdentifier().setValue("002");
 		patient.setGender(AdministrativeGender.MALE);
 		myReturnResource = patient;

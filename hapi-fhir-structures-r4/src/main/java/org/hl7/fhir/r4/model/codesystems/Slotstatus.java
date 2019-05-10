@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,7 +45,7 @@ public enum Slotstatus {
          */
         FREE, 
         /**
-         * Indicates that the time interval is busy and that the interval can not be scheduled.
+         * Indicates that the time interval is busy and that the interval cannot be scheduled.
          */
         BUSYUNAVAILABLE, 
         /**
@@ -92,7 +92,7 @@ public enum Slotstatus {
           switch (this) {
             case BUSY: return "Indicates that the time interval is busy because one  or more events have been scheduled for that interval.";
             case FREE: return "Indicates that the time interval is free for scheduling.";
-            case BUSYUNAVAILABLE: return "Indicates that the time interval is busy and that the interval can not be scheduled.";
+            case BUSYUNAVAILABLE: return "Indicates that the time interval is busy and that the interval cannot be scheduled.";
             case BUSYTENTATIVE: return "Indicates that the time interval is busy because one or more events have been tentatively scheduled for that interval.";
             case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
             default: return "?";

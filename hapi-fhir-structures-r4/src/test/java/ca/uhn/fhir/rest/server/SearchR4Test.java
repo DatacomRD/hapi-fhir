@@ -1,6 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
@@ -14,6 +16,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -25,10 +28,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.containsString;
@@ -88,9 +89,9 @@ public class SearchR4Test {
 		String linkSelf;
 
 		// Initial search
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=foo%7Cbar&_elements=name");
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=foo%7Cbar&_elements=name&_elements:exclude=birthDate,active");
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
-		assertThat(toJson(bundle), not(containsString("active")));
+		assertThat(toJson(bundle), not(containsString("\"active\"")));
 		linkSelf = bundle.getLink(Constants.LINK_SELF).getUrl();
 		assertThat(linkSelf, containsString("_elements=name"));
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
@@ -101,24 +102,80 @@ public class SearchR4Test {
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
-		assertThat(toJson(bundle), not(containsString("active")));
+		assertThat(toJson(bundle), not(containsString("\"active\"")));
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext, containsString("_elements=name"));
+		assertThat(linkNext, containsString("_elements:exclude=active,birthDate"));
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
-		assertThat(toJson(bundle), not(containsString("active")));
+		assertThat(toJson(bundle), not(containsString("\"active\"")));
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext, containsString("_elements=name"));
+		assertThat(linkNext, containsString("_elements:exclude=active,birthDate"));
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
-		assertThat(toJson(bundle), not(containsString("active")));
+		assertThat(toJson(bundle), not(containsString("\"active\"")));
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext, containsString("_elements=name"));
+		assertThat(linkNext, containsString("_elements:exclude=active,birthDate"));
 
+	}
+
+	/**
+	 * See #836
+	 */
+	@Test
+	public void testIncludeSingleParameter() throws Exception {
+		HttpGet httpGet;
+		Bundle bundle;
+
+		// No include specified
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/MedicationRequest");
+		bundle = executeAndReturnBundle(httpGet);
+		assertEquals(1, bundle.getEntry().size());
+	}
+
+	/**
+	 * See #836
+	 */
+	@Test
+	public void testIncludeSingleParameterWithIncludeStar() throws Exception {
+		HttpGet httpGet;
+		Bundle bundle;
+
+		// * include specified
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/MedicationRequest?_include=" + UrlUtil.escapeUrlParam("*"));
+		bundle = executeAndReturnBundle(httpGet);
+		assertEquals(2, bundle.getEntry().size());
+	}
+
+	/**
+	 * See #836
+	 */
+	@Test
+	public void testIncludeSingleParameterWithIncludeByName() throws Exception {
+		HttpGet httpGet;
+		Bundle bundle;
+
+		// MedicationRequest:medication include specified
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/MedicationRequest?_include=" + UrlUtil.escapeUrlParam(MedicationRequest.INCLUDE_MEDICATION.getValue()));
+		bundle = executeAndReturnBundle(httpGet);
+		assertEquals(2, bundle.getEntry().size());
+
+	}
+
+	private Bundle executeAndReturnBundle(HttpGet theHttpGet) throws IOException {
+		Bundle bundle;
+		try (CloseableHttpResponse status = ourClient.execute(theHttpGet)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+		}
+		return bundle;
 	}
 
 	@Test
@@ -131,25 +188,25 @@ public class SearchR4Test {
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=foo%7Cbar&_format=" + Constants.CT_FHIR_JSON_NEW);
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_format=" + UrlUtil.escape(Constants.CT_FHIR_JSON_NEW)));
+		assertThat(linkNext, containsString("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW)));
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_format=" + UrlUtil.escape(Constants.CT_FHIR_JSON_NEW)));
+		assertThat(linkNext, containsString("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW)));
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_format=" + UrlUtil.escape(Constants.CT_FHIR_JSON_NEW)));
+		assertThat(linkNext, containsString("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW)));
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_format=" + UrlUtil.escape(Constants.CT_FHIR_JSON_NEW)));
+		assertThat(linkNext, containsString("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW)));
 
 	}
 
@@ -356,37 +413,6 @@ public class SearchR4Test {
 		return ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(theBundle);
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
-
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setDefaultResponseEncoding(EncodingEnum.JSON);
-		servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
-
-		servlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		ourServer.start();
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
-
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Override
@@ -411,6 +437,71 @@ public class SearchR4Test {
 			}
 			return retVal;
 		}
+
+	}
+
+	public static class DummyMedicationRequestResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return MedicationRequest.class;
+		}
+
+		@SuppressWarnings("rawtypes")
+		@Search()
+		public List<IBaseResource> search(
+			@IncludeParam Set<Include> theIncludes
+		) {
+			MedicationRequest mr = new MedicationRequest();
+			mr.setId("1");
+			mr.setStatus(MedicationRequest.MedicationRequestStatus.ACTIVE);
+
+			Medication m = new Medication();
+			m.setId("2");
+			m.setStatus(Medication.MedicationStatus.ENTEREDINERROR);
+
+			mr.setMedication(new Reference(m));
+
+			ArrayList<IBaseResource> retVal = Lists.newArrayList(mr);
+
+			if (theIncludes.contains(MedicationRequest.INCLUDE_MEDICATION)) {
+				retVal.add(m);
+			}
+
+			return retVal;
+		}
+
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
+
+		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
+		DummyMedicationRequestResourceProvider medRequestProvider = new DummyMedicationRequestResourceProvider();
+
+		ServletHandler proxyHandler = new ServletHandler();
+		RestfulServer servlet = new RestfulServer(ourCtx);
+		servlet.setDefaultResponseEncoding(EncodingEnum.JSON);
+		servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
+
+		servlet.setResourceProviders(patientProvider, medRequestProvider);
+		ServletHolder servletHolder = new ServletHolder(servlet);
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(proxyHandler);
+		ourServer.start();
+
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourClient = builder.build();
 
 	}
 

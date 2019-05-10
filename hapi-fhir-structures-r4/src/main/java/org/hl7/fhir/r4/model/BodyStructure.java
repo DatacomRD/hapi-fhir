@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Record details about an anatomical structure.  This resource may be used when a coded concept does not provide the necessary detail needed for the use case.
  */
-@ResourceDef(name="BodyStructure", profile="http://hl7.org/fhir/Profile/BodyStructure")
+@ResourceDef(name="BodyStructure", profile="http://hl7.org/fhir/StructureDefinition/BodyStructure")
 public class BodyStructure extends DomainResource {
 
     /**
@@ -87,10 +87,10 @@ public class BodyStructure extends DomainResource {
     protected List<CodeableConcept> locationQualifier;
 
     /**
-     * A summary, charactarization or explanation of the body structure.
+     * A summary, characterization or explanation of the body structure.
      */
     @Child(name = "description", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Text description", formalDefinition="A summary, charactarization or explanation of the body structure." )
+    @Description(shortDefinition="Text description", formalDefinition="A summary, characterization or explanation of the body structure." )
     protected StringType description;
 
     /**
@@ -329,7 +329,7 @@ public class BodyStructure extends DomainResource {
     }
 
     /**
-     * @return {@link #description} (A summary, charactarization or explanation of the body structure.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A summary, characterization or explanation of the body structure.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public StringType getDescriptionElement() { 
       if (this.description == null)
@@ -349,7 +349,7 @@ public class BodyStructure extends DomainResource {
     }
 
     /**
-     * @param value {@link #description} (A summary, charactarization or explanation of the body structure.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A summary, characterization or explanation of the body structure.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public BodyStructure setDescriptionElement(StringType value) { 
       this.description = value;
@@ -357,14 +357,14 @@ public class BodyStructure extends DomainResource {
     }
 
     /**
-     * @return A summary, charactarization or explanation of the body structure.
+     * @return A summary, characterization or explanation of the body structure.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A summary, charactarization or explanation of the body structure.
+     * @param value A summary, characterization or explanation of the body structure.
      */
     public BodyStructure setDescription(String value) { 
       if (Utilities.noString(value))
@@ -481,7 +481,7 @@ public class BodyStructure extends DomainResource {
         children.add(new Property("morphology", "CodeableConcept", "The kind of structure being represented by the body structure at `BodyStructure.location`.  This can define both normal and abnormal morphologies.", 0, 1, morphology));
         children.add(new Property("location", "CodeableConcept", "The anatomical location or region of the specimen, lesion, or body structure.", 0, 1, location));
         children.add(new Property("locationQualifier", "CodeableConcept", "Qualifier to refine the anatomical location.  These include qualifiers for laterality, relative location, directionality, number, and plane.", 0, java.lang.Integer.MAX_VALUE, locationQualifier));
-        children.add(new Property("description", "string", "A summary, charactarization or explanation of the body structure.", 0, 1, description));
+        children.add(new Property("description", "string", "A summary, characterization or explanation of the body structure.", 0, 1, description));
         children.add(new Property("image", "Attachment", "Image or images used to identify a location.", 0, java.lang.Integer.MAX_VALUE, image));
         children.add(new Property("patient", "Reference(Patient)", "The person to which the body site belongs.", 0, 1, patient));
       }
@@ -494,7 +494,7 @@ public class BodyStructure extends DomainResource {
         case 1807231644: /*morphology*/  return new Property("morphology", "CodeableConcept", "The kind of structure being represented by the body structure at `BodyStructure.location`.  This can define both normal and abnormal morphologies.", 0, 1, morphology);
         case 1901043637: /*location*/  return new Property("location", "CodeableConcept", "The anatomical location or region of the specimen, lesion, or body structure.", 0, 1, location);
         case 433081461: /*locationQualifier*/  return new Property("locationQualifier", "CodeableConcept", "Qualifier to refine the anatomical location.  These include qualifiers for laterality, relative location, directionality, number, and plane.", 0, java.lang.Integer.MAX_VALUE, locationQualifier);
-        case -1724546052: /*description*/  return new Property("description", "string", "A summary, charactarization or explanation of the body structure.", 0, 1, description);
+        case -1724546052: /*description*/  return new Property("description", "string", "A summary, characterization or explanation of the body structure.", 0, 1, description);
         case 100313435: /*image*/  return new Property("image", "Attachment", "Image or images used to identify a location.", 0, java.lang.Integer.MAX_VALUE, image);
         case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The person to which the body site belongs.", 0, 1, patient);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -674,12 +674,12 @@ public class BodyStructure extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof BodyStructure))
+        if (!(other_ instanceof BodyStructure))
           return false;
-        BodyStructure o = (BodyStructure) other;
+        BodyStructure o = (BodyStructure) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(active, o.active, true) && compareDeep(morphology, o.morphology, true)
            && compareDeep(location, o.location, true) && compareDeep(locationQualifier, o.locationQualifier, true)
            && compareDeep(description, o.description, true) && compareDeep(image, o.image, true) && compareDeep(patient, o.patient, true)
@@ -687,12 +687,12 @@ public class BodyStructure extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof BodyStructure))
+        if (!(other_ instanceof BodyStructure))
           return false;
-        BodyStructure o = (BodyStructure) other;
+        BodyStructure o = (BodyStructure) other_;
         return compareValues(active, o.active, true) && compareValues(description, o.description, true);
       }
 

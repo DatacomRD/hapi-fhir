@@ -11,6 +11,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import com.helger.commons.io.stream.StringInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.http.*;
@@ -29,7 +30,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.google.common.base.Charsets;
-import com.phloc.commons.io.streams.StringInputStream;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -371,46 +371,6 @@ public class GenericClientDstu3Test {
 	}
 
 	@Test
-	public void testAcceptHeaderWithEncodingSpecified() throws Exception {
-		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
-
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).then(new Answer<InputStream>() {
-			@Override
-			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
-			}
-		});
-
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
-		int idx = 0;
-
-		client.setEncoding(EncodingEnum.JSON);
-		client.search()
-				.forResource("Device")
-				.returnBundle(Bundle.class)
-				.execute();
-
-		assertEquals("http://example.com/fhir/Device?_format=json", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals("application/fhir+json;q=1.0, application/json+fhir;q=0.9", capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
-		idx++;
-
-		client.setEncoding(EncodingEnum.XML);
-		client.search()
-				.forResource("Device")
-				.returnBundle(Bundle.class)
-				.execute();
-
-		assertEquals("http://example.com/fhir/Device?_format=xml", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals("application/fhir+xml;q=1.0, application/xml+fhir;q=0.9", capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
-		idx++;
-
-	}
-
-	@Test
 	public void testBinaryCreateWithFhirContentType() throws Exception {
 		IParser p = ourCtx.newXmlParser();
 
@@ -496,7 +456,7 @@ public class GenericClientDstu3Test {
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenThrow(IllegalStateException.class, RuntimeException.class, Exception.class);
+		when(myHttpResponse.getEntity().getContent()).thenThrow(IllegalStateException.class, RuntimeException.class, IOException.class);
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
@@ -504,7 +464,7 @@ public class GenericClientDstu3Test {
 			client.read().resource(Patient.class).withId("1").execute();
 			fail();
 		} catch (FhirClientConnectionException e) {
-			assertEquals("java.lang.IllegalStateException", e.getMessage());
+			assertEquals(null, e.getMessage());
 		}
 
 		try {
@@ -518,7 +478,7 @@ public class GenericClientDstu3Test {
 			client.read().resource(Patient.class).withId("1").execute();
 			fail();
 		} catch (FhirClientConnectionException e) {
-			assertEquals("java.lang.Exception", e.getMessage());
+			assertThat(e.getMessage(), containsString("java.io.IOException"));
 		}
 	}
 

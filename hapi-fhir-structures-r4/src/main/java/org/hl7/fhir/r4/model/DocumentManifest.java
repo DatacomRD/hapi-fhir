@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -46,234 +46,8 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A collection of documents compiled for a purpose together with metadata that applies to the collection.
  */
-@ResourceDef(name="DocumentManifest", profile="http://hl7.org/fhir/Profile/DocumentManifest")
+@ResourceDef(name="DocumentManifest", profile="http://hl7.org/fhir/StructureDefinition/DocumentManifest")
 public class DocumentManifest extends DomainResource {
-
-    @Block()
-    public static class DocumentManifestAgentComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Specification of the participation type the agent played.
-         */
-        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="How agent participated", formalDefinition="Specification of the participation type the agent played." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/participation-role-type")
-        protected CodeableConcept type;
-
-        /**
-         * Identifies who is the agent. Such as the author of the manifest, and adding  documents to it.
-         */
-        @Child(name = "who", type = {Practitioner.class, PractitionerRole.class, Organization.class, Device.class, Patient.class, RelatedPerson.class}, order=2, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Who and/or what had an agent participation", formalDefinition="Identifies who is the agent. Such as the author of the manifest, and adding  documents to it." )
-        protected Reference who;
-
-        /**
-         * The actual object that is the target of the reference (Identifies who is the agent. Such as the author of the manifest, and adding  documents to it.)
-         */
-        protected Resource whoTarget;
-
-        private static final long serialVersionUID = -1480994789L;
-
-    /**
-     * Constructor
-     */
-      public DocumentManifestAgentComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public DocumentManifestAgentComponent(Reference who) {
-        super();
-        this.who = who;
-      }
-
-        /**
-         * @return {@link #type} (Specification of the participation type the agent played.)
-         */
-        public CodeableConcept getType() { 
-          if (this.type == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create DocumentManifestAgentComponent.type");
-            else if (Configuration.doAutoCreate())
-              this.type = new CodeableConcept(); // cc
-          return this.type;
-        }
-
-        public boolean hasType() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        /**
-         * @param value {@link #type} (Specification of the participation type the agent played.)
-         */
-        public DocumentManifestAgentComponent setType(CodeableConcept value) { 
-          this.type = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #who} (Identifies who is the agent. Such as the author of the manifest, and adding  documents to it.)
-         */
-        public Reference getWho() { 
-          if (this.who == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create DocumentManifestAgentComponent.who");
-            else if (Configuration.doAutoCreate())
-              this.who = new Reference(); // cc
-          return this.who;
-        }
-
-        public boolean hasWho() { 
-          return this.who != null && !this.who.isEmpty();
-        }
-
-        /**
-         * @param value {@link #who} (Identifies who is the agent. Such as the author of the manifest, and adding  documents to it.)
-         */
-        public DocumentManifestAgentComponent setWho(Reference value) { 
-          this.who = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #who} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Identifies who is the agent. Such as the author of the manifest, and adding  documents to it.)
-         */
-        public Resource getWhoTarget() { 
-          return this.whoTarget;
-        }
-
-        /**
-         * @param value {@link #who} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Identifies who is the agent. Such as the author of the manifest, and adding  documents to it.)
-         */
-        public DocumentManifestAgentComponent setWhoTarget(Resource value) { 
-          this.whoTarget = value;
-          return this;
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("type", "CodeableConcept", "Specification of the participation type the agent played.", 0, 1, type));
-          children.add(new Property("who", "Reference(Practitioner|PractitionerRole|Organization|Device|Patient|RelatedPerson)", "Identifies who is the agent. Such as the author of the manifest, and adding  documents to it.", 0, 1, who));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Specification of the participation type the agent played.", 0, 1, type);
-          case 117694: /*who*/  return new Property("who", "Reference(Practitioner|PractitionerRole|Organization|Device|Patient|RelatedPerson)", "Identifies who is the agent. Such as the author of the manifest, and adding  documents to it.", 0, 1, who);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
-        case 117694: /*who*/ return this.who == null ? new Base[0] : new Base[] {this.who}; // Reference
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3575610: // type
-          this.type = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        case 117694: // who
-          this.who = castToReference(value); // Reference
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type")) {
-          this.type = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("who")) {
-          this.who = castToReference(value); // Reference
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3575610:  return getType(); 
-        case 117694:  return getWho(); 
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
-        case 117694: /*who*/ return new String[] {"Reference"};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("type")) {
-          this.type = new CodeableConcept();
-          return this.type;
-        }
-        else if (name.equals("who")) {
-          this.who = new Reference();
-          return this.who;
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public DocumentManifestAgentComponent copy() {
-        DocumentManifestAgentComponent dst = new DocumentManifestAgentComponent();
-        copyValues(dst);
-        dst.type = type == null ? null : type.copy();
-        dst.who = who == null ? null : who.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof DocumentManifestAgentComponent))
-          return false;
-        DocumentManifestAgentComponent o = (DocumentManifestAgentComponent) other;
-        return compareDeep(type, o.type, true) && compareDeep(who, o.who, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof DocumentManifestAgentComponent))
-          return false;
-        DocumentManifestAgentComponent o = (DocumentManifestAgentComponent) other;
-        return true;
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, who);
-      }
-
-  public String fhirType() {
-    return "DocumentManifest.agent";
-
-  }
-
-  }
 
     @Block()
     public static class DocumentManifestRelatedComponent extends BackboneElement implements IBaseBackboneElement {
@@ -285,14 +59,14 @@ public class DocumentManifest extends DomainResource {
         protected Identifier identifier;
 
         /**
-         * Related Resource to this DocumentManifest. For example, Order, ProcedureRequest,  Procedure, EligibilityRequest, etc.
+         * Related Resource to this DocumentManifest. For example, Order, ServiceRequest,  Procedure, EligibilityRequest, etc.
          */
         @Child(name = "ref", type = {Reference.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Related Resource", formalDefinition="Related Resource to this DocumentManifest. For example, Order, ProcedureRequest,  Procedure, EligibilityRequest, etc." )
+        @Description(shortDefinition="Related Resource", formalDefinition="Related Resource to this DocumentManifest. For example, Order, ServiceRequest,  Procedure, EligibilityRequest, etc." )
         protected Reference ref;
 
         /**
-         * The actual object that is the target of the reference (Related Resource to this DocumentManifest. For example, Order, ProcedureRequest,  Procedure, EligibilityRequest, etc.)
+         * The actual object that is the target of the reference (Related Resource to this DocumentManifest. For example, Order, ServiceRequest,  Procedure, EligibilityRequest, etc.)
          */
         protected Resource refTarget;
 
@@ -330,7 +104,7 @@ public class DocumentManifest extends DomainResource {
         }
 
         /**
-         * @return {@link #ref} (Related Resource to this DocumentManifest. For example, Order, ProcedureRequest,  Procedure, EligibilityRequest, etc.)
+         * @return {@link #ref} (Related Resource to this DocumentManifest. For example, Order, ServiceRequest,  Procedure, EligibilityRequest, etc.)
          */
         public Reference getRef() { 
           if (this.ref == null)
@@ -346,7 +120,7 @@ public class DocumentManifest extends DomainResource {
         }
 
         /**
-         * @param value {@link #ref} (Related Resource to this DocumentManifest. For example, Order, ProcedureRequest,  Procedure, EligibilityRequest, etc.)
+         * @param value {@link #ref} (Related Resource to this DocumentManifest. For example, Order, ServiceRequest,  Procedure, EligibilityRequest, etc.)
          */
         public DocumentManifestRelatedComponent setRef(Reference value) { 
           this.ref = value;
@@ -354,14 +128,14 @@ public class DocumentManifest extends DomainResource {
         }
 
         /**
-         * @return {@link #ref} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Related Resource to this DocumentManifest. For example, Order, ProcedureRequest,  Procedure, EligibilityRequest, etc.)
+         * @return {@link #ref} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Related Resource to this DocumentManifest. For example, Order, ServiceRequest,  Procedure, EligibilityRequest, etc.)
          */
         public Resource getRefTarget() { 
           return this.refTarget;
         }
 
         /**
-         * @param value {@link #ref} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Related Resource to this DocumentManifest. For example, Order, ProcedureRequest,  Procedure, EligibilityRequest, etc.)
+         * @param value {@link #ref} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Related Resource to this DocumentManifest. For example, Order, ServiceRequest,  Procedure, EligibilityRequest, etc.)
          */
         public DocumentManifestRelatedComponent setRefTarget(Resource value) { 
           this.refTarget = value;
@@ -371,14 +145,14 @@ public class DocumentManifest extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("identifier", "Identifier", "Related identifier to this DocumentManifest.  For example, Order numbers, accession numbers, XDW workflow numbers.", 0, 1, identifier));
-          children.add(new Property("ref", "Reference(Any)", "Related Resource to this DocumentManifest. For example, Order, ProcedureRequest,  Procedure, EligibilityRequest, etc.", 0, 1, ref));
+          children.add(new Property("ref", "Reference(Any)", "Related Resource to this DocumentManifest. For example, Order, ServiceRequest,  Procedure, EligibilityRequest, etc.", 0, 1, ref));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Related identifier to this DocumentManifest.  For example, Order numbers, accession numbers, XDW workflow numbers.", 0, 1, identifier);
-          case 112787: /*ref*/  return new Property("ref", "Reference(Any)", "Related Resource to this DocumentManifest. For example, Order, ProcedureRequest,  Procedure, EligibilityRequest, etc.", 0, 1, ref);
+          case 112787: /*ref*/  return new Property("ref", "Reference(Any)", "Related Resource to this DocumentManifest. For example, Order, ServiceRequest,  Procedure, EligibilityRequest, etc.", 0, 1, ref);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -462,22 +236,22 @@ public class DocumentManifest extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DocumentManifestRelatedComponent))
+        if (!(other_ instanceof DocumentManifestRelatedComponent))
           return false;
-        DocumentManifestRelatedComponent o = (DocumentManifestRelatedComponent) other;
+        DocumentManifestRelatedComponent o = (DocumentManifestRelatedComponent) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(ref, o.ref, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DocumentManifestRelatedComponent))
+        if (!(other_ instanceof DocumentManifestRelatedComponent))
           return false;
-        DocumentManifestRelatedComponent o = (DocumentManifestRelatedComponent) other;
+        DocumentManifestRelatedComponent o = (DocumentManifestRelatedComponent) other_;
         return true;
       }
 
@@ -515,11 +289,11 @@ public class DocumentManifest extends DomainResource {
     protected Enumeration<DocumentReferenceStatus> status;
 
     /**
-     * Specifies the kind of this set of documents (e.g. Patient Summary, Discharge Summary, Prescription, etc.). The type of a set of documents may be the same as one of the documents in it - especially if there is only one - but it may be wider.
+     * The code specifying the type of clinical activity that resulted in placing the associated content into the DocumentManifest.
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Kind of document set", formalDefinition="Specifies the kind of this set of documents (e.g. Patient Summary, Discharge Summary, Prescription, etc.). The type of a set of documents may be the same as one of the documents in it - especially if there is only one - but it may be wider." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/c80-doc-typecodes")
+    @Description(shortDefinition="Kind of document set", formalDefinition="The code specifying the type of clinical activity that resulted in placing the associated content into the DocumentManifest." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://terminology.hl7.org/ValueSet/v3-ActCode")
     protected CodeableConcept type;
 
     /**
@@ -542,11 +316,16 @@ public class DocumentManifest extends DomainResource {
     protected DateTimeType created;
 
     /**
-     * An actor taking an active role in the manifest.
+     * Identifies who is the author of the manifest. Manifest author is not necessarly the author of the references included.
      */
-    @Child(name = "agent", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Agent involved", formalDefinition="An actor taking an active role in the manifest." )
-    protected List<DocumentManifestAgentComponent> agent;
+    @Child(name = "author", type = {Practitioner.class, PractitionerRole.class, Organization.class, Device.class, Patient.class, RelatedPerson.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Who and/or what authored the DocumentManifest", formalDefinition="Identifies who is the author of the manifest. Manifest author is not necessarly the author of the references included." )
+    protected List<Reference> author;
+    /**
+     * The actual objects that are the target of the reference (Identifies who is the author of the manifest. Manifest author is not necessarly the author of the references included.)
+     */
+    protected List<Resource> authorTarget;
+
 
     /**
      * A patient, practitioner, or organization for which this set of documents is intended.
@@ -577,7 +356,7 @@ public class DocumentManifest extends DomainResource {
     /**
      * The list of Resources that consist of the parts of this manifest.
      */
-    @Child(name = "content", type = {Reference.class}, order=10, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "content", type = {Reference.class}, order=10, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Items in manifest", formalDefinition="The list of Resources that consist of the parts of this manifest." )
     protected List<Reference> content;
     /**
@@ -593,7 +372,7 @@ public class DocumentManifest extends DomainResource {
     @Description(shortDefinition="Related things", formalDefinition="Related identifiers or resources associated with the DocumentManifest." )
     protected List<DocumentManifestRelatedComponent> related;
 
-    private static final long serialVersionUID = -1607612345L;
+    private static final long serialVersionUID = 432971934L;
 
   /**
    * Constructor
@@ -733,7 +512,7 @@ public class DocumentManifest extends DomainResource {
     }
 
     /**
-     * @return {@link #type} (Specifies the kind of this set of documents (e.g. Patient Summary, Discharge Summary, Prescription, etc.). The type of a set of documents may be the same as one of the documents in it - especially if there is only one - but it may be wider.)
+     * @return {@link #type} (The code specifying the type of clinical activity that resulted in placing the associated content into the DocumentManifest.)
      */
     public CodeableConcept getType() { 
       if (this.type == null)
@@ -749,7 +528,7 @@ public class DocumentManifest extends DomainResource {
     }
 
     /**
-     * @param value {@link #type} (Specifies the kind of this set of documents (e.g. Patient Summary, Discharge Summary, Prescription, etc.). The type of a set of documents may be the same as one of the documents in it - especially if there is only one - but it may be wider.)
+     * @param value {@link #type} (The code specifying the type of clinical activity that resulted in placing the associated content into the DocumentManifest.)
      */
     public DocumentManifest setType(CodeableConcept value) { 
       this.type = value;
@@ -845,56 +624,66 @@ public class DocumentManifest extends DomainResource {
     }
 
     /**
-     * @return {@link #agent} (An actor taking an active role in the manifest.)
+     * @return {@link #author} (Identifies who is the author of the manifest. Manifest author is not necessarly the author of the references included.)
      */
-    public List<DocumentManifestAgentComponent> getAgent() { 
-      if (this.agent == null)
-        this.agent = new ArrayList<DocumentManifestAgentComponent>();
-      return this.agent;
+    public List<Reference> getAuthor() { 
+      if (this.author == null)
+        this.author = new ArrayList<Reference>();
+      return this.author;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public DocumentManifest setAgent(List<DocumentManifestAgentComponent> theAgent) { 
-      this.agent = theAgent;
+    public DocumentManifest setAuthor(List<Reference> theAuthor) { 
+      this.author = theAuthor;
       return this;
     }
 
-    public boolean hasAgent() { 
-      if (this.agent == null)
+    public boolean hasAuthor() { 
+      if (this.author == null)
         return false;
-      for (DocumentManifestAgentComponent item : this.agent)
+      for (Reference item : this.author)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public DocumentManifestAgentComponent addAgent() { //3
-      DocumentManifestAgentComponent t = new DocumentManifestAgentComponent();
-      if (this.agent == null)
-        this.agent = new ArrayList<DocumentManifestAgentComponent>();
-      this.agent.add(t);
+    public Reference addAuthor() { //3
+      Reference t = new Reference();
+      if (this.author == null)
+        this.author = new ArrayList<Reference>();
+      this.author.add(t);
       return t;
     }
 
-    public DocumentManifest addAgent(DocumentManifestAgentComponent t) { //3
+    public DocumentManifest addAuthor(Reference t) { //3
       if (t == null)
         return this;
-      if (this.agent == null)
-        this.agent = new ArrayList<DocumentManifestAgentComponent>();
-      this.agent.add(t);
+      if (this.author == null)
+        this.author = new ArrayList<Reference>();
+      this.author.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #agent}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #author}, creating it if it does not already exist
      */
-    public DocumentManifestAgentComponent getAgentFirstRep() { 
-      if (getAgent().isEmpty()) {
-        addAgent();
+    public Reference getAuthorFirstRep() { 
+      if (getAuthor().isEmpty()) {
+        addAuthor();
       }
-      return getAgent().get(0);
+      return getAuthor().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getAuthorTarget() { 
+      if (this.authorTarget == null)
+        this.authorTarget = new ArrayList<Resource>();
+      return this.authorTarget;
     }
 
     /**
@@ -1179,10 +968,10 @@ public class DocumentManifest extends DomainResource {
         children.add(new Property("masterIdentifier", "Identifier", "A single identifier that uniquely identifies this manifest. Principally used to refer to the manifest in non-FHIR contexts.", 0, 1, masterIdentifier));
         children.add(new Property("identifier", "Identifier", "Other identifiers associated with the document manifest, including version independent  identifiers.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "The status of this document manifest.", 0, 1, status));
-        children.add(new Property("type", "CodeableConcept", "Specifies the kind of this set of documents (e.g. Patient Summary, Discharge Summary, Prescription, etc.). The type of a set of documents may be the same as one of the documents in it - especially if there is only one - but it may be wider.", 0, 1, type));
+        children.add(new Property("type", "CodeableConcept", "The code specifying the type of clinical activity that resulted in placing the associated content into the DocumentManifest.", 0, 1, type));
         children.add(new Property("subject", "Reference(Patient|Practitioner|Group|Device)", "Who or what the set of documents is about. The documents can be about a person, (patient or healthcare practitioner), a device (i.e. machine) or even a group of subjects (such as a document about a herd of farm animals, or a set of patients that share a common exposure). If the documents cross more than one subject, then more than one subject is allowed here (unusual use case).", 0, 1, subject));
         children.add(new Property("created", "dateTime", "When the document manifest was created for submission to the server (not necessarily the same thing as the actual resource last modified time, since it may be modified, replicated, etc.).", 0, 1, created));
-        children.add(new Property("agent", "", "An actor taking an active role in the manifest.", 0, java.lang.Integer.MAX_VALUE, agent));
+        children.add(new Property("author", "Reference(Practitioner|PractitionerRole|Organization|Device|Patient|RelatedPerson)", "Identifies who is the author of the manifest. Manifest author is not necessarly the author of the references included.", 0, java.lang.Integer.MAX_VALUE, author));
         children.add(new Property("recipient", "Reference(Patient|Practitioner|PractitionerRole|RelatedPerson|Organization)", "A patient, practitioner, or organization for which this set of documents is intended.", 0, java.lang.Integer.MAX_VALUE, recipient));
         children.add(new Property("source", "uri", "Identifies the source system, application, or software that produced the document manifest.", 0, 1, source));
         children.add(new Property("description", "string", "Human-readable description of the source document. This is sometimes known as the \"title\".", 0, 1, description));
@@ -1196,10 +985,10 @@ public class DocumentManifest extends DomainResource {
         case 243769515: /*masterIdentifier*/  return new Property("masterIdentifier", "Identifier", "A single identifier that uniquely identifies this manifest. Principally used to refer to the manifest in non-FHIR contexts.", 0, 1, masterIdentifier);
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Other identifiers associated with the document manifest, including version independent  identifiers.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this document manifest.", 0, 1, status);
-        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Specifies the kind of this set of documents (e.g. Patient Summary, Discharge Summary, Prescription, etc.). The type of a set of documents may be the same as one of the documents in it - especially if there is only one - but it may be wider.", 0, 1, type);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The code specifying the type of clinical activity that resulted in placing the associated content into the DocumentManifest.", 0, 1, type);
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Practitioner|Group|Device)", "Who or what the set of documents is about. The documents can be about a person, (patient or healthcare practitioner), a device (i.e. machine) or even a group of subjects (such as a document about a herd of farm animals, or a set of patients that share a common exposure). If the documents cross more than one subject, then more than one subject is allowed here (unusual use case).", 0, 1, subject);
         case 1028554472: /*created*/  return new Property("created", "dateTime", "When the document manifest was created for submission to the server (not necessarily the same thing as the actual resource last modified time, since it may be modified, replicated, etc.).", 0, 1, created);
-        case 92750597: /*agent*/  return new Property("agent", "", "An actor taking an active role in the manifest.", 0, java.lang.Integer.MAX_VALUE, agent);
+        case -1406328437: /*author*/  return new Property("author", "Reference(Practitioner|PractitionerRole|Organization|Device|Patient|RelatedPerson)", "Identifies who is the author of the manifest. Manifest author is not necessarly the author of the references included.", 0, java.lang.Integer.MAX_VALUE, author);
         case 820081177: /*recipient*/  return new Property("recipient", "Reference(Patient|Practitioner|PractitionerRole|RelatedPerson|Organization)", "A patient, practitioner, or organization for which this set of documents is intended.", 0, java.lang.Integer.MAX_VALUE, recipient);
         case -896505829: /*source*/  return new Property("source", "uri", "Identifies the source system, application, or software that produced the document manifest.", 0, 1, source);
         case -1724546052: /*description*/  return new Property("description", "string", "Human-readable description of the source document. This is sometimes known as the \"title\".", 0, 1, description);
@@ -1219,7 +1008,7 @@ public class DocumentManifest extends DomainResource {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
-        case 92750597: /*agent*/ return this.agent == null ? new Base[0] : this.agent.toArray(new Base[this.agent.size()]); // DocumentManifestAgentComponent
+        case -1406328437: /*author*/ return this.author == null ? new Base[0] : this.author.toArray(new Base[this.author.size()]); // Reference
         case 820081177: /*recipient*/ return this.recipient == null ? new Base[0] : this.recipient.toArray(new Base[this.recipient.size()]); // Reference
         case -896505829: /*source*/ return this.source == null ? new Base[0] : new Base[] {this.source}; // UriType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
@@ -1252,8 +1041,8 @@ public class DocumentManifest extends DomainResource {
         case 1028554472: // created
           this.created = castToDateTime(value); // DateTimeType
           return value;
-        case 92750597: // agent
-          this.getAgent().add((DocumentManifestAgentComponent) value); // DocumentManifestAgentComponent
+        case -1406328437: // author
+          this.getAuthor().add(castToReference(value)); // Reference
           return value;
         case 820081177: // recipient
           this.getRecipient().add(castToReference(value)); // Reference
@@ -1290,8 +1079,8 @@ public class DocumentManifest extends DomainResource {
           this.subject = castToReference(value); // Reference
         } else if (name.equals("created")) {
           this.created = castToDateTime(value); // DateTimeType
-        } else if (name.equals("agent")) {
-          this.getAgent().add((DocumentManifestAgentComponent) value);
+        } else if (name.equals("author")) {
+          this.getAuthor().add(castToReference(value));
         } else if (name.equals("recipient")) {
           this.getRecipient().add(castToReference(value));
         } else if (name.equals("source")) {
@@ -1316,7 +1105,7 @@ public class DocumentManifest extends DomainResource {
         case 3575610:  return getType(); 
         case -1867885268:  return getSubject(); 
         case 1028554472:  return getCreatedElement();
-        case 92750597:  return addAgent(); 
+        case -1406328437:  return addAuthor(); 
         case 820081177:  return addRecipient(); 
         case -896505829:  return getSourceElement();
         case -1724546052:  return getDescriptionElement();
@@ -1336,7 +1125,7 @@ public class DocumentManifest extends DomainResource {
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
         case -1867885268: /*subject*/ return new String[] {"Reference"};
         case 1028554472: /*created*/ return new String[] {"dateTime"};
-        case 92750597: /*agent*/ return new String[] {};
+        case -1406328437: /*author*/ return new String[] {"Reference"};
         case 820081177: /*recipient*/ return new String[] {"Reference"};
         case -896505829: /*source*/ return new String[] {"uri"};
         case -1724546052: /*description*/ return new String[] {"string"};
@@ -1370,8 +1159,8 @@ public class DocumentManifest extends DomainResource {
         else if (name.equals("created")) {
           throw new FHIRException("Cannot call addChild on a primitive type DocumentManifest.created");
         }
-        else if (name.equals("agent")) {
-          return addAgent();
+        else if (name.equals("author")) {
+          return addAuthor();
         }
         else if (name.equals("recipient")) {
           return addRecipient();
@@ -1410,10 +1199,10 @@ public class DocumentManifest extends DomainResource {
         dst.type = type == null ? null : type.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.created = created == null ? null : created.copy();
-        if (agent != null) {
-          dst.agent = new ArrayList<DocumentManifestAgentComponent>();
-          for (DocumentManifestAgentComponent i : agent)
-            dst.agent.add(i.copy());
+        if (author != null) {
+          dst.author = new ArrayList<Reference>();
+          for (Reference i : author)
+            dst.author.add(i.copy());
         };
         if (recipient != null) {
           dst.recipient = new ArrayList<Reference>();
@@ -1440,33 +1229,33 @@ public class DocumentManifest extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DocumentManifest))
+        if (!(other_ instanceof DocumentManifest))
           return false;
-        DocumentManifest o = (DocumentManifest) other;
+        DocumentManifest o = (DocumentManifest) other_;
         return compareDeep(masterIdentifier, o.masterIdentifier, true) && compareDeep(identifier, o.identifier, true)
            && compareDeep(status, o.status, true) && compareDeep(type, o.type, true) && compareDeep(subject, o.subject, true)
-           && compareDeep(created, o.created, true) && compareDeep(agent, o.agent, true) && compareDeep(recipient, o.recipient, true)
+           && compareDeep(created, o.created, true) && compareDeep(author, o.author, true) && compareDeep(recipient, o.recipient, true)
            && compareDeep(source, o.source, true) && compareDeep(description, o.description, true) && compareDeep(content, o.content, true)
            && compareDeep(related, o.related, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DocumentManifest))
+        if (!(other_ instanceof DocumentManifest))
           return false;
-        DocumentManifest o = (DocumentManifest) other;
+        DocumentManifest o = (DocumentManifest) other_;
         return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(source, o.source, true)
            && compareValues(description, o.description, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(masterIdentifier, identifier
-          , status, type, subject, created, agent, recipient, source, description, content
+          , status, type, subject, created, author, recipient, source, description, content
           , related);
       }
 
@@ -1494,32 +1283,6 @@ public class DocumentManifest extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
-
- /**
-   * Search parameter: <b>agent</b>
-   * <p>
-   * Description: <b>Who and/or what had an agent participation</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>DocumentManifest.agent.who</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="agent", path="DocumentManifest.agent.who", description="Who and/or what had an agent participation", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
-  public static final String SP_AGENT = "agent";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>agent</b>
-   * <p>
-   * Description: <b>Who and/or what had an agent participation</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>DocumentManifest.agent.who</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam AGENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_AGENT);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>DocumentManifest:agent</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_AGENT = new ca.uhn.fhir.model.api.Include("DocumentManifest:agent").toLocked();
 
  /**
    * Search parameter: <b>item</b>
@@ -1592,6 +1355,32 @@ public class DocumentManifest extends DomainResource {
    * the path value of "<b>DocumentManifest:subject</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("DocumentManifest:subject").toLocked();
+
+ /**
+   * Search parameter: <b>author</b>
+   * <p>
+   * Description: <b>Who and/or what authored the DocumentManifest</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DocumentManifest.author</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="author", path="DocumentManifest.author", description="Who and/or what authored the DocumentManifest", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
+  public static final String SP_AUTHOR = "author";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>author</b>
+   * <p>
+   * Description: <b>Who and/or what authored the DocumentManifest</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DocumentManifest.author</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam AUTHOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_AUTHOR);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DocumentManifest:author</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_AUTHOR = new ca.uhn.fhir.model.api.Include("DocumentManifest:author").toLocked();
 
  /**
    * Search parameter: <b>created</b>
@@ -1707,7 +1496,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference", target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="DocumentManifest.subject.where(resolve() is Patient)", description="The subject of the set of documents", type="reference", target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1733,7 +1522,7 @@ public class DocumentManifest extends DomainResource {
    * Path: <b>DocumentManifest.recipient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="Intended to get notified about this set of documents", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="Intended to get notified about this set of documents", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
   public static final String SP_RECIPIENT = "recipient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>recipient</b>

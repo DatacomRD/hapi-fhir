@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,13 +37,17 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum QuestionnaireDisplayCategory {
 
         /**
-         * The text provides guidances on how to populate or use a portion of the questionnaire (or the questionnaire as a whole).
+         * The text provides guidance on how to populate or use a portion of the questionnaire (or the questionnaire as a whole).
          */
         INSTRUCTIONS, 
         /**
          * The text provides guidance on how the information should be or will be handled from a security/confidentiality/access control perspective when completed
          */
         SECURITY, 
+        /**
+         * The text provides additional guidance on populating the containing item.  Help text isn't necessarily expected to be rendered as part of the form, but may instead be made available through fly-over, pop-up button, link to a "help" page, etc.
+         */
+        HELP, 
         /**
          * added to help the parsers
          */
@@ -55,12 +59,15 @@ public enum QuestionnaireDisplayCategory {
           return INSTRUCTIONS;
         if ("security".equals(codeString))
           return SECURITY;
+        if ("help".equals(codeString))
+          return HELP;
         throw new FHIRException("Unknown QuestionnaireDisplayCategory code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case INSTRUCTIONS: return "instructions";
             case SECURITY: return "security";
+            case HELP: return "help";
             default: return "?";
           }
         }
@@ -69,8 +76,9 @@ public enum QuestionnaireDisplayCategory {
         }
         public String getDefinition() {
           switch (this) {
-            case INSTRUCTIONS: return "The text provides guidances on how to populate or use a portion of the questionnaire (or the questionnaire as a whole).";
+            case INSTRUCTIONS: return "The text provides guidance on how to populate or use a portion of the questionnaire (or the questionnaire as a whole).";
             case SECURITY: return "The text provides guidance on how the information should be or will be handled from a security/confidentiality/access control perspective when completed";
+            case HELP: return "The text provides additional guidance on populating the containing item.  Help text isn't necessarily expected to be rendered as part of the form, but may instead be made available through fly-over, pop-up button, link to a \"help\" page, etc.";
             default: return "?";
           }
         }
@@ -78,6 +86,7 @@ public enum QuestionnaireDisplayCategory {
           switch (this) {
             case INSTRUCTIONS: return "Instructions";
             case SECURITY: return "Security";
+            case HELP: return "Help";
             default: return "?";
           }
     }

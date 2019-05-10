@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,11 +49,11 @@ public enum SearchParamType {
          */
         STRING, 
         /**
-         * Search parameter on a coded element or identifier. May be used to search through the text, displayname, code and code/codesystem (for codes) and label, system and key (for identifier). Its value is either a string or a pair of namespace and value, separated by a "|", depending on the modifier used.
+         * Search parameter on a coded element or identifier. May be used to search through the text, display, code and code/codesystem (for codes) and label, system and key (for identifier). Its value is either a string or a pair of namespace and value, separated by a "|", depending on the modifier used.
          */
         TOKEN, 
         /**
-         * A reference to another resource.
+         * A reference to another resource (Reference or canonical).
          */
         REFERENCE, 
         /**
@@ -68,6 +68,10 @@ public enum SearchParamType {
          * A search parameter that searches on a URI (RFC 3986).
          */
         URI, 
+        /**
+         * Special logic applies to this parameter per the description of the search parameter.
+         */
+        SPECIAL, 
         /**
          * added to help the parsers
          */
@@ -91,6 +95,8 @@ public enum SearchParamType {
           return QUANTITY;
         if ("uri".equals(codeString))
           return URI;
+        if ("special".equals(codeString))
+          return SPECIAL;
         throw new FHIRException("Unknown SearchParamType code '"+codeString+"'");
         }
         public String toCode() {
@@ -103,6 +109,7 @@ public enum SearchParamType {
             case COMPOSITE: return "composite";
             case QUANTITY: return "quantity";
             case URI: return "uri";
+            case SPECIAL: return "special";
             default: return "?";
           }
         }
@@ -114,11 +121,12 @@ public enum SearchParamType {
             case NUMBER: return "Search parameter SHALL be a number (a whole number, or a decimal).";
             case DATE: return "Search parameter is on a date/time. The date format is the standard XML format, though other formats may be supported.";
             case STRING: return "Search parameter is a simple string, like a name part. Search is case-insensitive and accent-insensitive. May match just the start of a string. String parameters may contain spaces.";
-            case TOKEN: return "Search parameter on a coded element or identifier. May be used to search through the text, displayname, code and code/codesystem (for codes) and label, system and key (for identifier). Its value is either a string or a pair of namespace and value, separated by a \"|\", depending on the modifier used.";
-            case REFERENCE: return "A reference to another resource.";
+            case TOKEN: return "Search parameter on a coded element or identifier. May be used to search through the text, display, code and code/codesystem (for codes) and label, system and key (for identifier). Its value is either a string or a pair of namespace and value, separated by a \"|\", depending on the modifier used.";
+            case REFERENCE: return "A reference to another resource (Reference or canonical).";
             case COMPOSITE: return "A composite search parameter that combines a search on two values together.";
             case QUANTITY: return "A search parameter that searches on a quantity.";
             case URI: return "A search parameter that searches on a URI (RFC 3986).";
+            case SPECIAL: return "Special logic applies to this parameter per the description of the search parameter.";
             default: return "?";
           }
         }
@@ -132,6 +140,7 @@ public enum SearchParamType {
             case COMPOSITE: return "Composite";
             case QUANTITY: return "Quantity";
             case URI: return "URI";
+            case SPECIAL: return "Special";
             default: return "?";
           }
     }

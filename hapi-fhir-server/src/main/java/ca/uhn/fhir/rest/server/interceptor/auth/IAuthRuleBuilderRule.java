@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,11 @@ public interface IAuthRuleBuilderRule {
 	IAuthRuleBuilderOperation operation();
 
 	/**
+	 * This rule applies to a FHIR patch operation
+	 */
+	IAuthRuleBuilderPatch patch();
+
+	/**
 	 * This rule applies to any FHIR operation involving reading, including
 	 * <code>read</code>, <code>vread</code>, <code>search</code>, and
 	 * <code>history</code>
@@ -78,7 +83,8 @@ public interface IAuthRuleBuilderRule {
 
 	/**
 	 * This rule applies to the FHIR transaction operation. Transaction is a special
-	 * case in that it bundles other operations
+	 * case in that it bundles other operations. This permission also allows FHIR
+	 * batch to be performed.
 	 */
 	IAuthRuleBuilderRuleTransaction transaction();
 
@@ -102,4 +108,8 @@ public interface IAuthRuleBuilderRule {
 	 */
 	IAuthRuleBuilderRuleOp write();
 
+	/**
+	 * Allow a GraphQL query
+	 */
+	IAuthRuleBuilderGraphQL graphQL();
 }

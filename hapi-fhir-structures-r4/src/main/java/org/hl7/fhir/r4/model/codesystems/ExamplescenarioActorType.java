@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ExamplescenarioActorType {
 
         /**
-         * A person
+         * A person.
          */
         PERSON, 
         /**
-         * A system
+         * A system.
          */
         ENTITY, 
         /**
@@ -69,8 +69,8 @@ public enum ExamplescenarioActorType {
         }
         public String getDefinition() {
           switch (this) {
-            case PERSON: return "A person";
-            case ENTITY: return "A system";
+            case PERSON: return "A person.";
+            case ENTITY: return "A system.";
             default: return "?";
           }
         }

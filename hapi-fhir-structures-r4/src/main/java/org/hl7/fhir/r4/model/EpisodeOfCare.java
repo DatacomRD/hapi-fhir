@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time.
  */
-@ResourceDef(name="EpisodeOfCare", profile="http://hl7.org/fhir/Profile/EpisodeOfCare")
+@ResourceDef(name="EpisodeOfCare", profile="http://hl7.org/fhir/StructureDefinition/EpisodeOfCare")
 public class EpisodeOfCare extends DomainResource {
 
     public enum EpisodeOfCareStatus {
@@ -63,7 +63,7 @@ public class EpisodeOfCare extends DomainResource {
          */
         ACTIVE, 
         /**
-         * This episode of care is on hold, the organization has limited responsibility for the patient (such as while on respite).
+         * This episode of care is on hold; the organization has limited responsibility for the patient (such as while on respite).
          */
         ONHOLD, 
         /**
@@ -133,7 +133,7 @@ public class EpisodeOfCare extends DomainResource {
             case PLANNED: return "This episode of care is planned to start at the date specified in the period.start. During this status, an organization may perform assessments to determine if the patient is eligible to receive services, or be organizing to make resources available to provide care services.";
             case WAITLIST: return "This episode has been placed on a waitlist, pending the episode being made active (or cancelled).";
             case ACTIVE: return "This episode of care is current.";
-            case ONHOLD: return "This episode of care is on hold, the organization has limited responsibility for the patient (such as while on respite).";
+            case ONHOLD: return "This episode of care is on hold; the organization has limited responsibility for the patient (such as while on respite).";
             case FINISHED: return "This episode of care is finished and the organization is not expecting to be providing further care to the patient. Can also be known as \"closed\", \"completed\" or other similar terms.";
             case CANCELLED: return "The episode of care was cancelled, or withdrawn from service, often selected during the planned stage as the patient may have gone elsewhere, or the circumstances have changed and the organization is unable to provide the care. It indicates that services terminated outside the planned/expected workflow.";
             case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
@@ -420,22 +420,22 @@ public class EpisodeOfCare extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof EpisodeOfCareStatusHistoryComponent))
+        if (!(other_ instanceof EpisodeOfCareStatusHistoryComponent))
           return false;
-        EpisodeOfCareStatusHistoryComponent o = (EpisodeOfCareStatusHistoryComponent) other;
+        EpisodeOfCareStatusHistoryComponent o = (EpisodeOfCareStatusHistoryComponent) other_;
         return compareDeep(status, o.status, true) && compareDeep(period, o.period, true);
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof EpisodeOfCareStatusHistoryComponent))
+        if (!(other_ instanceof EpisodeOfCareStatusHistoryComponent))
           return false;
-        EpisodeOfCareStatusHistoryComponent o = (EpisodeOfCareStatusHistoryComponent) other;
+        EpisodeOfCareStatusHistoryComponent o = (EpisodeOfCareStatusHistoryComponent) other_;
         return compareValues(status, o.status, true);
       }
 
@@ -717,23 +717,23 @@ public class EpisodeOfCare extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof DiagnosisComponent))
+        if (!(other_ instanceof DiagnosisComponent))
           return false;
-        DiagnosisComponent o = (DiagnosisComponent) other;
+        DiagnosisComponent o = (DiagnosisComponent) other_;
         return compareDeep(condition, o.condition, true) && compareDeep(role, o.role, true) && compareDeep(rank, o.rank, true)
           ;
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof DiagnosisComponent))
+        if (!(other_ instanceof DiagnosisComponent))
           return false;
-        DiagnosisComponent o = (DiagnosisComponent) other;
+        DiagnosisComponent o = (DiagnosisComponent) other_;
         return compareValues(rank, o.rank, true);
       }
 
@@ -819,26 +819,26 @@ public class EpisodeOfCare extends DomainResource {
     /**
      * Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals.
      */
-    @Child(name = "referralRequest", type = {ProcedureRequest.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "referralRequest", type = {ServiceRequest.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Originating Referral Request(s)", formalDefinition="Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals." )
     protected List<Reference> referralRequest;
     /**
      * The actual objects that are the target of the reference (Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals.)
      */
-    protected List<ProcedureRequest> referralRequestTarget;
+    protected List<ServiceRequest> referralRequestTarget;
 
 
     /**
-     * The practitioner that is the care manager/care co-ordinator for this patient.
+     * The practitioner that is the care manager/care coordinator for this patient.
      */
-    @Child(name = "careManager", type = {Practitioner.class}, order=9, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Care manager/care co-ordinator for the patient", formalDefinition="The practitioner that is the care manager/care co-ordinator for this patient." )
+    @Child(name = "careManager", type = {Practitioner.class, PractitionerRole.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Care manager/care coordinator for the patient", formalDefinition="The practitioner that is the care manager/care coordinator for this patient." )
     protected Reference careManager;
 
     /**
-     * The actual object that is the target of the reference (The practitioner that is the care manager/care co-ordinator for this patient.)
+     * The actual object that is the target of the reference (The practitioner that is the care manager/care coordinator for this patient.)
      */
-    protected Practitioner careManagerTarget;
+    protected Resource careManagerTarget;
 
     /**
      * The list of practitioners that may be facilitating this episode of care for specific purposes.
@@ -864,7 +864,7 @@ public class EpisodeOfCare extends DomainResource {
     protected List<Account> accountTarget;
 
 
-    private static final long serialVersionUID = 826333451L;
+    private static final long serialVersionUID = 548033949L;
 
   /**
    * Constructor
@@ -1308,9 +1308,9 @@ public class EpisodeOfCare extends DomainResource {
      * @deprecated Use Reference#setResource(IBaseResource) instead
      */
     @Deprecated
-    public List<ProcedureRequest> getReferralRequestTarget() { 
+    public List<ServiceRequest> getReferralRequestTarget() { 
       if (this.referralRequestTarget == null)
-        this.referralRequestTarget = new ArrayList<ProcedureRequest>();
+        this.referralRequestTarget = new ArrayList<ServiceRequest>();
       return this.referralRequestTarget;
     }
 
@@ -1318,16 +1318,16 @@ public class EpisodeOfCare extends DomainResource {
      * @deprecated Use Reference#setResource(IBaseResource) instead
      */
     @Deprecated
-    public ProcedureRequest addReferralRequestTarget() { 
-      ProcedureRequest r = new ProcedureRequest();
+    public ServiceRequest addReferralRequestTarget() { 
+      ServiceRequest r = new ServiceRequest();
       if (this.referralRequestTarget == null)
-        this.referralRequestTarget = new ArrayList<ProcedureRequest>();
+        this.referralRequestTarget = new ArrayList<ServiceRequest>();
       this.referralRequestTarget.add(r);
       return r;
     }
 
     /**
-     * @return {@link #careManager} (The practitioner that is the care manager/care co-ordinator for this patient.)
+     * @return {@link #careManager} (The practitioner that is the care manager/care coordinator for this patient.)
      */
     public Reference getCareManager() { 
       if (this.careManager == null)
@@ -1343,7 +1343,7 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @param value {@link #careManager} (The practitioner that is the care manager/care co-ordinator for this patient.)
+     * @param value {@link #careManager} (The practitioner that is the care manager/care coordinator for this patient.)
      */
     public EpisodeOfCare setCareManager(Reference value) { 
       this.careManager = value;
@@ -1351,21 +1351,16 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     /**
-     * @return {@link #careManager} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The practitioner that is the care manager/care co-ordinator for this patient.)
+     * @return {@link #careManager} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The practitioner that is the care manager/care coordinator for this patient.)
      */
-    public Practitioner getCareManagerTarget() { 
-      if (this.careManagerTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create EpisodeOfCare.careManager");
-        else if (Configuration.doAutoCreate())
-          this.careManagerTarget = new Practitioner(); // aa
+    public Resource getCareManagerTarget() { 
       return this.careManagerTarget;
     }
 
     /**
-     * @param value {@link #careManager} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The practitioner that is the care manager/care co-ordinator for this patient.)
+     * @param value {@link #careManager} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The practitioner that is the care manager/care coordinator for this patient.)
      */
-    public EpisodeOfCare setCareManagerTarget(Practitioner value) { 
+    public EpisodeOfCare setCareManagerTarget(Resource value) { 
       this.careManagerTarget = value;
       return this;
     }
@@ -1530,8 +1525,8 @@ public class EpisodeOfCare extends DomainResource {
         children.add(new Property("patient", "Reference(Patient)", "The patient who is the focus of this episode of care.", 0, 1, patient));
         children.add(new Property("managingOrganization", "Reference(Organization)", "The organization that has assumed the specific responsibilities for the specified duration.", 0, 1, managingOrganization));
         children.add(new Property("period", "Period", "The interval during which the managing organization assumes the defined responsibility.", 0, 1, period));
-        children.add(new Property("referralRequest", "Reference(ProcedureRequest)", "Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals.", 0, java.lang.Integer.MAX_VALUE, referralRequest));
-        children.add(new Property("careManager", "Reference(Practitioner)", "The practitioner that is the care manager/care co-ordinator for this patient.", 0, 1, careManager));
+        children.add(new Property("referralRequest", "Reference(ServiceRequest)", "Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals.", 0, java.lang.Integer.MAX_VALUE, referralRequest));
+        children.add(new Property("careManager", "Reference(Practitioner|PractitionerRole)", "The practitioner that is the care manager/care coordinator for this patient.", 0, 1, careManager));
         children.add(new Property("team", "Reference(CareTeam)", "The list of practitioners that may be facilitating this episode of care for specific purposes.", 0, java.lang.Integer.MAX_VALUE, team));
         children.add(new Property("account", "Reference(Account)", "The set of accounts that may be used for billing for this EpisodeOfCare.", 0, java.lang.Integer.MAX_VALUE, account));
       }
@@ -1547,8 +1542,8 @@ public class EpisodeOfCare extends DomainResource {
         case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The patient who is the focus of this episode of care.", 0, 1, patient);
         case -2058947787: /*managingOrganization*/  return new Property("managingOrganization", "Reference(Organization)", "The organization that has assumed the specific responsibilities for the specified duration.", 0, 1, managingOrganization);
         case -991726143: /*period*/  return new Property("period", "Period", "The interval during which the managing organization assumes the defined responsibility.", 0, 1, period);
-        case -310299598: /*referralRequest*/  return new Property("referralRequest", "Reference(ProcedureRequest)", "Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals.", 0, java.lang.Integer.MAX_VALUE, referralRequest);
-        case -1147746468: /*careManager*/  return new Property("careManager", "Reference(Practitioner)", "The practitioner that is the care manager/care co-ordinator for this patient.", 0, 1, careManager);
+        case -310299598: /*referralRequest*/  return new Property("referralRequest", "Reference(ServiceRequest)", "Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals.", 0, java.lang.Integer.MAX_VALUE, referralRequest);
+        case -1147746468: /*careManager*/  return new Property("careManager", "Reference(Practitioner|PractitionerRole)", "The practitioner that is the care manager/care coordinator for this patient.", 0, 1, careManager);
         case 3555933: /*team*/  return new Property("team", "Reference(CareTeam)", "The list of practitioners that may be facilitating this episode of care for specific purposes.", 0, java.lang.Integer.MAX_VALUE, team);
         case -1177318867: /*account*/  return new Property("account", "Reference(Account)", "The set of accounts that may be used for billing for this EpisodeOfCare.", 0, java.lang.Integer.MAX_VALUE, account);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -1795,12 +1790,12 @@ public class EpisodeOfCare extends DomainResource {
       }
 
       @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
           return false;
-        if (!(other instanceof EpisodeOfCare))
+        if (!(other_ instanceof EpisodeOfCare))
           return false;
-        EpisodeOfCare o = (EpisodeOfCare) other;
+        EpisodeOfCare o = (EpisodeOfCare) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(statusHistory, o.statusHistory, true)
            && compareDeep(type, o.type, true) && compareDeep(diagnosis, o.diagnosis, true) && compareDeep(patient, o.patient, true)
            && compareDeep(managingOrganization, o.managingOrganization, true) && compareDeep(period, o.period, true)
@@ -1809,12 +1804,12 @@ public class EpisodeOfCare extends DomainResource {
       }
 
       @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
           return false;
-        if (!(other instanceof EpisodeOfCare))
+        if (!(other_ instanceof EpisodeOfCare))
           return false;
-        EpisodeOfCare o = (EpisodeOfCare) other;
+        EpisodeOfCare o = (EpisodeOfCare) other_;
         return compareValues(status, o.status, true);
       }
 
@@ -1896,32 +1891,6 @@ public class EpisodeOfCare extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_CONDITION = new ca.uhn.fhir.model.api.Include("EpisodeOfCare:condition").toLocked();
 
  /**
-   * Search parameter: <b>incomingreferral</b>
-   * <p>
-   * Description: <b>Incoming Referral Request</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>EpisodeOfCare.referralRequest</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="incomingreferral", path="EpisodeOfCare.referralRequest", description="Incoming Referral Request", type="reference", target={ProcedureRequest.class } )
-  public static final String SP_INCOMINGREFERRAL = "incomingreferral";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>incomingreferral</b>
-   * <p>
-   * Description: <b>Incoming Referral Request</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>EpisodeOfCare.referralRequest</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam INCOMINGREFERRAL = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_INCOMINGREFERRAL);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>EpisodeOfCare:incomingreferral</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_INCOMINGREFERRAL = new ca.uhn.fhir.model.api.Include("EpisodeOfCare:incomingreferral").toLocked();
-
- /**
    * Search parameter: <b>patient</b>
    * <p>
    * Description: <b>The patient who is the focus of this episode of care</b><br>
@@ -1996,17 +1965,17 @@ public class EpisodeOfCare extends DomainResource {
  /**
    * Search parameter: <b>care-manager</b>
    * <p>
-   * Description: <b>Care manager/care co-ordinator for the patient</b><br>
+   * Description: <b>Care manager/care coordinator for the patient</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>EpisodeOfCare.careManager</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="care-manager", path="EpisodeOfCare.careManager", description="Care manager/care co-ordinator for the patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
+  @SearchParamDefinition(name="care-manager", path="EpisodeOfCare.careManager.where(resolve() is Practitioner)", description="Care manager/care coordinator for the patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
   public static final String SP_CARE_MANAGER = "care-manager";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>care-manager</b>
    * <p>
-   * Description: <b>Care manager/care co-ordinator for the patient</b><br>
+   * Description: <b>Care manager/care coordinator for the patient</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>EpisodeOfCare.careManager</b><br>
    * </p>
@@ -2038,6 +2007,32 @@ public class EpisodeOfCare extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
+ /**
+   * Search parameter: <b>incoming-referral</b>
+   * <p>
+   * Description: <b>Incoming Referral Request</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>EpisodeOfCare.referralRequest</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="incoming-referral", path="EpisodeOfCare.referralRequest", description="Incoming Referral Request", type="reference", target={ServiceRequest.class } )
+  public static final String SP_INCOMING_REFERRAL = "incoming-referral";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>incoming-referral</b>
+   * <p>
+   * Description: <b>Incoming Referral Request</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>EpisodeOfCare.referralRequest</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam INCOMING_REFERRAL = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_INCOMING_REFERRAL);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>EpisodeOfCare:incoming-referral</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_INCOMING_REFERRAL = new ca.uhn.fhir.model.api.Include("EpisodeOfCare:incoming-referral").toLocked();
 
 
 }

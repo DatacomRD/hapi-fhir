@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -153,11 +153,11 @@ public enum ResourceStatus {
          */
         NOTREADY, 
         /**
-         * The device transducer is diconnected
+         * The device transducer is disconnected
          */
         TRANSDUCDISCON, 
         /**
-         * The hardware is diconnected
+         * The hardware is disconnected
          */
         HWDISCON, 
         /**
@@ -301,8 +301,8 @@ public enum ResourceStatus {
             case AHEADOFTARGET: return "Ahead of the planned timelines";
             case BEHINDTARGET: return "";
             case NOTREADY: return "Behind the planned timelines";
-            case TRANSDUCDISCON: return "The device transducer is diconnected";
-            case HWDISCON: return "The hardware is diconnected";
+            case TRANSDUCDISCON: return "The device transducer is disconnected";
+            case HWDISCON: return "The hardware is disconnected";
             default: return "?";
           }
         }

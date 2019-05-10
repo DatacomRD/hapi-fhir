@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -59,6 +59,14 @@ public class ClaimInformationcategoryEnumFactory implements EnumFactory<ClaimInf
       return ClaimInformationcategory.PROSTHESIS;
     if ("other".equals(codeString))
       return ClaimInformationcategory.OTHER;
+    if ("hospitalized".equals(codeString))
+      return ClaimInformationcategory.HOSPITALIZED;
+    if ("employmentimpacted".equals(codeString))
+      return ClaimInformationcategory.EMPLOYMENTIMPACTED;
+    if ("externalcause".equals(codeString))
+      return ClaimInformationcategory.EXTERNALCAUSE;
+    if ("patientreasonforvisit".equals(codeString))
+      return ClaimInformationcategory.PATIENTREASONFORVISIT;
     throw new IllegalArgumentException("Unknown ClaimInformationcategory code '"+codeString+"'");
   }
 
@@ -83,6 +91,14 @@ public class ClaimInformationcategoryEnumFactory implements EnumFactory<ClaimInf
       return "prosthesis";
     if (code == ClaimInformationcategory.OTHER)
       return "other";
+    if (code == ClaimInformationcategory.HOSPITALIZED)
+      return "hospitalized";
+    if (code == ClaimInformationcategory.EMPLOYMENTIMPACTED)
+      return "employmentimpacted";
+    if (code == ClaimInformationcategory.EXTERNALCAUSE)
+      return "externalcause";
+    if (code == ClaimInformationcategory.PATIENTREASONFORVISIT)
+      return "patientreasonforvisit";
     return "?";
   }
 

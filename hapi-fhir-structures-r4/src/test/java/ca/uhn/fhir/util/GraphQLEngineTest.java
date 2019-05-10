@@ -15,6 +15,7 @@ import org.mockito.stubbing.Answer;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -32,11 +33,11 @@ public class GraphQLEngineTest {
 		return obs;
 	}
 
-	private IGraphQLStorageServices<Resource, Reference, Bundle> createStorageServices() throws FHIRException {
-		IGraphQLStorageServices<Resource, Reference, Bundle> retVal = mock(IGraphQLStorageServices.class);
-		when(retVal.lookup(any(Object.class), any(Resource.class), any(Reference.class))).thenAnswer(new Answer<Object>() {
+	private GraphQLEngine.IGraphQLStorageServices createStorageServices() throws FHIRException {
+		GraphQLEngine.IGraphQLStorageServices retVal = mock(GraphQLEngine.IGraphQLStorageServices.class);
+		when(retVal.lookup(nullable(Object.class), nullable(Resource.class), nullable(Reference.class))).thenAnswer(new Answer<Object>() {
 			@Override
-			public Object answer(InvocationOnMock invocation) throws Throwable {
+			public Object answer(InvocationOnMock invocation) {
 				Object appInfo = invocation.getArguments()[0];
 				Resource context = (Resource) invocation.getArguments()[1];
 				Reference reference = (Reference) invocation.getArguments()[2];
@@ -45,7 +46,7 @@ public class GraphQLEngineTest {
 				if (reference.getReference().equalsIgnoreCase("Patient/123")) {
 					Patient p = new Patient();
 					p.getBirthDateElement().setValueAsString("2011-02-22");
-					return new ReferenceResolution<>(context, p);
+					return new GraphQLEngine.IGraphQLStorageServices.ReferenceResolution(context, p);
 				}
 
 				ourLog.info("Not found!");

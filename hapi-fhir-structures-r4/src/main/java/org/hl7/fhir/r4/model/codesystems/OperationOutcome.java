@@ -29,13 +29,17 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
 
 public enum OperationOutcome {
 
+        /**
+         * null
+         */
+        DELETEMULTIPLEMATCHES, 
         /**
          * null
          */
@@ -107,11 +111,11 @@ public enum OperationOutcome {
         /**
          * null
          */
-        MSGNOMATCH, 
+        MSGNOEXIST, 
         /**
          * null
          */
-        MSGNOEXIST, 
+        MSGNOMATCH, 
         /**
          * null
          */
@@ -131,19 +135,19 @@ public enum OperationOutcome {
         /**
          * null
          */
-        MSGPARAMNOREPEAT, 
-        /**
-         * null
-         */
-        MSGPARAMUNKNOWN, 
-        /**
-         * null
-         */
         MSGPARAMINVALID, 
         /**
          * null
          */
         MSGPARAMMODIFIERINVALID, 
+        /**
+         * null
+         */
+        MSGPARAMNOREPEAT, 
+        /**
+         * null
+         */
+        MSGPARAMUNKNOWN, 
         /**
          * null
          */
@@ -155,19 +159,19 @@ public enum OperationOutcome {
         /**
          * null
          */
-        MSGRESOURCENOTALLOWED, 
-        /**
-         * null
-         */
-        MSGRESOURCEREQUIRED, 
-        /**
-         * null
-         */
         MSGRESOURCEIDMISMATCH, 
         /**
          * null
          */
         MSGRESOURCEIDMISSING, 
+        /**
+         * null
+         */
+        MSGRESOURCENOTALLOWED, 
+        /**
+         * null
+         */
+        MSGRESOURCEREQUIRED, 
         /**
          * null
          */
@@ -227,15 +231,11 @@ public enum OperationOutcome {
         /**
          * null
          */
-        UPDATEMULTIPLEMATCHES, 
-        /**
-         * null
-         */
-        DELETEMULTIPLEMATCHES, 
-        /**
-         * null
-         */
         SEARCHNONE, 
+        /**
+         * null
+         */
+        UPDATEMULTIPLEMATCHES, 
         /**
          * added to help the parsers
          */
@@ -243,6 +243,8 @@ public enum OperationOutcome {
         public static OperationOutcome fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("DELETE_MULTIPLE_MATCHES".equals(codeString))
+          return DELETEMULTIPLEMATCHES;
         if ("MSG_AUTH_REQUIRED".equals(codeString))
           return MSGAUTHREQUIRED;
         if ("MSG_BAD_FORMAT".equals(codeString))
@@ -277,10 +279,10 @@ public enum OperationOutcome {
           return MSGJSONOBJECT;
         if ("MSG_LOCAL_FAIL".equals(codeString))
           return MSGLOCALFAIL;
-        if ("MSG_NO_MATCH".equals(codeString))
-          return MSGNOMATCH;
         if ("MSG_NO_EXIST".equals(codeString))
           return MSGNOEXIST;
+        if ("MSG_NO_MATCH".equals(codeString))
+          return MSGNOMATCH;
         if ("MSG_NO_MODULE".equals(codeString))
           return MSGNOMODULE;
         if ("MSG_NO_SUMMARY".equals(codeString))
@@ -289,26 +291,26 @@ public enum OperationOutcome {
           return MSGOPNOTALLOWED;
         if ("MSG_PARAM_CHAINED".equals(codeString))
           return MSGPARAMCHAINED;
-        if ("MSG_PARAM_NO_REPEAT".equals(codeString))
-          return MSGPARAMNOREPEAT;
-        if ("MSG_PARAM_UNKNOWN".equals(codeString))
-          return MSGPARAMUNKNOWN;
         if ("MSG_PARAM_INVALID".equals(codeString))
           return MSGPARAMINVALID;
         if ("MSG_PARAM_MODIFIER_INVALID".equals(codeString))
           return MSGPARAMMODIFIERINVALID;
+        if ("MSG_PARAM_NO_REPEAT".equals(codeString))
+          return MSGPARAMNOREPEAT;
+        if ("MSG_PARAM_UNKNOWN".equals(codeString))
+          return MSGPARAMUNKNOWN;
         if ("MSG_RESOURCE_EXAMPLE_PROTECTED".equals(codeString))
           return MSGRESOURCEEXAMPLEPROTECTED;
         if ("MSG_RESOURCE_ID_FAIL".equals(codeString))
           return MSGRESOURCEIDFAIL;
-        if ("MSG_RESOURCE_NOT_ALLOWED".equals(codeString))
-          return MSGRESOURCENOTALLOWED;
-        if ("MSG_RESOURCE_REQUIRED".equals(codeString))
-          return MSGRESOURCEREQUIRED;
         if ("MSG_RESOURCE_ID_MISMATCH".equals(codeString))
           return MSGRESOURCEIDMISMATCH;
         if ("MSG_RESOURCE_ID_MISSING".equals(codeString))
           return MSGRESOURCEIDMISSING;
+        if ("MSG_RESOURCE_NOT_ALLOWED".equals(codeString))
+          return MSGRESOURCENOTALLOWED;
+        if ("MSG_RESOURCE_REQUIRED".equals(codeString))
+          return MSGRESOURCEREQUIRED;
         if ("MSG_RESOURCE_TYPE_MISMATCH".equals(codeString))
           return MSGRESOURCETYPEMISMATCH;
         if ("MSG_SORT_UNKNOWN".equals(codeString))
@@ -337,16 +339,15 @@ public enum OperationOutcome {
           return MSGWRONGNS;
         if ("SEARCH_MULTIPLE".equals(codeString))
           return SEARCHMULTIPLE;
-        if ("UPDATE_MULTIPLE_MATCHES".equals(codeString))
-          return UPDATEMULTIPLEMATCHES;
-        if ("DELETE_MULTIPLE_MATCHES".equals(codeString))
-          return DELETEMULTIPLEMATCHES;
         if ("SEARCH_NONE".equals(codeString))
           return SEARCHNONE;
+        if ("UPDATE_MULTIPLE_MATCHES".equals(codeString))
+          return UPDATEMULTIPLEMATCHES;
         throw new FHIRException("Unknown OperationOutcome code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
+            case DELETEMULTIPLEMATCHES: return "DELETE_MULTIPLE_MATCHES";
             case MSGAUTHREQUIRED: return "MSG_AUTH_REQUIRED";
             case MSGBADFORMAT: return "MSG_BAD_FORMAT";
             case MSGBADSYNTAX: return "MSG_BAD_SYNTAX";
@@ -364,22 +365,22 @@ public enum OperationOutcome {
             case MSGINVALIDID: return "MSG_INVALID_ID";
             case MSGJSONOBJECT: return "MSG_JSON_OBJECT";
             case MSGLOCALFAIL: return "MSG_LOCAL_FAIL";
-            case MSGNOMATCH: return "MSG_NO_MATCH";
             case MSGNOEXIST: return "MSG_NO_EXIST";
+            case MSGNOMATCH: return "MSG_NO_MATCH";
             case MSGNOMODULE: return "MSG_NO_MODULE";
             case MSGNOSUMMARY: return "MSG_NO_SUMMARY";
             case MSGOPNOTALLOWED: return "MSG_OP_NOT_ALLOWED";
             case MSGPARAMCHAINED: return "MSG_PARAM_CHAINED";
-            case MSGPARAMNOREPEAT: return "MSG_PARAM_NO_REPEAT";
-            case MSGPARAMUNKNOWN: return "MSG_PARAM_UNKNOWN";
             case MSGPARAMINVALID: return "MSG_PARAM_INVALID";
             case MSGPARAMMODIFIERINVALID: return "MSG_PARAM_MODIFIER_INVALID";
+            case MSGPARAMNOREPEAT: return "MSG_PARAM_NO_REPEAT";
+            case MSGPARAMUNKNOWN: return "MSG_PARAM_UNKNOWN";
             case MSGRESOURCEEXAMPLEPROTECTED: return "MSG_RESOURCE_EXAMPLE_PROTECTED";
             case MSGRESOURCEIDFAIL: return "MSG_RESOURCE_ID_FAIL";
-            case MSGRESOURCENOTALLOWED: return "MSG_RESOURCE_NOT_ALLOWED";
-            case MSGRESOURCEREQUIRED: return "MSG_RESOURCE_REQUIRED";
             case MSGRESOURCEIDMISMATCH: return "MSG_RESOURCE_ID_MISMATCH";
             case MSGRESOURCEIDMISSING: return "MSG_RESOURCE_ID_MISSING";
+            case MSGRESOURCENOTALLOWED: return "MSG_RESOURCE_NOT_ALLOWED";
+            case MSGRESOURCEREQUIRED: return "MSG_RESOURCE_REQUIRED";
             case MSGRESOURCETYPEMISMATCH: return "MSG_RESOURCE_TYPE_MISMATCH";
             case MSGSORTUNKNOWN: return "MSG_SORT_UNKNOWN";
             case MSGTRANSACTIONDUPLICATEID: return "MSG_TRANSACTION_DUPLICATE_ID";
@@ -394,17 +395,17 @@ public enum OperationOutcome {
             case MSGVERSIONAWAREURL: return "MSG_VERSION_AWARE_URL";
             case MSGWRONGNS: return "MSG_WRONG_NS";
             case SEARCHMULTIPLE: return "SEARCH_MULTIPLE";
-            case UPDATEMULTIPLEMATCHES: return "UPDATE_MULTIPLE_MATCHES";
-            case DELETEMULTIPLEMATCHES: return "DELETE_MULTIPLE_MATCHES";
             case SEARCHNONE: return "SEARCH_NONE";
+            case UPDATEMULTIPLEMATCHES: return "UPDATE_MULTIPLE_MATCHES";
             default: return "?";
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/operation-outcome";
+          return "http://terminology.hl7.org/CodeSystem/operation-outcome";
         }
         public String getDefinition() {
           switch (this) {
+            case DELETEMULTIPLEMATCHES: return "";
             case MSGAUTHREQUIRED: return "";
             case MSGBADFORMAT: return "";
             case MSGBADSYNTAX: return "";
@@ -422,22 +423,22 @@ public enum OperationOutcome {
             case MSGINVALIDID: return "";
             case MSGJSONOBJECT: return "";
             case MSGLOCALFAIL: return "";
-            case MSGNOMATCH: return "";
             case MSGNOEXIST: return "";
+            case MSGNOMATCH: return "";
             case MSGNOMODULE: return "";
             case MSGNOSUMMARY: return "";
             case MSGOPNOTALLOWED: return "";
             case MSGPARAMCHAINED: return "";
-            case MSGPARAMNOREPEAT: return "";
-            case MSGPARAMUNKNOWN: return "";
             case MSGPARAMINVALID: return "";
             case MSGPARAMMODIFIERINVALID: return "";
+            case MSGPARAMNOREPEAT: return "";
+            case MSGPARAMUNKNOWN: return "";
             case MSGRESOURCEEXAMPLEPROTECTED: return "";
             case MSGRESOURCEIDFAIL: return "";
-            case MSGRESOURCENOTALLOWED: return "";
-            case MSGRESOURCEREQUIRED: return "";
             case MSGRESOURCEIDMISMATCH: return "";
             case MSGRESOURCEIDMISSING: return "";
+            case MSGRESOURCENOTALLOWED: return "";
+            case MSGRESOURCEREQUIRED: return "";
             case MSGRESOURCETYPEMISMATCH: return "";
             case MSGSORTUNKNOWN: return "";
             case MSGTRANSACTIONDUPLICATEID: return "";
@@ -452,14 +453,14 @@ public enum OperationOutcome {
             case MSGVERSIONAWAREURL: return "";
             case MSGWRONGNS: return "";
             case SEARCHMULTIPLE: return "";
-            case UPDATEMULTIPLEMATCHES: return "";
-            case DELETEMULTIPLEMATCHES: return "";
             case SEARCHNONE: return "";
+            case UPDATEMULTIPLEMATCHES: return "";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
+            case DELETEMULTIPLEMATCHES: return "Error: Multiple matches exist for the conditional delete";
             case MSGAUTHREQUIRED: return "You must authenticate before you can use this service";
             case MSGBADFORMAT: return "Bad Syntax: \"%s\" must be a %s'";
             case MSGBADSYNTAX: return "Bad Syntax in %s";
@@ -477,22 +478,22 @@ public enum OperationOutcome {
             case MSGINVALIDID: return "Id not accepted";
             case MSGJSONOBJECT: return "Json Source for a resource should start with an object";
             case MSGLOCALFAIL: return "Unable to resolve local reference to resource %s";
-            case MSGNOMATCH: return "No Resource found matching the query \"%s\"";
             case MSGNOEXIST: return "Resource Id \"%s\" does not exist";
+            case MSGNOMATCH: return "No Resource found matching the query \"%s\"";
             case MSGNOMODULE: return "No module could be found to handle the request \"%s\"";
             case MSGNOSUMMARY: return "No Summary for this resource";
             case MSGOPNOTALLOWED: return "Operation %s not allowed for resource %s (due to local configuration)";
             case MSGPARAMCHAINED: return "Unknown chained parameter name \"%s\"";
-            case MSGPARAMNOREPEAT: return "Parameter \"%s\" is not allowed to repeat";
-            case MSGPARAMUNKNOWN: return "Parameter \"%s\" not understood";
             case MSGPARAMINVALID: return "Parameter \"%s\" content is invalid";
             case MSGPARAMMODIFIERINVALID: return "Parameter \"%s\" modifier is invalid";
+            case MSGPARAMNOREPEAT: return "Parameter \"%s\" is not allowed to repeat";
+            case MSGPARAMUNKNOWN: return "Parameter \"%s\" not understood";
             case MSGRESOURCEEXAMPLEPROTECTED: return "Resources with identity \"example\" cannot be deleted (for testing/training purposes)";
             case MSGRESOURCEIDFAIL: return "unable to allocate resource id";
-            case MSGRESOURCENOTALLOWED: return "Not allowed to submit a resource for this operation";
-            case MSGRESOURCEREQUIRED: return "A resource is required";
             case MSGRESOURCEIDMISMATCH: return "Resource Id Mismatch";
             case MSGRESOURCEIDMISSING: return "Resource Id Missing";
+            case MSGRESOURCENOTALLOWED: return "Not allowed to submit a resource for this operation";
+            case MSGRESOURCEREQUIRED: return "A resource is required";
             case MSGRESOURCETYPEMISMATCH: return "Resource Type Mismatch";
             case MSGSORTUNKNOWN: return "Unknown sort parameter name \"%s\"";
             case MSGTRANSACTIONDUPLICATEID: return "Duplicate Identifier in transaction: %s";
@@ -507,9 +508,8 @@ public enum OperationOutcome {
             case MSGVERSIONAWAREURL: return "Version specific URL not recognised";
             case MSGWRONGNS: return "This does not appear to be a FHIR element or resource (wrong namespace \"%s\")";
             case SEARCHMULTIPLE: return "Error: Multiple matches exist for %s search parameters \"%s\"";
-            case UPDATEMULTIPLEMATCHES: return "Error: Multiple matches exist for the conditional update";
-            case DELETEMULTIPLEMATCHES: return "Error: Multiple matches exist for the conditional delete";
             case SEARCHNONE: return "Error: no processable search found for %s search parameters \"%s\"";
+            case UPDATEMULTIPLEMATCHES: return "Error: Multiple matches exist for the conditional update";
             default: return "?";
           }
     }

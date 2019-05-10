@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MapInputMode {
 
         /**
-         * Names an input instance used a source for mapping
+         * Names an input instance used a source for mapping.
          */
         SOURCE, 
         /**
-         * Names an instance that is being populated
+         * Names an instance that is being populated.
          */
         TARGET, 
         /**
@@ -69,8 +69,8 @@ public enum MapInputMode {
         }
         public String getDefinition() {
           switch (this) {
-            case SOURCE: return "Names an input instance used a source for mapping";
-            case TARGET: return "Names an instance that is being populated";
+            case SOURCE: return "Names an input instance used a source for mapping.";
+            case TARGET: return "Names an instance that is being populated.";
             default: return "?";
           }
         }

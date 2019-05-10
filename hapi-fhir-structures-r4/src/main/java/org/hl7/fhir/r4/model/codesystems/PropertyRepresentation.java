@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,19 +41,19 @@ public enum PropertyRepresentation {
          */
         XMLATTR, 
         /**
-         * This element is represented using the XML text attribute (primitives only)
+         * This element is represented using the XML text attribute (primitives only).
          */
         XMLTEXT, 
         /**
-         * The type of this element is indicated using xsi:type
+         * The type of this element is indicated using xsi:type.
          */
         TYPEATTR, 
         /**
-         * Use CDA narrative instead of XHTML
+         * Use CDA narrative instead of XHTML.
          */
         CDATEXT, 
         /**
-         * The property is represented using XHTML
+         * The property is represented using XHTML.
          */
         XHTML, 
         /**
@@ -91,10 +91,10 @@ public enum PropertyRepresentation {
         public String getDefinition() {
           switch (this) {
             case XMLATTR: return "In XML, this property is represented as an attribute not an element.";
-            case XMLTEXT: return "This element is represented using the XML text attribute (primitives only)";
-            case TYPEATTR: return "The type of this element is indicated using xsi:type";
-            case CDATEXT: return "Use CDA narrative instead of XHTML";
-            case XHTML: return "The property is represented using XHTML";
+            case XMLTEXT: return "This element is represented using the XML text attribute (primitives only).";
+            case TYPEATTR: return "The type of this element is indicated using xsi:type.";
+            case CDATEXT: return "Use CDA narrative instead of XHTML.";
+            case XHTML: return "The property is represented using XHTML.";
             default: return "?";
           }
         }

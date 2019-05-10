@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,7 +45,7 @@ public enum ContractTermSubtype {
          */
         WARRANTY, 
         /**
-         * Breach of which may or may not go to the root of the contract depending upon the nature of the breach
+         * Breach of which might or might not go to the root of the contract depending upon the nature of the breach
          */
         INNOMINATE, 
         /**
@@ -72,13 +72,13 @@ public enum ContractTermSubtype {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/contracttermsubtypecodes";
+          return "http://terminology.hl7.org/CodeSystem/contracttermsubtypecodes";
         }
         public String getDefinition() {
           switch (this) {
             case CONDITION: return "Terms that go to the very root of a contract.";
             case WARRANTY: return "Less imperative than a condition, so the contract will survive a breach";
-            case INNOMINATE: return "Breach of which may or may not go to the root of the contract depending upon the nature of the breach";
+            case INNOMINATE: return "Breach of which might or might not go to the root of the contract depending upon the nature of the breach";
             default: return "?";
           }
         }

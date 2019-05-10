@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,7 +49,7 @@ public enum ClaimType {
          */
         PHARMACY, 
         /**
-         * Typically outpatient claims from Physician, Psychological, Chiropractor, Physiotherapy, Speech Pathology, rehabilitative, consulting.
+         * Typically, outpatient claims from Physician, Psychological, Chiropractor, Physiotherapy, Speech Pathology, rehabilitative, consulting.
          */
         PROFESSIONAL, 
         /**
@@ -86,14 +86,14 @@ public enum ClaimType {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/ex-claimtype";
+          return "http://terminology.hl7.org/CodeSystem/claim-type";
         }
         public String getDefinition() {
           switch (this) {
             case INSTITUTIONAL: return "Hospital, clinic and typically inpatient claims.";
             case ORAL: return "Dental, Denture and Hygiene claims.";
             case PHARMACY: return "Pharmacy claims for goods and services.";
-            case PROFESSIONAL: return "Typically outpatient claims from Physician, Psychological, Chiropractor, Physiotherapy, Speech Pathology, rehabilitative, consulting.";
+            case PROFESSIONAL: return "Typically, outpatient claims from Physician, Psychological, Chiropractor, Physiotherapy, Speech Pathology, rehabilitative, consulting.";
             case VISION: return "Vision claims for professional services and products such as glasses and contact lenses.";
             default: return "?";
           }

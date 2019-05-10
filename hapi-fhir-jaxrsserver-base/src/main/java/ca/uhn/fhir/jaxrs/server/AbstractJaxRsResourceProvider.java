@@ -4,7 +4,7 @@ package ca.uhn.fhir.jaxrs.server;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -47,8 +48,8 @@ import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
  * a large amount of the fhir api functionality using JAXRS
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
-@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN })
-@Consumes({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_XML_NEW })
+@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML })
+@Consumes({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML, Constants.CT_FHIR_JSON_NEW, Constants.CT_FHIR_XML_NEW, "application/octet-stream" })
 @Interceptors(JaxRsExceptionInterceptor.class)
 public abstract class AbstractJaxRsResourceProvider<R extends IBaseResource> extends AbstractJaxRsProvider
 
@@ -102,7 +103,7 @@ implements IRestfulServer<JaxRsRequest>, IResourceProvider {
         theBindings = JaxRsMethodBindings.getMethodBindings(this, theProviderClass);
     }
 
-    /**
+	/**
      * The base for request for a resource provider has the following form:</br>
      * {@link AbstractJaxRsResourceProvider#getBaseForServer()
      * getBaseForServer()} + "/" +
@@ -340,7 +341,12 @@ implements IRestfulServer<JaxRsRequest>, IResourceProvider {
         return BundleInclusionRule.BASED_ON_INCLUDES;
     }
 
-    /**
+	@Override
+	public PreferReturnEnum getDefaultPreferReturn() {
+		return PreferReturnEnum.REPRESENTATION;
+	}
+
+	/**
      * The resource type should return conform to the generic resource included
      * in the topic
      */

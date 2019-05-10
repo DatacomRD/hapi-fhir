@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ public interface IServerConformanceProvider<T extends IBaseResource> {
 	 * 
 	 * See the class documentation for an important note if you are extending this class
 	 */
-	public abstract T getServerConformance(HttpServletRequest theRequest);
+	T getServerConformance(HttpServletRequest theRequest);
 
 	/**
 	 * This setter is needed in implementation classes (along with
@@ -40,5 +40,5 @@ public interface IServerConformanceProvider<T extends IBaseResource> {
 	 * 
 	 * @param theRestfulServer
 	 */
-	public void setRestfulServer(RestfulServer theRestfulServer);
+	void setRestfulServer(RestfulServer theRestfulServer);
 }

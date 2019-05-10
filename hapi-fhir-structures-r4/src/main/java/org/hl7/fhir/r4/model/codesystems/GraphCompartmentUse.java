@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum GraphCompartmentUse {
 
         /**
-         * This compartment rule is a condition for whether the rule applies
+         * This compartment rule is a condition for whether the rule applies.
          */
         CONDITION, 
         /**
-         * This compartment rule is enforced on any relationships that meet the conditions
+         * This compartment rule is enforced on any relationships that meet the conditions.
          */
         REQUIREMENT, 
         /**
@@ -69,8 +69,8 @@ public enum GraphCompartmentUse {
         }
         public String getDefinition() {
           switch (this) {
-            case CONDITION: return "This compartment rule is a condition for whether the rule applies";
-            case REQUIREMENT: return "This compartment rule is enforced on any relationships that meet the conditions";
+            case CONDITION: return "This compartment rule is a condition for whether the rule applies.";
+            case REQUIREMENT: return "This compartment rule is enforced on any relationships that meet the conditions.";
             default: return "?";
           }
         }

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -39,22 +39,22 @@ public class MessageSignificanceCategoryEnumFactory implements EnumFactory<Messa
   public MessageSignificanceCategory fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("Consequence".equals(codeString))
+    if ("consequence".equals(codeString))
       return MessageSignificanceCategory.CONSEQUENCE;
-    if ("Currency".equals(codeString))
+    if ("currency".equals(codeString))
       return MessageSignificanceCategory.CURRENCY;
-    if ("Notification".equals(codeString))
+    if ("notification".equals(codeString))
       return MessageSignificanceCategory.NOTIFICATION;
     throw new IllegalArgumentException("Unknown MessageSignificanceCategory code '"+codeString+"'");
   }
 
   public String toCode(MessageSignificanceCategory code) {
     if (code == MessageSignificanceCategory.CONSEQUENCE)
-      return "Consequence";
+      return "consequence";
     if (code == MessageSignificanceCategory.CURRENCY)
-      return "Currency";
+      return "currency";
     if (code == MessageSignificanceCategory.NOTIFICATION)
-      return "Notification";
+      return "notification";
     return "?";
   }
 

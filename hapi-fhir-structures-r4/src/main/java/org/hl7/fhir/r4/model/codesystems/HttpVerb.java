@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,21 +37,29 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum HttpVerb {
 
         /**
-         * HTTP GET
+         * HTTP GET Command.
          */
         GET, 
         /**
-         * HTTP POST
+         * HTTP HEAD Command.
+         */
+        HEAD, 
+        /**
+         * HTTP POST Command.
          */
         POST, 
         /**
-         * HTTP PUT
+         * HTTP PUT Command.
          */
         PUT, 
         /**
-         * HTTP DELETE
+         * HTTP DELETE Command.
          */
         DELETE, 
+        /**
+         * HTTP PATCH Command.
+         */
+        PATCH, 
         /**
          * added to help the parsers
          */
@@ -61,20 +69,26 @@ public enum HttpVerb {
                 return null;
         if ("GET".equals(codeString))
           return GET;
+        if ("HEAD".equals(codeString))
+          return HEAD;
         if ("POST".equals(codeString))
           return POST;
         if ("PUT".equals(codeString))
           return PUT;
         if ("DELETE".equals(codeString))
           return DELETE;
+        if ("PATCH".equals(codeString))
+          return PATCH;
         throw new FHIRException("Unknown HttpVerb code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case GET: return "GET";
+            case HEAD: return "HEAD";
             case POST: return "POST";
             case PUT: return "PUT";
             case DELETE: return "DELETE";
+            case PATCH: return "PATCH";
             default: return "?";
           }
         }
@@ -83,19 +97,23 @@ public enum HttpVerb {
         }
         public String getDefinition() {
           switch (this) {
-            case GET: return "HTTP GET";
-            case POST: return "HTTP POST";
-            case PUT: return "HTTP PUT";
-            case DELETE: return "HTTP DELETE";
+            case GET: return "HTTP GET Command.";
+            case HEAD: return "HTTP HEAD Command.";
+            case POST: return "HTTP POST Command.";
+            case PUT: return "HTTP PUT Command.";
+            case DELETE: return "HTTP DELETE Command.";
+            case PATCH: return "HTTP PATCH Command.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
             case GET: return "GET";
+            case HEAD: return "HEAD";
             case POST: return "POST";
             case PUT: return "PUT";
             case DELETE: return "DELETE";
+            case PATCH: return "PATCH";
             default: return "?";
           }
     }

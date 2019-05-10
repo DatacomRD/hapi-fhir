@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -39,6 +39,8 @@ public class OperationOutcomeEnumFactory implements EnumFactory<OperationOutcome
   public OperationOutcome fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
+    if ("DELETE_MULTIPLE_MATCHES".equals(codeString))
+      return OperationOutcome.DELETEMULTIPLEMATCHES;
     if ("MSG_AUTH_REQUIRED".equals(codeString))
       return OperationOutcome.MSGAUTHREQUIRED;
     if ("MSG_BAD_FORMAT".equals(codeString))
@@ -73,10 +75,10 @@ public class OperationOutcomeEnumFactory implements EnumFactory<OperationOutcome
       return OperationOutcome.MSGJSONOBJECT;
     if ("MSG_LOCAL_FAIL".equals(codeString))
       return OperationOutcome.MSGLOCALFAIL;
-    if ("MSG_NO_MATCH".equals(codeString))
-      return OperationOutcome.MSGNOMATCH;
     if ("MSG_NO_EXIST".equals(codeString))
       return OperationOutcome.MSGNOEXIST;
+    if ("MSG_NO_MATCH".equals(codeString))
+      return OperationOutcome.MSGNOMATCH;
     if ("MSG_NO_MODULE".equals(codeString))
       return OperationOutcome.MSGNOMODULE;
     if ("MSG_NO_SUMMARY".equals(codeString))
@@ -85,26 +87,26 @@ public class OperationOutcomeEnumFactory implements EnumFactory<OperationOutcome
       return OperationOutcome.MSGOPNOTALLOWED;
     if ("MSG_PARAM_CHAINED".equals(codeString))
       return OperationOutcome.MSGPARAMCHAINED;
-    if ("MSG_PARAM_NO_REPEAT".equals(codeString))
-      return OperationOutcome.MSGPARAMNOREPEAT;
-    if ("MSG_PARAM_UNKNOWN".equals(codeString))
-      return OperationOutcome.MSGPARAMUNKNOWN;
     if ("MSG_PARAM_INVALID".equals(codeString))
       return OperationOutcome.MSGPARAMINVALID;
     if ("MSG_PARAM_MODIFIER_INVALID".equals(codeString))
       return OperationOutcome.MSGPARAMMODIFIERINVALID;
+    if ("MSG_PARAM_NO_REPEAT".equals(codeString))
+      return OperationOutcome.MSGPARAMNOREPEAT;
+    if ("MSG_PARAM_UNKNOWN".equals(codeString))
+      return OperationOutcome.MSGPARAMUNKNOWN;
     if ("MSG_RESOURCE_EXAMPLE_PROTECTED".equals(codeString))
       return OperationOutcome.MSGRESOURCEEXAMPLEPROTECTED;
     if ("MSG_RESOURCE_ID_FAIL".equals(codeString))
       return OperationOutcome.MSGRESOURCEIDFAIL;
-    if ("MSG_RESOURCE_NOT_ALLOWED".equals(codeString))
-      return OperationOutcome.MSGRESOURCENOTALLOWED;
-    if ("MSG_RESOURCE_REQUIRED".equals(codeString))
-      return OperationOutcome.MSGRESOURCEREQUIRED;
     if ("MSG_RESOURCE_ID_MISMATCH".equals(codeString))
       return OperationOutcome.MSGRESOURCEIDMISMATCH;
     if ("MSG_RESOURCE_ID_MISSING".equals(codeString))
       return OperationOutcome.MSGRESOURCEIDMISSING;
+    if ("MSG_RESOURCE_NOT_ALLOWED".equals(codeString))
+      return OperationOutcome.MSGRESOURCENOTALLOWED;
+    if ("MSG_RESOURCE_REQUIRED".equals(codeString))
+      return OperationOutcome.MSGRESOURCEREQUIRED;
     if ("MSG_RESOURCE_TYPE_MISMATCH".equals(codeString))
       return OperationOutcome.MSGRESOURCETYPEMISMATCH;
     if ("MSG_SORT_UNKNOWN".equals(codeString))
@@ -133,16 +135,16 @@ public class OperationOutcomeEnumFactory implements EnumFactory<OperationOutcome
       return OperationOutcome.MSGWRONGNS;
     if ("SEARCH_MULTIPLE".equals(codeString))
       return OperationOutcome.SEARCHMULTIPLE;
-    if ("UPDATE_MULTIPLE_MATCHES".equals(codeString))
-      return OperationOutcome.UPDATEMULTIPLEMATCHES;
-    if ("DELETE_MULTIPLE_MATCHES".equals(codeString))
-      return OperationOutcome.DELETEMULTIPLEMATCHES;
     if ("SEARCH_NONE".equals(codeString))
       return OperationOutcome.SEARCHNONE;
+    if ("UPDATE_MULTIPLE_MATCHES".equals(codeString))
+      return OperationOutcome.UPDATEMULTIPLEMATCHES;
     throw new IllegalArgumentException("Unknown OperationOutcome code '"+codeString+"'");
   }
 
   public String toCode(OperationOutcome code) {
+    if (code == OperationOutcome.DELETEMULTIPLEMATCHES)
+      return "DELETE_MULTIPLE_MATCHES";
     if (code == OperationOutcome.MSGAUTHREQUIRED)
       return "MSG_AUTH_REQUIRED";
     if (code == OperationOutcome.MSGBADFORMAT)
@@ -177,10 +179,10 @@ public class OperationOutcomeEnumFactory implements EnumFactory<OperationOutcome
       return "MSG_JSON_OBJECT";
     if (code == OperationOutcome.MSGLOCALFAIL)
       return "MSG_LOCAL_FAIL";
-    if (code == OperationOutcome.MSGNOMATCH)
-      return "MSG_NO_MATCH";
     if (code == OperationOutcome.MSGNOEXIST)
       return "MSG_NO_EXIST";
+    if (code == OperationOutcome.MSGNOMATCH)
+      return "MSG_NO_MATCH";
     if (code == OperationOutcome.MSGNOMODULE)
       return "MSG_NO_MODULE";
     if (code == OperationOutcome.MSGNOSUMMARY)
@@ -189,26 +191,26 @@ public class OperationOutcomeEnumFactory implements EnumFactory<OperationOutcome
       return "MSG_OP_NOT_ALLOWED";
     if (code == OperationOutcome.MSGPARAMCHAINED)
       return "MSG_PARAM_CHAINED";
-    if (code == OperationOutcome.MSGPARAMNOREPEAT)
-      return "MSG_PARAM_NO_REPEAT";
-    if (code == OperationOutcome.MSGPARAMUNKNOWN)
-      return "MSG_PARAM_UNKNOWN";
     if (code == OperationOutcome.MSGPARAMINVALID)
       return "MSG_PARAM_INVALID";
     if (code == OperationOutcome.MSGPARAMMODIFIERINVALID)
       return "MSG_PARAM_MODIFIER_INVALID";
+    if (code == OperationOutcome.MSGPARAMNOREPEAT)
+      return "MSG_PARAM_NO_REPEAT";
+    if (code == OperationOutcome.MSGPARAMUNKNOWN)
+      return "MSG_PARAM_UNKNOWN";
     if (code == OperationOutcome.MSGRESOURCEEXAMPLEPROTECTED)
       return "MSG_RESOURCE_EXAMPLE_PROTECTED";
     if (code == OperationOutcome.MSGRESOURCEIDFAIL)
       return "MSG_RESOURCE_ID_FAIL";
-    if (code == OperationOutcome.MSGRESOURCENOTALLOWED)
-      return "MSG_RESOURCE_NOT_ALLOWED";
-    if (code == OperationOutcome.MSGRESOURCEREQUIRED)
-      return "MSG_RESOURCE_REQUIRED";
     if (code == OperationOutcome.MSGRESOURCEIDMISMATCH)
       return "MSG_RESOURCE_ID_MISMATCH";
     if (code == OperationOutcome.MSGRESOURCEIDMISSING)
       return "MSG_RESOURCE_ID_MISSING";
+    if (code == OperationOutcome.MSGRESOURCENOTALLOWED)
+      return "MSG_RESOURCE_NOT_ALLOWED";
+    if (code == OperationOutcome.MSGRESOURCEREQUIRED)
+      return "MSG_RESOURCE_REQUIRED";
     if (code == OperationOutcome.MSGRESOURCETYPEMISMATCH)
       return "MSG_RESOURCE_TYPE_MISMATCH";
     if (code == OperationOutcome.MSGSORTUNKNOWN)
@@ -237,12 +239,10 @@ public class OperationOutcomeEnumFactory implements EnumFactory<OperationOutcome
       return "MSG_WRONG_NS";
     if (code == OperationOutcome.SEARCHMULTIPLE)
       return "SEARCH_MULTIPLE";
-    if (code == OperationOutcome.UPDATEMULTIPLEMATCHES)
-      return "UPDATE_MULTIPLE_MATCHES";
-    if (code == OperationOutcome.DELETEMULTIPLEMATCHES)
-      return "DELETE_MULTIPLE_MATCHES";
     if (code == OperationOutcome.SEARCHNONE)
       return "SEARCH_NONE";
+    if (code == OperationOutcome.UPDATEMULTIPLEMATCHES)
+      return "UPDATE_MULTIPLE_MATCHES";
     return "?";
   }
 

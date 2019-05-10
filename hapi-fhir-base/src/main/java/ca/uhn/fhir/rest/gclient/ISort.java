@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.gclient;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,13 @@ package ca.uhn.fhir.rest.gclient;
 public interface ISort<T> {
 
 	/**
-	 * Sort ascending 
+	 * Sort ascending
 	 */
 	IQuery<T> ascending(IParam theParam);
 
 	/**
-	 * Sort ascending 
-	 * 
+	 * Sort ascending
+	 *
 	 * @param theParam The param name, e.g. "address"
 	 */
 	IQuery<T> ascending(String theParam);
@@ -37,22 +37,30 @@ public interface ISort<T> {
 	/**
 	 * Sort by the default order. Note that as of STU3, there is no longer
 	 * a concept of default order, only ascending and descending. This method
-	 * technically implies "ascending" but it makes more sense to use 
+	 * technically implies "ascending" but it makes more sense to use
 	 * {@link #ascending(IParam)}
 	 */
 	IQuery<T> defaultOrder(IParam theParam);
 
 	/**
+	 * Sort by the default order. Note that as of STU3, there is no longer
+	 * a concept of default order, only ascending and descending. This method
+	 * technically implies "ascending" but it makes more sense to use
+	 * {@link #ascending(IParam)}
+	 */
+	IQuery<T> defaultOrder(String theParam);
+
+	/**
 	 * Sort descending
-	 * 
-	 * @param theParam A query param - Could be a constant such as <code>Patient.ADDRESS</code> or a custom 
-	 * param such as <code>new StringClientParam("foo")</code>
+	 *
+	 * @param theParam A query param - Could be a constant such as <code>Patient.ADDRESS</code> or a custom
+	 *                 param such as <code>new StringClientParam("foo")</code>
 	 */
 	IQuery<T> descending(IParam theParam);
-	
+
 	/**
-	 * Sort ascending 
-	 * 
+	 * Sort ascending
+	 *
 	 * @param theParam The param name, e.g. "address"
 	 */
 	IQuery<T> descending(String theParam);

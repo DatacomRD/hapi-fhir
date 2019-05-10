@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,23 +37,23 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum QuestionnaireUsageMode {
 
         /**
-         * Render the item regardless of usage mode
+         * Render the item regardless of usage mode.
          */
         CAPTUREDISPLAY, 
         /**
-         * Render the item only when capturing data
+         * Render the item only when capturing data.
          */
         CAPTURE, 
         /**
-         * Render the item only when displaying a completed form
+         * Render the item only when displaying a completed form.
          */
         DISPLAY, 
         /**
-         * Render the item only when displaying a completed form and the item has been answered (or has child items that have been answered)
+         * Render the item only when displaying a completed form and the item has been answered (or has child items that have been answered).
          */
         DISPLAYNONEMPTY, 
         /**
-         * Render the item when capturing data or when displaying a completed form and the item has been answered (or has child items that have been answered)
+         * Render the item when capturing data or when displaying a completed form and the item has been answered (or has child items that have been answered).
          */
         CAPTUREDISPLAYNONEMPTY, 
         /**
@@ -86,15 +86,15 @@ public enum QuestionnaireUsageMode {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/questionnaire-usage-mode";
+          return "http://terminology.hl7.org/CodeSystem/questionnaire-usage-mode";
         }
         public String getDefinition() {
           switch (this) {
-            case CAPTUREDISPLAY: return "Render the item regardless of usage mode";
-            case CAPTURE: return "Render the item only when capturing data";
-            case DISPLAY: return "Render the item only when displaying a completed form";
-            case DISPLAYNONEMPTY: return "Render the item only when displaying a completed form and the item has been answered (or has child items that have been answered)";
-            case CAPTUREDISPLAYNONEMPTY: return "Render the item when capturing data or when displaying a completed form and the item has been answered (or has child items that have been answered)";
+            case CAPTUREDISPLAY: return "Render the item regardless of usage mode.";
+            case CAPTURE: return "Render the item only when capturing data.";
+            case DISPLAY: return "Render the item only when displaying a completed form.";
+            case DISPLAYNONEMPTY: return "Render the item only when displaying a completed form and the item has been answered (or has child items that have been answered).";
+            case CAPTUREDISPLAYNONEMPTY: return "Render the item when capturing data or when displaying a completed form and the item has been answered (or has child items that have been answered).";
             default: return "?";
           }
         }

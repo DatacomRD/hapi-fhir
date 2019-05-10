@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -161,7 +161,7 @@ public enum ServiceCategory {
          */
         _27, 
         /**
-         * Specialist Obstetrics & Gynaecology - requires referral
+         * Specialist Obstetrics & Gynecology - requires referral
          */
         _28, 
         /**
@@ -317,7 +317,7 @@ public enum ServiceCategory {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/service-category";
+          return "http://terminology.hl7.org/CodeSystem/service-category";
         }
         public String getDefinition() {
           switch (this) {
@@ -352,7 +352,7 @@ public enum ServiceCategory {
             case _25: return "Respite/Carer Support";
             case _26: return "Specialist Clinical Pathology - requires referral";
             case _27: return "Specialist Medical - requires referral";
-            case _28: return "Specialist Obstetrics & Gynaecology - requires referral";
+            case _28: return "Specialist Obstetrics & Gynecology - requires referral";
             case _29: return "Specialist Paediatric - requires referral";
             case _30: return "Specialist Radiology/Imaging - requires referral";
             case _31: return "Specialist Surgical - requires referral";
@@ -395,7 +395,7 @@ public enum ServiceCategory {
             case _25: return "Respite/Carer Support";
             case _26: return "Specialist Clinical Pathology";
             case _27: return "Specialist Medical";
-            case _28: return "Specialist Obstetrics & Gynaecology";
+            case _28: return "Specialist Obstetrics & Gynecology";
             case _29: return "Specialist Paediatric";
             case _30: return "Specialist Radiology/Imaging";
             case _31: return "Specialist Surgical";

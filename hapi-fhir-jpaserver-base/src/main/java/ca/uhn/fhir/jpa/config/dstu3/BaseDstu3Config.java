@@ -6,19 +6,25 @@ import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.dao.dstu3.SearchParamExtractorDstu3;
-import ca.uhn.fhir.jpa.dao.dstu3.SearchParamRegistryDstu3;
+import ca.uhn.fhir.jpa.dao.TransactionProcessor;
+import ca.uhn.fhir.jpa.dao.dstu3.TransactionProcessorVersionAdapterDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
+import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu3;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu3;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvcDstu3;
-import ca.uhn.fhir.jpa.term.TerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
+import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.validation.IValidatorModule;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.dstu3.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.utils.IResourceValidator.BestPracticeWarningLevel;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.r4.utils.IResourceValidator;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +36,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +56,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class BaseDstu3Config extends BaseConfig {
 
+	@Override
+	public FhirContext fhirContext() {
+		return fhirContextDstu3();
+	}
+
 	@Bean
 	@Primary
 	public FhirContext fhirContextDstu3() {
@@ -62,18 +73,40 @@ public class BaseDstu3Config extends BaseConfig {
 		return retVal;
 	}
 
+	@Bean
+	public TransactionProcessor.ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
+		return new TransactionProcessorVersionAdapterDstu3();
+	}
+
+	@Bean
+	public TransactionProcessor<Bundle, Bundle.BundleEntryComponent> transactionProcessor() {
+		return new TransactionProcessor<>();
+	}
+
 	@Bean(name = "myInstanceValidatorDstu3")
 	@Lazy
 	public IValidatorModule instanceValidatorDstu3() {
 		FhirInstanceValidator val = new FhirInstanceValidator();
-		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
+		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
 		val.setValidationSupport(validationSupportChainDstu3());
 		return val;
+	}
+
+	@Bean
+	public JpaValidationSupportChainDstu3 jpaValidationSupportChain() {
+		return new JpaValidationSupportChainDstu3();
 	}
 
 	@Bean(name = "myJpaValidationSupportDstu3", autowire = Autowire.BY_NAME)
 	public ca.uhn.fhir.jpa.dao.dstu3.IJpaValidationSupportDstu3 jpaValidationSupportDstu3() {
 		ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3 retVal = new ca.uhn.fhir.jpa.dao.dstu3.JpaValidationSupportDstu3();
+		return retVal;
+	}
+
+	@Bean(name = "myResourceCountsCache")
+	public ResourceCountCache resourceCountsCache() {
+		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoDstu3().getResourceCounts());
+		retVal.setCacheMillis(4 * DateUtils.MILLIS_PER_HOUR);
 		return retVal;
 	}
 
@@ -109,7 +142,7 @@ public class BaseDstu3Config extends BaseConfig {
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public IHapiTerminologyLoaderSvc terminologyLoaderService() {
-		return new TerminologyLoaderSvc();
+		return new TerminologyLoaderSvcImpl();
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
@@ -127,7 +160,7 @@ public class BaseDstu3Config extends BaseConfig {
 	@Primary
 	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainDstu3")
 	public IValidationSupport validationSupportChainDstu3() {
-		return new JpaValidationSupportChainDstu3();
+		return new CachingValidationSupport(jpaValidationSupportChain());
 	}
-	
+
 }

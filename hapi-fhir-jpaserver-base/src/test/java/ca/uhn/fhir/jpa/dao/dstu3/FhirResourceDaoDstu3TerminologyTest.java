@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 
 import java.util.*;
 
+import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance.AllergyIntoleranceCategory;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance.AllergyIntoleranceClinicalStatus;
@@ -21,10 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem.LookupCodeResult;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
-import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -48,7 +49,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	public void after() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
 		
-		BaseHapiTerminologySvc.setForceSaveDeferredAlwaysForUnitTest(false);
+		BaseHapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
 	@Before
@@ -63,11 +64,10 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
+		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
-		cs.setResourceVersionId(table.getVersion());
 
 		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
 		cs.getConcepts().add(parentA);
@@ -97,7 +97,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		TermConcept childCA = new TermConcept(cs, "childCA").setDisplay("Child CA");
 		parentC.addChild(childCA, RelationshipTypeEnum.ISA);
 
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, cs);
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", cs);
 		return codeSystem;
 	}
 
@@ -107,11 +107,10 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
+		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
-		cs.setResourceVersionId(table.getVersion());
 
 		TermConcept parentA = new TermConcept(cs, "codeA").setDisplay("CodeA");
 		cs.getConcepts().add(parentA);
@@ -129,7 +128,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 			parentB.addChild(childI, RelationshipTypeEnum.ISA);
 		}
 
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, cs);
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", cs);
 		return codeSystem;
 	}
 
@@ -145,11 +144,10 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
+		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
-		cs.setResourceVersionId(table.getVersion());
 
 		TermConcept hello = new TermConcept(cs, "hello").setDisplay("Hello");
 		cs.getConcepts().add(hello);
@@ -166,7 +164,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		TermConcept beagle = new TermConcept(cs, "beagle").setDisplay("Beagle");
 		dogs.addChild(beagle, RelationshipTypeEnum.ISA);
 
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, cs);
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM,"SYSTEM NAME" , cs);
 		return codeSystem;
 	}
 
@@ -486,14 +484,14 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testExpandWithIsAInExternalValueSetReindex() {
-		BaseHapiTerminologySvc.setForceSaveDeferredAlwaysForUnitTest(true);
+		BaseHapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(true);
 		
 		createExternalCsAndLocalVs();
 
-		mySystemDao.markAllResourcesForReindexing();
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 
-		mySystemDao.performReindexingPass(100);
-		mySystemDao.performReindexingPass(100);
 		myHapiTerminologySvc.saveDeferred();
 		myHapiTerminologySvc.saveDeferred();
 		myHapiTerminologySvc.saveDeferred();
@@ -520,13 +518,8 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		include.setSystem(URL_MY_CODE_SYSTEM);
 		include.addConcept().setCode("ZZZZ");
 
-		try {
-			myValueSetDao.expand(vs, null);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("Unable to find code 'ZZZZ' in code system http://example.com/my_code_system", e.getMessage());
-		}
-
+		ValueSet expansion = myValueSetDao.expand(vs, null);
+		assertEquals(0, expansion.getExpansion().getContains().size());
 	}
 
 	@Test
@@ -546,36 +539,6 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		}
 	}
 	
-	@Test
-	public void testExpandWithSystemAndCodesAndFilterKeywordInLocalValueSet() {
-		createLocalCsAndVs();
-
-		ValueSet vs = new ValueSet();
-		ConceptSetComponent include = vs.getCompose().addInclude();
-		include.setSystem(URL_MY_CODE_SYSTEM);
-		include.addConcept().setCode("A");
-
-		include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue("AAA");
-
-		ValueSet result = myValueSetDao.expand(vs, null);
-		
-		// Technically it's not valid to expand a ValueSet with both includes and filters so the
-		// result fails validation because of the input.. we're being permissive by allowing both
-		// though, so we won't validate the input
-		result.setCompose(new ValueSetComposeComponent());
-		
-		logAndValidateValueSet(result);
-
-		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("A", "AAA"));
-
-		int idx = codes.indexOf("AAA");
-		assertEquals("AAA", result.getExpansion().getContains().get(idx).getCode());
-		assertEquals("Code AAA", result.getExpansion().getContains().get(idx).getDisplay());
-		assertEquals(URL_MY_CODE_SYSTEM, result.getExpansion().getContains().get(idx).getSystem());
-		//
-	}
-
 	@Test
 	public void testExpandWithSystemAndCodesInExternalValueSet() {
 		createExternalCsAndLocalVs();
@@ -710,14 +673,13 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
-		ResourceTable table = myResourceTableDao.findOne(id.getIdPartAsLong());
+		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
 
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
-		cs.setResourceVersionId(table.getVersion());
 		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
 		cs.getConcepts().add(parentA);
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://snomed.info/sct", cs);
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), "http://snomed.info/sct", "Snomed CT", cs);
 
 		StringType code = new StringType("ParentA");
 		StringType system = new StringType("http://snomed.info/sct");
@@ -768,17 +730,17 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		include.setSystem(URL_MY_CODE_SYSTEM);
 		include.addConcept().setCode("ZZZZ");
 
-		mySystemDao.markAllResourcesForReindexing();
-		mySystemDao.performReindexingPass(null);
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 		myTermSvc.saveDeferred();
-		mySystemDao.performReindexingPass(null);
 		myTermSvc.saveDeferred();
 		
 		// Again
-		mySystemDao.markAllResourcesForReindexing();
-		mySystemDao.performReindexingPass(null);
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 		myTermSvc.saveDeferred();
-		mySystemDao.performReindexingPass(null);
 		myTermSvc.saveDeferred();
 
 	}

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ExPayeeResourceType {
 
         /**
-         * Organization resource
+         * Organization resource.
          */
         ORGANIZATION, 
         /**
-         * Patient resource
+         * Patient resource.
          */
         PATIENT, 
         /**
-         * Practitioner resource
+         * Practitioner resource.
          */
         PRACTITIONER, 
         /**
-         * RelatedPerson resource
+         * RelatedPerson resource.
          */
         RELATEDPERSON, 
         /**
@@ -79,14 +79,14 @@ public enum ExPayeeResourceType {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/ex-payee-resource-type";
+          return "http://terminology.hl7.org/CodeSystem/ex-payee-resource-type";
         }
         public String getDefinition() {
           switch (this) {
-            case ORGANIZATION: return "Organization resource";
-            case PATIENT: return "Patient resource";
-            case PRACTITIONER: return "Practitioner resource";
-            case RELATEDPERSON: return "RelatedPerson resource";
+            case ORGANIZATION: return "Organization resource.";
+            case PATIENT: return "Patient resource.";
+            case PRACTITIONER: return "Practitioner resource.";
+            case RELATEDPERSON: return "RelatedPerson resource.";
             default: return "?";
           }
         }

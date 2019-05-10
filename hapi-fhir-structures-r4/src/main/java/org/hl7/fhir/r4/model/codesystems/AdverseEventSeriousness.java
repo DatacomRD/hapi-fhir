@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,35 +37,35 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum AdverseEventSeriousness {
 
         /**
-         * Non-serious
+         * Non-serious.
          */
         NONSERIOUS, 
         /**
-         * Serious
+         * Serious.
          */
         SERIOUS, 
         /**
-         * Results in death
+         * Results in death.
          */
         SERIOUSRESULTSINDEATH, 
         /**
-         * Is Life-threatening
+         * Is Life-threatening.
          */
         SERIOUSISLIFETHREATENING, 
         /**
-         * Requires inpatient hospitalization or causes prolongation of existing hospitalization
+         * Requires inpatient hospitalization or causes prolongation of existing hospitalization.
          */
         SERIOUSRESULTSINHOSPITALIZATION, 
         /**
-         * Results in persistent or significant disability/incapacity
+         * Results in persistent or significant disability/incapacity.
          */
         SERIOUSRESULTSINDISABILITY, 
         /**
-         * Is a congenital anomaly/birth defect
+         * Is a congenital anomaly/birth defect.
          */
         SERIOUSISBIRTHDEFECT, 
         /**
-         * Requires intervention to prevent permanent impairment or damage (i.e., an important medical event that requires medical judgement)
+         * Requires intervention to prevent permanent impairment or damage (i.e., an important medical event that requires medical judgement).
          */
         SERIOUSREQUIRESPREVENTIMPAIRMENT, 
         /**
@@ -107,18 +107,18 @@ public enum AdverseEventSeriousness {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/adverse-event-seriousness";
+          return "http://terminology.hl7.org/CodeSystem/adverse-event-seriousness";
         }
         public String getDefinition() {
           switch (this) {
-            case NONSERIOUS: return "Non-serious";
-            case SERIOUS: return "Serious";
-            case SERIOUSRESULTSINDEATH: return "Results in death";
-            case SERIOUSISLIFETHREATENING: return "Is Life-threatening";
-            case SERIOUSRESULTSINHOSPITALIZATION: return "Requires inpatient hospitalization or causes prolongation of existing hospitalization";
-            case SERIOUSRESULTSINDISABILITY: return "Results in persistent or significant disability/incapacity";
-            case SERIOUSISBIRTHDEFECT: return "Is a congenital anomaly/birth defect";
-            case SERIOUSREQUIRESPREVENTIMPAIRMENT: return "Requires intervention to prevent permanent impairment or damage (i.e., an important medical event that requires medical judgement)";
+            case NONSERIOUS: return "Non-serious.";
+            case SERIOUS: return "Serious.";
+            case SERIOUSRESULTSINDEATH: return "Results in death.";
+            case SERIOUSISLIFETHREATENING: return "Is Life-threatening.";
+            case SERIOUSRESULTSINHOSPITALIZATION: return "Requires inpatient hospitalization or causes prolongation of existing hospitalization.";
+            case SERIOUSRESULTSINDISABILITY: return "Results in persistent or significant disability/incapacity.";
+            case SERIOUSISBIRTHDEFECT: return "Is a congenital anomaly/birth defect.";
+            case SERIOUSREQUIRESPREVENTIMPAIRMENT: return "Requires intervention to prevent permanent impairment or damage (i.e., an important medical event that requires medical judgement).";
             default: return "?";
           }
         }

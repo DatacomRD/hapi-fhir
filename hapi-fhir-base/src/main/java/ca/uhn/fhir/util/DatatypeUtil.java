@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,25 +20,24 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import ca.uhn.fhir.model.primitive.StringDt;
 
 public class DatatypeUtil {
 
 	/**
 	 * Convert a list of FHIR String objects to a set of native java Strings
 	 */
-	public static Set<String> toStringSet(List<StringDt> theStringList) {
-		HashSet<String> retVal = new HashSet<String>();
+	public static Set<String> toStringSet(List<? extends IPrimitiveType<?>> theStringList) {
+		HashSet<String> retVal = new HashSet<>();
 		if (theStringList != null) {
-			for (StringDt string : theStringList) {
-				if (string != null && string.getValue()!=null) {
-					retVal.add(string.getValue());
+			for (IPrimitiveType<?> string : theStringList) {
+				if (string != null && string.getValue() != null) {
+					retVal.add(string.getValueAsString());
 				}
 			}
 		}
@@ -46,7 +45,7 @@ public class DatatypeUtil {
 	}
 
 	/**
-	 * Joins a list of strings with a single space (' ') between each string 
+	 * Joins a list of strings with a single space (' ') between each string
 	 */
 	public static String joinStringsSpaceSeparated(List<? extends IPrimitiveType<String>> theStrings) {
 		StringBuilder b = new StringBuilder();

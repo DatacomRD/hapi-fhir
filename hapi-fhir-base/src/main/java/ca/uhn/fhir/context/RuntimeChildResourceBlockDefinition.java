@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,15 +43,15 @@ public class RuntimeChildResourceBlockDefinition extends BaseRuntimeDeclaredChil
 	}
 
 	@Override
-	public RuntimeResourceBlockDefinition getChildByName(String theName) {
+	public BaseRuntimeElementCompositeDefinition getChildByName(String theName) {
 		if (getElementName().equals(theName)) {
 			return getDefinition();
 		}
 		return null;
 	}
 
-	private RuntimeResourceBlockDefinition getDefinition() {
-		return (RuntimeResourceBlockDefinition) myContext.getElementDefinition(myResourceBlockType);
+	private BaseRuntimeElementCompositeDefinition getDefinition() {
+		return (BaseRuntimeElementCompositeDefinition) myContext.getElementDefinition(myResourceBlockType);
 	}
 
 	@Override

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,35 +20,35 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.util.ParametersUtil;
-
 public abstract class BaseJpaSystemProviderDstu2Plus<T, MT> extends BaseJpaSystemProvider<T, MT> {
 
-	@Operation(name=MARK_ALL_RESOURCES_FOR_REINDEXING, idempotent=true, returnParameters= {
-		@OperationParam(name="status")
+
+	@Operation(name = MARK_ALL_RESOURCES_FOR_REINDEXING, idempotent = true, returnParameters = {
+		@OperationParam(name = "status")
 	})
 	public IBaseResource markAllResourcesForReindexing() {
-		Integer count = getDao().markAllResourcesForReindexing();
-		
+		getResourceReindexingSvc().markAllResourcesForReindexing();
+
 		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
-		
-		IPrimitiveType<?> string = ParametersUtil.createString(getContext(), "Marked " + count + " resources");
-		ParametersUtil.addParameterToParameters(getContext(), retVal, string, "status");
+
+		IPrimitiveType<?> string = ParametersUtil.createString(getContext(), "Marked resources");
+		ParametersUtil.addParameterToParameters(getContext(), retVal, "status", string);
 
 		return retVal;
 	}
 
-	@Operation(name=PERFORM_REINDEXING_PASS, idempotent=true, returnParameters= {
-		@OperationParam(name="status")
+	@Operation(name = PERFORM_REINDEXING_PASS, idempotent = true, returnParameters = {
+		@OperationParam(name = "status")
 	})
 	public IBaseResource performReindexingPass() {
-		Integer count = getDao().performReindexingPass(1000);
+		Integer count = getResourceReindexingSvc().runReindexingPass();
 
 		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
 
@@ -58,7 +58,7 @@ public abstract class BaseJpaSystemProviderDstu2Plus<T, MT> extends BaseJpaSyste
 		} else {
 			string = ParametersUtil.createString(getContext(), "Indexed " + count + " resources");
 		}
-		ParametersUtil.addParameterToParameters(getContext(), retVal, string, "status");
+		ParametersUtil.addParameterToParameters(getContext(), retVal, "status", string);
 
 		return retVal;
 	}

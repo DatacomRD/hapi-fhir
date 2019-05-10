@@ -5,7 +5,7 @@ package ca.uhn.fhir.rest.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,15 @@ public enum RestSearchParameterTypeEnum {
 	 */
 	HAS("string", "http://hl7.org/fhir/search-param-type"),
 
+	/**
+	 * Code Value: <b>number</b>
+	 *
+	 * Search parameter SHALL be a number (a whole number, or a decimal).
+	 */
+	SPECIAL("special", "http://hl7.org/fhir/search-param-type"),
+
 	;
+
 	
 	/**
 	 * Identifier for this Value Set:

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.apache;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,28 +20,27 @@ package ca.uhn.fhir.rest.client.apache;
  * #L%
  */
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.*;
 
 /**
  * A Http Request based on Apache. This is an adapter around the class
  * {@link org.apache.http.client.methods.HttpRequestBase HttpRequestBase}
- * 
+ *
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 public class ApacheHttpRequest implements IHttpRequest {
@@ -61,23 +60,26 @@ public class ApacheHttpRequest implements IHttpRequest {
 
 	@Override
 	public IHttpResponse execute() throws IOException {
-		return new ApacheHttpResponse(myClient.execute(myRequest));
+		StopWatch responseStopWatch = new StopWatch();
+		HttpResponse httpResponse = myClient.execute(myRequest);
+		return new ApacheHttpResponse(httpResponse, responseStopWatch);
 	}
 
 	@Override
 	public Map<String, List<String>> getAllHeaders() {
-		Map<String, List<String>> result = new HashMap<String, List<String>>();
+		Map<String, List<String>> result = new HashMap<>();
 		for (Header header : myRequest.getAllHeaders()) {
 			if (!result.containsKey(header.getName())) {
-				result.put(header.getName(), new LinkedList<String>());
+				result.put(header.getName(), new LinkedList<>());
 			}
 			result.get(header.getName()).add(header.getValue());
 		}
-		return result;
+		return Collections.unmodifiableMap(result);
 	}
 
 	/**
 	 * Get the ApacheRequest
+	 *
 	 * @return the ApacheRequest
 	 */
 	public HttpRequestBase getApacheRequest() {
@@ -87,6 +89,12 @@ public class ApacheHttpRequest implements IHttpRequest {
 	@Override
 	public String getHttpVerbName() {
 		return myRequest.getMethod();
+	}
+
+	@Override
+	public void removeHeaders(String theHeaderName) {
+		Validate.notBlank(theHeaderName, "theHeaderName must not be null or blank");
+		myRequest.removeHeaders(theHeaderName);
 	}
 
 	@Override

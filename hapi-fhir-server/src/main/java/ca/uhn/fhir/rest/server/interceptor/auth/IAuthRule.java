@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,15 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
 
+import java.util.Set;
+
+/**
+ * Note: At this time, this interface is considered internal API to HAPI FHIR,
+ * and is subject to change without warning. Create your own implementations at
+ * your own risk. If you have use cases that are not met by the current
+ * implementation, please consider raising them on the HAPI FHIR
+ * Google Group.
+ */
 public interface IAuthRule {
 
 	/**
@@ -44,9 +53,10 @@ public interface IAuthRule {
 	 * @param theRuleApplier
 	 *           The rule applying module (this can be used by rules to apply the rule set to
 	 *           nested objects in the request, such as nested requests in a transaction)
+	 * @param theFlags
 	 * @return Returns a policy decision, or <code>null</code> if the rule does not apply
 	 */
-	Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier);
+	Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags);
 
 	/**
 	 * Returns a name for this rule, to be used in logs and error messages

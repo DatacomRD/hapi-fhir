@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MeasureReportStatus {
 
         /**
-         * The report is complete and ready for use
+         * The report is complete and ready for use.
          */
         COMPLETE, 
         /**
-         * The report is currently being generated
+         * The report is currently being generated.
          */
         PENDING, 
         /**
-         * An error occurred attempting to generate the report
+         * An error occurred attempting to generate the report.
          */
         ERROR, 
         /**
@@ -76,9 +76,9 @@ public enum MeasureReportStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case COMPLETE: return "The report is complete and ready for use";
-            case PENDING: return "The report is currently being generated";
-            case ERROR: return "An error occurred attempting to generate the report";
+            case COMPLETE: return "The report is complete and ready for use.";
+            case PENDING: return "The report is currently being generated.";
+            case ERROR: return "An error occurred attempting to generate the report.";
             default: return "?";
           }
         }

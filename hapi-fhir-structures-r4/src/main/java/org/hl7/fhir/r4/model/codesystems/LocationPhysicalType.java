@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,7 +41,7 @@ public enum LocationPhysicalType {
          */
         SI, 
         /**
-         * Any Building or structure. This may contain rooms, corridors, wings, etc. It may not have walls, or a roof, but is considered a defined/allocated space.
+         * Any Building or structure. This may contain rooms, corridors, wings, etc. It might not have walls, or a roof, but is considered a defined/allocated space.
          */
         BU, 
         /**
@@ -89,7 +89,7 @@ public enum LocationPhysicalType {
          */
         AREA, 
         /**
-         * A wide scope that covers a conceptual domain, such as a Nation (Country wide community or Federal Government - e.g. Ministry of Health),  Province or State (community or Government), Business (throughout the enterprise), Nation with a business scope of an agency (e.g. CDC, FDA etc.) or a Business segment (UK Pharmacy), not just an physical boundry
+         * A wide scope that covers a conceptual domain, such as a Nation (Country wide community or Federal Government - e.g. Ministry of Health),  Province or State (community or Government), Business (throughout the enterprise), Nation with a business scope of an agency (e.g. CDC, FDA etc.) or a Business segment (UK Pharmacy), not just an physical boundary
          */
         JDN, 
         /**
@@ -149,12 +149,12 @@ public enum LocationPhysicalType {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/location-physical-type";
+          return "http://terminology.hl7.org/CodeSystem/location-physical-type";
         }
         public String getDefinition() {
           switch (this) {
             case SI: return "A collection of buildings or other locations such as a site or a campus.";
-            case BU: return "Any Building or structure. This may contain rooms, corridors, wings, etc. It may not have walls, or a roof, but is considered a defined/allocated space.";
+            case BU: return "Any Building or structure. This may contain rooms, corridors, wings, etc. It might not have walls, or a roof, but is considered a defined/allocated space.";
             case WI: return "A Wing within a Building, this often contains levels, rooms and corridors.";
             case WA: return "A Ward is a section of a medical facility that may contain rooms and other types of location.";
             case LVL: return "A Level in a multi-level Building/Structure.";
@@ -166,7 +166,7 @@ public enum LocationPhysicalType {
             case CA: return "A container that can store goods, equipment, medications or other items.";
             case RD: return "A defined path to travel between 2 points that has a known name.";
             case AREA: return "A defined physical boundary of something, such as a flood risk zone, region, postcode";
-            case JDN: return "A wide scope that covers a conceptual domain, such as a Nation (Country wide community or Federal Government - e.g. Ministry of Health),  Province or State (community or Government), Business (throughout the enterprise), Nation with a business scope of an agency (e.g. CDC, FDA etc.) or a Business segment (UK Pharmacy), not just an physical boundry";
+            case JDN: return "A wide scope that covers a conceptual domain, such as a Nation (Country wide community or Federal Government - e.g. Ministry of Health),  Province or State (community or Government), Business (throughout the enterprise), Nation with a business scope of an agency (e.g. CDC, FDA etc.) or a Business segment (UK Pharmacy), not just an physical boundary";
             default: return "?";
           }
         }

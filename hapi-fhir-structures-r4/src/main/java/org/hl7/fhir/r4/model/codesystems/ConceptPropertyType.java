@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,29 +37,33 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ConceptPropertyType {
 
         /**
-         * The property value is a code that identifies a concept defined in the code system
+         * The property value is a code that identifies a concept defined in the code system.
          */
         CODE, 
         /**
-         * The property  value is a code defined in an external code system. This may be used for translations, but is not the intent
+         * The property  value is a code defined in an external code system. This may be used for translations, but is not the intent.
          */
         CODING, 
         /**
-         * The property value is a string
+         * The property value is a string.
          */
         STRING, 
         /**
-         * The property value is a string (often used to assign ranking values to concepts for supporting score assessments)
+         * The property value is a string (often used to assign ranking values to concepts for supporting score assessments).
          */
         INTEGER, 
         /**
-         * The property value is a boolean true | false
+         * The property value is a boolean true | false.
          */
         BOOLEAN, 
         /**
-         * The property is a date or a date + time
+         * The property is a date or a date + time.
          */
         DATETIME, 
+        /**
+         * The property value is a decimal number.
+         */
+        DECIMAL, 
         /**
          * added to help the parsers
          */
@@ -79,6 +83,8 @@ public enum ConceptPropertyType {
           return BOOLEAN;
         if ("dateTime".equals(codeString))
           return DATETIME;
+        if ("decimal".equals(codeString))
+          return DECIMAL;
         throw new FHIRException("Unknown ConceptPropertyType code '"+codeString+"'");
         }
         public String toCode() {
@@ -89,6 +95,7 @@ public enum ConceptPropertyType {
             case INTEGER: return "integer";
             case BOOLEAN: return "boolean";
             case DATETIME: return "dateTime";
+            case DECIMAL: return "decimal";
             default: return "?";
           }
         }
@@ -97,12 +104,13 @@ public enum ConceptPropertyType {
         }
         public String getDefinition() {
           switch (this) {
-            case CODE: return "The property value is a code that identifies a concept defined in the code system";
-            case CODING: return "The property  value is a code defined in an external code system. This may be used for translations, but is not the intent";
-            case STRING: return "The property value is a string";
-            case INTEGER: return "The property value is a string (often used to assign ranking values to concepts for supporting score assessments)";
-            case BOOLEAN: return "The property value is a boolean true | false";
-            case DATETIME: return "The property is a date or a date + time";
+            case CODE: return "The property value is a code that identifies a concept defined in the code system.";
+            case CODING: return "The property  value is a code defined in an external code system. This may be used for translations, but is not the intent.";
+            case STRING: return "The property value is a string.";
+            case INTEGER: return "The property value is a string (often used to assign ranking values to concepts for supporting score assessments).";
+            case BOOLEAN: return "The property value is a boolean true | false.";
+            case DATETIME: return "The property is a date or a date + time.";
+            case DECIMAL: return "The property value is a decimal number.";
             default: return "?";
           }
         }
@@ -114,6 +122,7 @@ public enum ConceptPropertyType {
             case INTEGER: return "integer";
             case BOOLEAN: return "boolean";
             case DATETIME: return "dateTime";
+            case DECIMAL: return "decimal";
             default: return "?";
           }
     }

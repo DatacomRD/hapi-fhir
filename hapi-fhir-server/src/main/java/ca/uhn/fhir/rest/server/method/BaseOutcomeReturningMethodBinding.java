@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,43 +20,38 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
-import java.io.IOException;
-import java.io.Writer;
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Set;
 
-import javax.servlet.http.HttpServletResponse;
-
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.server.IRestfulResponse;
+import ca.uhn.fhir.rest.api.server.IRestfulServer;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.ResponseDetails;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.api.server.IRestfulResponse;
-import ca.uhn.fhir.rest.api.server.IRestfulServer;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
 
 abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<MethodOutcome> {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
 
-	private static EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader = EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE);
+	private static EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader = EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE, RestOperationTypeEnum.PATCH);
 
 	private boolean myReturnVoid;
 
@@ -89,34 +84,34 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 	private int getOperationStatus(MethodOutcome response) {
 		switch (getRestOperationType()) {
-		case CREATE:
-			if (response == null) {
-				throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null, which is not allowed for create operation");
-			}
-			if (response.getCreated() == null || Boolean.TRUE.equals(response.getCreated())) {
-				return Constants.STATUS_HTTP_201_CREATED;
-			}
-			return Constants.STATUS_HTTP_200_OK;
-
-		case UPDATE:
-			if (response == null || response.getCreated() == null || Boolean.FALSE.equals(response.getCreated())) {
-				return Constants.STATUS_HTTP_200_OK;
-			}
-			return Constants.STATUS_HTTP_201_CREATED;
-
-		case VALIDATE:
-		case DELETE:
-		default:
-			if (response == null) {
-				if (isReturnVoid() == false) {
-					throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null");
+			case CREATE:
+				if (response == null) {
+					throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null, which is not allowed for create operation");
 				}
-				return Constants.STATUS_HTTP_204_NO_CONTENT;
-			}
-			if (response.getOperationOutcome() == null) {
-				return Constants.STATUS_HTTP_204_NO_CONTENT;
-			}
-			return Constants.STATUS_HTTP_200_OK;
+				if (response.getCreated() == null || Boolean.TRUE.equals(response.getCreated())) {
+					return Constants.STATUS_HTTP_201_CREATED;
+				}
+				return Constants.STATUS_HTTP_200_OK;
+
+			case UPDATE:
+			case PATCH:
+				if (response == null || response.getCreated() == null || Boolean.FALSE.equals(response.getCreated())) {
+					return Constants.STATUS_HTTP_200_OK;
+				}
+				return Constants.STATUS_HTTP_201_CREATED;
+			case VALIDATE:
+			case DELETE:
+			default:
+				if (response == null) {
+					if (isReturnVoid() == false) {
+						throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null");
+					}
+					return Constants.STATUS_HTTP_204_NO_CONTENT;
+				}
+				if (response.getOperationOutcome() == null) {
+					return Constants.STATUS_HTTP_204_NO_CONTENT;
+				}
+				return Constants.STATUS_HTTP_200_OK;
 		}
 	}
 
@@ -136,17 +131,17 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		if (getMatchingOperation() != null && !getMatchingOperation().equals(theRequest.getOperation())) {
 			return false;
 		}
-		
+
 		/*
 		 * Note: Technically this will match an update (PUT) method even if
 		 * there is no ID in the URL - We allow this here because there is no
 		 * better match for that, and this allows the update/PUT method to give
-		 * a helpful error if the client has forgotten to include the 
+		 * a helpful error if the client has forgotten to include the
 		 * ID in the URL.
-		 * 
+		 *
 		 * It's also needed for conditional update..
 		 */
-		
+
 		return true;
 	}
 
@@ -162,14 +157,14 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		 */
 		MethodOutcome response;
 		Object methodReturn = invokeServerMethod(theServer, theRequest, params);
-		
+
 		if (methodReturn instanceof IBaseOperationOutcome) {
 			response = new MethodOutcome();
 			response.setOperationOutcome((IBaseOperationOutcome) methodReturn);
 		} else {
 			response = (MethodOutcome) methodReturn;
 		}
-		
+
 		if (response != null && response.getId() != null && response.getId().hasResourceType()) {
 			if (getContext().getResourceDefinition(response.getId().getResourceType()) == null) {
 				throw new InternalErrorException("Server method returned invalid resource ID: " + response.getId().getValue());
@@ -181,6 +176,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 		return returnResponse(theServer, theRequest, response, outcome, resource);
 	}
+
 	public boolean isReturnVoid() {
 		return myReturnVoid;
 	}
@@ -196,36 +192,47 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			allowPrefer = true;
 		}
 
-		if (resource != null && allowPrefer) {
+		if (allowPrefer) {
 			String prefer = theRequest.getHeader(Constants.HEADER_PREFER);
 			PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(prefer);
-			if (preferReturn != null) {
-				if (preferReturn == PreferReturnEnum.REPRESENTATION) {
-					outcome = resource;
-				}
+			if (preferReturn == null) {
+				preferReturn = theServer.getDefaultPreferReturn();
 			}
+
+			switch (preferReturn) {
+				case REPRESENTATION:
+					outcome = resource;
+					break;
+				case MINIMAL:
+					outcome = null;
+					break;
+				case OPERATION_OUTCOME:
+					outcome = originalOutcome;
+					break;
+			}
+
 		}
 
-		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-			IServerInterceptor next = theServer.getInterceptors().get(i);
-			boolean continueProcessing = next.outgoingResponse(theRequest, outcome);
-			if (!continueProcessing) {
-				return null;
-			}
+		ResponseDetails responseDetails = new ResponseDetails();
+		responseDetails.setResponseResource(outcome);
+		responseDetails.setResponseCode(operationStatus);
+
+		if (!BaseResourceReturningMethodBinding.callOutgoingResponseHook(theRequest, responseDetails)) {
+			return null;
 		}
-		
+
 		IRestfulResponse restfulResponse = theRequest.getResponse();
-		
+
 		if (response != null) {
 			if (response.getResource() != null) {
 				restfulResponse.setOperationResourceLastUpdated(RestfulServerUtils.extractLastUpdatedFromResource(response.getResource()));
 			}
-			
+
 			IIdType responseId = response.getId();
 			if (responseId != null && responseId.getResourceType() == null && responseId.hasIdPart()) {
 				responseId = responseId.withResourceType(getResourceName());
 			}
-			
+
 			if (responseId != null) {
 				String serverBase = theRequest.getFhirServerBase();
 				responseId = RestfulServerUtils.fullyQualifyResourceIdOrReturnNull(theServer, resource, serverBase, responseId);
@@ -236,35 +243,9 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
 		Set<SummaryEnum> summaryMode = Collections.emptySet();
 
-		return restfulResponse.streamResponseAsResource(outcome, prettyPrint, summaryMode, operationStatus, null, theRequest.isRespondGzip(), true);
-//		return theRequest.getResponse().returnResponse(ParseAction.create(outcome), operationStatus, allowPrefer, response, getResourceName());
+		return restfulResponse.streamResponseAsResource(responseDetails.getResponseResource(), prettyPrint, summaryMode, responseDetails.getResponseCode(), null, theRequest.isRespondGzip(), true);
 	}
 
-	protected void streamOperationOutcome(BaseServerResponseException theE, RestfulServer theServer, EncodingEnum theEncodingNotNull, HttpServletResponse theResponse, RequestDetails theRequest) throws IOException {
-		theResponse.setStatus(theE.getStatusCode());
-
-		theServer.addHeadersToResponse(theResponse);
-
-		if (theE.getOperationOutcome() != null) {
-			theResponse.setContentType(theEncodingNotNull.getResourceContentType());
-			IParser parser = theEncodingNotNull.newParser(theServer.getFhirContext());
-			parser.setPrettyPrint(RestfulServerUtils.prettyPrintResponse(theServer, theRequest));
-			Writer writer = theResponse.getWriter();
-			try {
-				parser.encodeResourceToWriter(theE.getOperationOutcome(), writer);
-			} finally {
-				writer.close();
-			}
-		} else {
-			theResponse.setContentType(Constants.CT_TEXT);
-			Writer writer = theResponse.getWriter();
-			try {
-				writer.append(theE.getMessage());
-			} finally {
-				writer.close();
-			}
-		}
-	}
 
 	protected static void parseContentLocation(FhirContext theContext, MethodOutcome theOutcomeToPopulate, String theLocationHeader) {
 		if (StringUtils.isBlank(theLocationHeader)) {

@@ -25,7 +25,7 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 		initTestPatients();
 
 		String query = "{name{family,given}}";
-		HttpGet httpGet = new HttpGet(ourServerBase + "/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escape(query));
+		HttpGet httpGet = new HttpGet(ourServerBase + "/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 
 		CloseableHttpResponse response = ourHttpClient.execute(httpGet);
 		try {
@@ -50,13 +50,13 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 		initTestPatients();
 
 		String query = "{PatientList(given:\"given\"){name{family,given}}}";
-		HttpGet httpGet = new HttpGet(ourServerBase + "/$graphql?query=" + UrlUtil.escape(query));
+		HttpGet httpGet = new HttpGet(ourServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 
 		CloseableHttpResponse response = ourHttpClient.execute(httpGet);
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(TestUtil.stripReturns(resp), TestUtil.stripReturns("{\n" +
+			assertEquals(TestUtil.stripReturns("{\n" +
 				"  \"PatientList\":[{\n" +
 				"    \"name\":[{\n" +
 				"      \"family\":\"FAM\",\n" +
@@ -69,7 +69,7 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 				"      \"given\":[\"GivenOnlyB1\",\"GivenOnlyB2\"]\n" +
 				"    }]\n" +
 				"  }]\n" +
-				"}"));
+				"}"), TestUtil.stripReturns(resp));
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -85,13 +85,13 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 		p.addName()
 			.addGiven("GivenOnly1")
 			.addGiven("GivenOnly2");
-		myPatientId0 = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		myPatientId0 = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addName()
 			.addGiven("GivenOnlyB1")
 			.addGiven("GivenOnlyB2");
-		myClient.create().resource(p).execute();
+		ourClient.create().resource(p).execute();
 	}
 
 

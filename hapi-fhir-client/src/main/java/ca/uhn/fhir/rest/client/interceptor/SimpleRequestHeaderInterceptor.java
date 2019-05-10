@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ import org.apache.commons.lang3.Validate;
 /**
  * This interceptor adds an arbitrary header to requests made by this client. Both the
  * header name and the header value are specified by the calling code.
+ *
+ * @see AdditionalRequestHeadersInterceptor for a more advanced version of this interceptor which can add multiple headers
  */
 public class SimpleRequestHeaderInterceptor implements IClientInterceptor {
 

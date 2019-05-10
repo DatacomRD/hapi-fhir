@@ -3,7 +3,6 @@ package ca.uhn.fhir.parser;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.TestUtil;
 import net.sf.json.JSON;
@@ -12,6 +11,7 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.*;
 import org.hl7.fhir.instance.model.Address.AddressUse;
 import org.hl7.fhir.instance.model.Address.AddressUseEnumFactory;
@@ -20,18 +20,16 @@ import org.hl7.fhir.instance.model.Conformance.UnknownContentCode;
 import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
 import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
 import org.hl7.fhir.instance.model.Patient.ContactComponent;
+import org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionAnswerComponent;
 import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetCodeSystemComponent;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.*;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -148,7 +146,7 @@ public class JsonParserHl7OrgDstu2Test {
     ourLog.info(encoded);
 
     assertThat(encoded, containsString("Patient"));
-    assertThat(encoded, stringContainsInOrder(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE));
+    assertThat(encoded, stringContainsInOrder(Constants.TAG_SUBSETTED_SYSTEM_DSTU3, Constants.TAG_SUBSETTED_CODE));
     assertThat(encoded, not(containsString("text")));
     assertThat(encoded, not(containsString("THE DIV")));
     assertThat(encoded, containsString("family"));
@@ -780,7 +778,7 @@ public class JsonParserHl7OrgDstu2Test {
 		
 		assertThat(encoded, containsString("Patient"));
 		assertThat(encoded, stringContainsInOrder("\"tag\"", 
-				"\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM + "\",", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE+"\","));
+				"\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE+"\","));
 		assertThat(encoded, not(containsString("THE DIV")));
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
@@ -802,7 +800,7 @@ public class JsonParserHl7OrgDstu2Test {
 		assertThat(encoded, containsString("Patient"));
 		assertThat(encoded, stringContainsInOrder("\"tag\"", 
 				"\"system\": \"foo\",", "\"code\": \"bar\"",
-				"\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM + "\",", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE+"\","));
+				"\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE+"\","));
 		assertThat(encoded, not(containsString("THE DIV")));
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
@@ -1016,42 +1014,6 @@ public class JsonParserHl7OrgDstu2Test {
 		//@formatter:on
   }
 
-  /*
-   * Narrative generation is disabled for HL7org structs for now
-   */
-  // @Test
-  public void testNarrativeGeneration() throws DataFormatException, IOException {
-
-    Patient patient = new Patient();
-    patient.addName().addFamily("Smith");
-    Organization org = new Organization();
-    patient.getManagingOrganization().setResource(org);
-
-    INarrativeGenerator gen = new INarrativeGenerator() {
-
-      @Override
-      public void generateNarrative(FhirContext theContext, IBaseResource theResource, INarrative theNarrative) {
-        try {
-          theNarrative.setDivAsString("<div>help</div>");
-        } catch (Exception e) {
-          throw new Error(e);
-        }
-        theNarrative.setStatusAsString("generated");
-      }
-
-    };
-
-    FhirContext context = ourCtx;
-    context.setNarrativeGenerator(gen);
-    IParser p = context.newJsonParser();
-    p.encodeResourceToWriter(patient, new OutputStreamWriter(System.out));
-    String str = p.encodeResourceToString(patient);
-
-    ourLog.info(str);
-
-    assertThat(str, StringContains.containsString(",\"text\":{\"status\":\"generated\",\"div\":\"<div>help</div>\"},"));
-  }
-
   @Test
   public void testNestedContainedResources() {
 
@@ -1189,8 +1151,7 @@ public class JsonParserHl7OrgDstu2Test {
     JSON expected = JSONSerializer.toJSON(jsonString);
     JSON actual = JSONSerializer.toJSON(encoded.trim());
 
-    // The encoded escapes quote marks using XML escaping instead of JSON escaping, which is probably nicer anyhow...
-    String exp = expected.toString().replace("\\\"Jim\\\"", "&quot;Jim&quot;");
+    String exp = expected.toString();
 
     // This shows up when we parse XML
     String act = actual.toString().replace(" xmlns=\\\"http://www.w3.org/1999/xhtml\\\"", "");
@@ -1297,6 +1258,17 @@ public class JsonParserHl7OrgDstu2Test {
 		Assert.assertEquals(1, extlst.size());
 		Assert.assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
 	}
+
+  @Test
+  public void testParseQuestionnaireResponseAnswerWithValueReference() throws FHIRException {
+    String response = "{\"resourceType\":\"QuestionnaireResponse\",\"group\":{\"question\":[{\"answer\": [{\"valueReference\": {\"reference\": \"Observation/testid\"}}]}]}}";
+    QuestionnaireResponse r = ourCtx.newJsonParser().parseResource(QuestionnaireResponse.class, response);
+
+    QuestionAnswerComponent answer = r.getGroup().getQuestion().get(0).getAnswer().get(0);
+    assertNotNull(answer);
+    assertNotNull(answer.getValueReference());
+    assertEquals("Observation/testid", answer.getValueReference().getReference());
+  }
 
   @ResourceDef(name = "Patient")
   public static class MyPatientWithOneDeclaredAddressExtension extends Patient {

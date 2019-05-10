@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,7 +45,7 @@ public enum HistoryAbsentReason {
          */
         WITHHELD, 
         /**
-         * Information cannot be obtained; e.g. unconscious patient
+         * Information cannot be obtained; e.g. unconscious patient.
          */
         UNABLETOOBTAIN, 
         /**
@@ -79,13 +79,13 @@ public enum HistoryAbsentReason {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/history-absent-reason";
+          return "http://terminology.hl7.org/CodeSystem/history-absent-reason";
         }
         public String getDefinition() {
           switch (this) {
             case SUBJECTUNKNOWN: return "Patient does not know the subject, e.g. the biological parent of an adopted patient.";
             case WITHHELD: return "The patient withheld or refused to share the information.";
-            case UNABLETOOBTAIN: return "Information cannot be obtained; e.g. unconscious patient";
+            case UNABLETOOBTAIN: return "Information cannot be obtained; e.g. unconscious patient.";
             case DEFERRED: return "Patient does not have the information now, but can provide the information at a later date.";
             default: return "?";
           }

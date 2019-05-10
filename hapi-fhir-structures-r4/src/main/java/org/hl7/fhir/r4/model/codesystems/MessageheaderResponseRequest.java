@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MessageheaderResponseRequest {
 
         /**
-         * initiator expects a response for this message
+         * initiator expects a response for this message.
          */
         ALWAYS, 
         /**
-         * initiator expects a response only if in error
+         * initiator expects a response only if in error.
          */
         ONERROR, 
         /**
-         * initiator does not expect a response
+         * initiator does not expect a response.
          */
         NEVER, 
         /**
-         * initiator expects a response only if successful
+         * initiator expects a response only if successful.
          */
         ONSUCCESS, 
         /**
@@ -83,10 +83,10 @@ public enum MessageheaderResponseRequest {
         }
         public String getDefinition() {
           switch (this) {
-            case ALWAYS: return "initiator expects a response for this message";
-            case ONERROR: return "initiator expects a response only if in error";
-            case NEVER: return "initiator does not expect a response";
-            case ONSUCCESS: return "initiator expects a response only if successful";
+            case ALWAYS: return "initiator expects a response for this message.";
+            case ONERROR: return "initiator expects a response only if in error.";
+            case NEVER: return "initiator does not expect a response.";
+            case ONSUCCESS: return "initiator expects a response only if successful.";
             default: return "?";
           }
         }

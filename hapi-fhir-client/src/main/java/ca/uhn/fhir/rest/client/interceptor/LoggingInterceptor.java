@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.interceptor;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,6 +107,9 @@ public class LoggingInterceptor implements IClientInterceptor {
 			 * Add response location
 			 */
 			List<String> locationHeaders = theResponse.getHeaders(Constants.HEADER_LOCATION);
+			if (locationHeaders == null || locationHeaders.isEmpty()) {
+				locationHeaders = theResponse.getHeaders(Constants.HEADER_CONTENT_LOCATION);
+			}
 			if (locationHeaders != null && locationHeaders.size() > 0) {
 				String locationValue = locationHeaders.get(0);
 				IdDt locationValueId = new IdDt(locationValue);
@@ -115,7 +118,9 @@ public class LoggingInterceptor implements IClientInterceptor {
 				}
 				respLocation = " (" + locationValue + ")";
 			}
-			myLog.info("Client response: {}{}", message, respLocation);
+
+			String timing = " in " + theResponse.getRequestStopWatch().toString();
+			myLog.info("Client response: {}{}{}", message, respLocation, timing);
 		}
 
 		if (myLogResponseHeaders) {

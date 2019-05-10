@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -55,6 +55,8 @@ public class CarePlanActivityStatusEnumFactory implements EnumFactory<CarePlanAc
       return CarePlanActivityStatus.STOPPED;
     if ("unknown".equals(codeString))
       return CarePlanActivityStatus.UNKNOWN;
+    if ("entered-in-error".equals(codeString))
+      return CarePlanActivityStatus.ENTEREDINERROR;
     throw new IllegalArgumentException("Unknown CarePlanActivityStatus code '"+codeString+"'");
   }
 
@@ -75,6 +77,8 @@ public class CarePlanActivityStatusEnumFactory implements EnumFactory<CarePlanAc
       return "stopped";
     if (code == CarePlanActivityStatus.UNKNOWN)
       return "unknown";
+    if (code == CarePlanActivityStatus.ENTEREDINERROR)
+      return "entered-in-error";
     return "?";
   }
 

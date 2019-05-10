@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.annotation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2017 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,11 +78,6 @@ public @interface Search {
 	// NB: Read, Search (maybe others) share this annotation method, so update the javadocs everywhere
 	Class<? extends IBaseResource> type() default IBaseResource.class;
 
-	/**
-	 * This is an experimental option - Use with caution
-	 */
-	boolean dynamic() default false;
-	
 	/**
 	 * In a REST server, should this method be invoked even if it does not have method parameters 
 	 * which correspond to all of the URL parameters passed in by the client (default is <code>false</code>).

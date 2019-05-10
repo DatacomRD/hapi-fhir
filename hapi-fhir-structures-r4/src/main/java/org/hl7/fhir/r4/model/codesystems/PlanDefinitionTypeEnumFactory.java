@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sat, Sep 23, 2017 17:56-0400 for FHIR v3.1.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -41,20 +41,24 @@ public class PlanDefinitionTypeEnumFactory implements EnumFactory<PlanDefinition
       return null;
     if ("order-set".equals(codeString))
       return PlanDefinitionType.ORDERSET;
-    if ("protocol".equals(codeString))
-      return PlanDefinitionType.PROTOCOL;
+    if ("clinical-protocol".equals(codeString))
+      return PlanDefinitionType.CLINICALPROTOCOL;
     if ("eca-rule".equals(codeString))
       return PlanDefinitionType.ECARULE;
+    if ("workflow-definition".equals(codeString))
+      return PlanDefinitionType.WORKFLOWDEFINITION;
     throw new IllegalArgumentException("Unknown PlanDefinitionType code '"+codeString+"'");
   }
 
   public String toCode(PlanDefinitionType code) {
     if (code == PlanDefinitionType.ORDERSET)
       return "order-set";
-    if (code == PlanDefinitionType.PROTOCOL)
-      return "protocol";
+    if (code == PlanDefinitionType.CLINICALPROTOCOL)
+      return "clinical-protocol";
     if (code == PlanDefinitionType.ECARULE)
       return "eca-rule";
+    if (code == PlanDefinitionType.WORKFLOWDEFINITION)
+      return "workflow-definition";
     return "?";
   }
 

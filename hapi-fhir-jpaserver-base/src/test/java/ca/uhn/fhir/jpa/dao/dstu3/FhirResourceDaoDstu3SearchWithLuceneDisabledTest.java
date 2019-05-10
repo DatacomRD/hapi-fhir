@@ -1,40 +1,51 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
-import javax.persistence.EntityManager;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.config.TestDstu3WithoutLuceneConfig;
+import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
+import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.Transactional;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.config.TestDstu3WithoutLuceneConfig;
-import ca.uhn.fhir.jpa.dao.*;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
-import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.TestUtil;
+import javax.persistence.EntityManager;
+
+import static org.junit.Assert.*;
 
 // @RunWith(SpringJUnit4ClassRunner.class)
 // @ContextConfiguration(classes= {TestDstu3WithoutLuceneConfig.class})
 // @SuppressWarnings("unchecked")
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { TestDstu3WithoutLuceneConfig.class })
+@ContextConfiguration(classes = {TestDstu3WithoutLuceneConfig.class})
 public class FhirResourceDaoDstu3SearchWithLuceneDisabledTest extends BaseJpaTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3SearchWithLuceneDisabledTest.class);
-
+	@Autowired
+	protected DaoConfig myDaoConfig;
+	@Autowired
+	protected PlatformTransactionManager myTxManager;
+	@Autowired
+	protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
+	@Autowired
+	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
+	@Autowired
+	protected ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	@Qualifier("myAllergyIntoleranceDaoDstu3")
 	private IFhirResourceDao<AllergyIntolerance> myAllergyIntoleranceDao;
@@ -62,8 +73,6 @@ public class FhirResourceDaoDstu3SearchWithLuceneDisabledTest extends BaseJpaTes
 	@Autowired
 	@Qualifier("myConditionDaoDstu3")
 	private IFhirResourceDao<Condition> myConditionDao;
-	@Autowired
-	protected DaoConfig myDaoConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoDstu3")
 	private IFhirResourceDao<Device> myDeviceDao;
@@ -135,25 +144,15 @@ public class FhirResourceDaoDstu3SearchWithLuceneDisabledTest extends BaseJpaTes
 	@Autowired
 	@Qualifier("mySystemProviderDstu3")
 	private JpaSystemProviderDstu3 mySystemProvider;
-
-	@Autowired
-	protected PlatformTransactionManager myTxManager;
-	@Autowired
-	protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
-
 	@Autowired
 	@Qualifier("myJpaValidationSupportChainDstu3")
 	private IValidationSupport myValidationSupport;
 	@Autowired
-	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
-	@Autowired
-	protected ISearchParamRegistry mySearchParamRegistry;
+	private IResourceReindexingSvc myResourceReindexingSvc;
 
 	@Before
-	@Transactional()
 	public void beforePurgeDatabase() {
-		final EntityManager entityManager = this.myEntityManager;
-		purgeDatabase(entityManager, myTxManager, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
+		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
 	}
 
 	@Before
@@ -168,18 +167,9 @@ public class FhirResourceDaoDstu3SearchWithLuceneDisabledTest extends BaseJpaTes
 		return myFhirCtx;
 	}
 
-	@Test
-	public void testSearchWithRegularParam() throws Exception {
-		String methodName = "testEverythingIncludesBackReferences";
-
-		Organization org = new Organization();
-		org.setName(methodName);
-		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
-
-		SearchParameterMap map = new SearchParameterMap();
-		map.add(Organization.SP_NAME, new StringParam(methodName));
-		myOrganizationDao.search(map);
-		
+	@Override
+	protected PlatformTransactionManager getTxManager() {
+		return myTxManager;
 	}
 
 	@Test
@@ -198,6 +188,20 @@ public class FhirResourceDaoDstu3SearchWithLuceneDisabledTest extends BaseJpaTes
 		} catch (InvalidRequestException e) {
 			assertEquals("Fulltext search is not enabled on this service, can not process parameter: _content", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testSearchWithRegularParam() throws Exception {
+		String methodName = "testEverythingIncludesBackReferences";
+
+		Organization org = new Organization();
+		org.setName(methodName);
+		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Organization.SP_NAME, new StringParam(methodName));
+		myOrganizationDao.search(map);
+
 	}
 
 	@Test
