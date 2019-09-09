@@ -58,11 +58,14 @@ public class Base64BinaryType extends PrimitiveType<byte[]> {
 	}
 
 	protected byte[] parse(String theValue) {
-		return Base64.decodeBase64(theValue);
+		return Base64.decodeBase64(theValue.getBytes(ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8));
 	}
 
 	protected String encode(byte[] theValue) {
-		return Base64.encodeBase64String(theValue);
+		if (theValue == null) {
+			return null;
+		}
+		return new String(Base64.encodeBase64(theValue), ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8);
 	}
 
 	@Override

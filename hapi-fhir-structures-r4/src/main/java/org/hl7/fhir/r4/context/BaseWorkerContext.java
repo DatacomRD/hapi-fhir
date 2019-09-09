@@ -8,7 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 
-import org.apache.commons.codec.Charsets;
+//import org.apache.commons.codec.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.r4.formats.IParser.OutputStyle;

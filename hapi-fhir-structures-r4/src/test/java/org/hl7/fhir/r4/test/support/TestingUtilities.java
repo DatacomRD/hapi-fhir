@@ -169,7 +169,7 @@ public class TestingUtilities {
 	}
 
 	private static byte[] unBase64(String text) {
-		return Base64.decodeBase64(text);
+		return Base64.decodeBase64(text.getBytes(ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8));
 	}
 
 	private static Node skipBlankText(Node node) {
